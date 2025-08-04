@@ -24,18 +24,17 @@ class WebSocketManager {
 
   private connect() {
     try {
-      // Use explicit port 5000 to match the Express server
+      // Use Replit's proxy routing without explicit port
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const hostname = window.location.hostname;
-      const port = '5000'; // Explicit port matching the Express server
-      const wsUrl = `${protocol}//${hostname}:${port}/ws`;
+      const wsUrl = `${protocol}//${hostname}/ws`;
       
       console.log('🔌 WebSocket connecting to:', wsUrl);
       console.log('🔌 Connection details:', {
         protocol,
         hostname,
-        port,
-        currentLocation: window.location.href
+        currentLocation: window.location.href,
+        finalUrl: wsUrl
       });
 
       this.ws = new WebSocket(wsUrl);
