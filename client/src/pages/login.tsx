@@ -67,9 +67,9 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="login" />
 
-      <div className="pt-20 pb-12">
-        <div className="flex items-center justify-center px-4">
-          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
+      <div className="pt-20 pb-12 min-h-[calc(100vh-5rem)]">
+        <div className="flex items-center justify-center px-4 h-full">
+          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full items-center">
             {/* Left Side - Login Form */}
             <div className="flex items-center justify-center">
               <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
@@ -181,7 +181,7 @@ export default function Login() {
               <div className="relative">
                 {/* Animated image */}
                 <img 
-                  src="/form-illustration.svg"
+                  src="/form-user.png"
                   alt="WhatsApp Messaging Illustration"
                   className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-3 filter drop-shadow-2xl"
                   loading="lazy"

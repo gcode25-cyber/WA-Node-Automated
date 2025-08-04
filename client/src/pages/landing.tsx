@@ -59,7 +59,7 @@ export default function Landing() {
             <div className="relative flex items-center justify-center">
               {/* Animated image */}
               <img 
-                src="/hero-illustration.svg"
+                src="/hero-community.png"
                 alt="WhatsApp Community and Messaging Illustration"
                 className="w-96 h-96 lg:w-[500px] lg:h-[500px] object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-2 filter drop-shadow-2xl"
                 loading="lazy"
@@ -115,7 +115,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src="/logo.svg" alt="HubWale" className="h-6 w-auto" />
+              <img src="/hw-logo.png" alt="HubWale" className="h-6 w-auto" />
             </div>
             <div className="flex space-x-6 text-sm text-gray-600 dark:text-gray-400">
               <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Terms of Service</Link>

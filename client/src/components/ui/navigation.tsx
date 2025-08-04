@@ -34,7 +34,7 @@ export default function Navigation({ showAuthButtons = true, currentPage }: Navi
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <Link href="/">
-              <img src="/logo.svg" alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
+              <img src="/hw-logo.png" alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
             </Link>
           </div>
           

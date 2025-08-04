@@ -53,7 +53,7 @@ export default function ForgotPassword() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
           <Link href="/">
-            <img src="/logo.svg" alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
+            <img src="/hw-logo.png" alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
           </Link>
           <Link href="/login">
             <Button variant="ghost" className="flex items-center space-x-2">
