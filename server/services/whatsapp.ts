@@ -70,7 +70,8 @@ export class WhatsAppService {
           dataPath: "./.wwebjs_auth" // Explicit data path
         }),
         puppeteer: {
-          headless: true, // Keep headless for production (set to false for local debugging)
+          headless: true, // Must be headless in cloud environment
+          slowMo: 100, // Slow down operations for stability
           executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
           args: [
             '--no-sandbox',
@@ -417,26 +418,108 @@ export class WhatsAppService {
                   console.log('Screenshot failed (non-critical):', screenshotErr.message);
                 }
                 
-                // Step 1: Click menu button with proper wait
+                // Step 1: Inspect page and click menu button with network monitoring
+                console.log('🔍 Enabling network monitoring...');
+                await page.setRequestInterception(true);
+                
+                // Monitor network requests for logout calls
+                page.on('request', (request) => {
+                  if (request.url().includes('logout') || request.url().includes('disconnect')) {
+                    console.log('🌐 Network request detected:', request.method(), request.url());
+                  }
+                  request.continue();
+                });
+                
+                page.on('response', (response) => {
+                  if (response.url().includes('logout') || response.url().includes('disconnect')) {
+                    console.log('🌐 Network response:', response.status(), response.url());
+                  }
+                });
+                
                 console.log('🔍 Looking for menu button...');
                 await page.waitForSelector("span[data-icon='menu']", { timeout: 5000 });
+                
+                // Log available elements for debugging
+                const menuElements = await page.$$("span[data-icon='menu']");
+                console.log(`📊 Found ${menuElements.length} menu elements`);
+                
                 await page.click("span[data-icon='menu']");
                 console.log('✅ Clicked menu button');
                 
                 // Step 2: Wait for menu to fully load
                 await page.waitForTimeout(2000);
                 
-                // Step 3: Look for logout button with visibility filter
-                console.log('🔍 Looking for logout button in menu...');
-                const logoutXPath = "//div[contains(text(), 'Log out') and not(ancestor::div[contains(@style, 'display: none')])]";
+                // Step 3: Comprehensive logout button detection
+                console.log('🔍 Analyzing menu structure...');
+                
+                // Get all text content in the menu to debug
+                const menuText = await page.evaluate(() => {
+                  const menuElements = document.querySelectorAll('[role="menu"], [data-testid="menu"], div[tabindex]');
+                  return Array.from(menuElements).map(el => ({
+                    text: el.textContent,
+                    classes: el.className,
+                    visible: el.offsetParent !== null
+                  }));
+                });
+                console.log('📋 Menu content found:', JSON.stringify(menuText, null, 2));
+                
+                // Try multiple logout detection strategies
+                const logoutStrategies = [
+                  "//div[contains(text(), 'Log out') and not(ancestor::div[contains(@style, 'display: none')])]",
+                  "//span[contains(text(), 'Log out')]",
+                  "//div[@role='button'][contains(text(), 'Log out')]",
+                  "[data-testid*='logout']",
+                  "//div[text()='Log out']"
+                ];
+                
+                let logoutBtn = null;
+                let usedStrategy = '';
+                
+                for (const strategy of logoutStrategies) {
+                  try {
+                    console.log(`🎯 Trying strategy: ${strategy}`);
+                    if (strategy.startsWith('//')) {
+                      await page.waitForXPath(strategy, { timeout: 2000 });
+                      const elements = await page.$x(strategy);
+                      if (elements.length > 0) {
+                        logoutBtn = elements[0];
+                        usedStrategy = strategy;
+                        console.log(`✅ Found logout button with: ${strategy}`);
+                        break;
+                      }
+                    } else {
+                      await page.waitForSelector(strategy, { timeout: 2000 });
+                      const element = await page.$(strategy);
+                      if (element) {
+                        logoutBtn = element;
+                        usedStrategy = strategy;
+                        console.log(`✅ Found logout button with: ${strategy}`);
+                        break;
+                      }
+                    }
+                  } catch (strategyErr) {
+                    console.log(`❌ Strategy failed: ${strategy}`);
+                  }
+                }
                 
                 try {
-                  await page.waitForXPath(logoutXPath, { timeout: 5000 });
-                  const [logoutBtn] = await page.$x(logoutXPath);
                   
                   if (logoutBtn) {
+                    console.log(`🎯 Clicking logout button found with: ${usedStrategy}`);
+                    
+                    // Monitor network before clicking
+                    const networkRequests = [];
+                    page.on('request', (req) => networkRequests.push(req.url()));
+                    
                     await logoutBtn.click();
                     console.log('✅ Clicked initial logout button');
+                    
+                    // Wait and check for network activity
+                    await page.waitForTimeout(1000);
+                    const logoutRequests = networkRequests.filter(url => 
+                      url.includes('logout') || url.includes('disconnect') || url.includes('terminate')
+                    );
+                    console.log('🌐 Logout-related network requests:', logoutRequests);
                     
                     // Take screenshot after clicking logout
                     try {
@@ -450,16 +533,67 @@ export class WhatsAppService {
                     console.log('🔍 Waiting for confirmation dialog...');
                     await page.waitForTimeout(2000);
                     
-                    // Look for confirmation dialog logout button
-                    const confirmXPath = "//div[contains(text(), 'Log out') and ancestor::div[@role='dialog']]";
+                    // Enhanced confirmation dialog handling
+                    console.log('🔍 Searching for confirmation dialog...');
                     
-                    try {
-                      await page.waitForXPath(confirmXPath, { timeout: 5000 });
-                      const [confirmBtn] = await page.$x(confirmXPath);
+                    // Check for modal/dialog presence first
+                    const dialogSelectors = [
+                      "[role='dialog']",
+                      ".modal",
+                      "[data-testid*='modal']",
+                      "[data-testid*='dialog']"
+                    ];
+                    
+                    let dialogFound = false;
+                    for (const selector of dialogSelectors) {
+                      try {
+                        await page.waitForSelector(selector, { timeout: 2000 });
+                        dialogFound = true;
+                        console.log(`✅ Found dialog with: ${selector}`);
+                        break;
+                      } catch (e) {
+                        // Continue to next selector
+                      }
+                    }
+                    
+                    if (dialogFound) {
+                      // Try multiple confirmation strategies
+                      const confirmStrategies = [
+                        "//div[contains(text(), 'Log out') and ancestor::div[@role='dialog']]",
+                        "//button[contains(text(), 'Log out')]",
+                        "//div[@role='button'][contains(text(), 'Log out')]",
+                        "[data-testid='popup-controls-ok']",
+                        "//div[text()='Log out' and ancestor::*[@role='dialog']]"
+                      ];
                       
-                      if (confirmBtn) {
-                        await confirmBtn.click();
-                        console.log('✅ Confirmed logout in dialog - phone should disconnect!');
+                      let confirmClicked = false;
+                      for (const strategy of confirmStrategies) {
+                        try {
+                          console.log(`🎯 Trying confirm strategy: ${strategy}`);
+                          if (strategy.startsWith('//')) {
+                            const elements = await page.$x(strategy);
+                            if (elements.length > 0) {
+                              await elements[0].click();
+                              console.log(`✅ Confirmed logout with: ${strategy}`);
+                              confirmClicked = true;
+                              break;
+                            }
+                          } else {
+                            const element = await page.$(strategy);
+                            if (element) {
+                              await element.click();
+                              console.log(`✅ Confirmed logout with: ${strategy}`);
+                              confirmClicked = true;
+                              break;
+                            }
+                          }
+                        } catch (strategyErr) {
+                          console.log(`❌ Confirm strategy failed: ${strategy}`);
+                        }
+                      }
+                      
+                      if (confirmClicked) {
+                        console.log('🎉 LOGOUT CONFIRMATION CLICKED - Phone should disconnect!');
                         
                         // Take final screenshot
                         try {
@@ -469,12 +603,19 @@ export class WhatsAppService {
                           console.log('Screenshot failed (non-critical):', screenshotErr.message);
                         }
                         
-                        // Wait for logout to complete
-                        await page.waitForTimeout(3000);
+                        // Wait and monitor for logout completion
+                        await page.waitForTimeout(5000);
+                        
+                        // Check if we're redirected to login page
+                        const currentUrl = page.url();
+                        console.log('🌐 Current URL after logout:', currentUrl);
                         
                       } else {
-                        console.log('⚠️ Confirmation button not found, logout may not be complete');
+                        console.log('⚠️ Could not click confirmation - manual fallback needed');
                       }
+                    } else {
+                      console.log('⚠️ No confirmation dialog found - logout may be direct');
+                    }
                       
                     } catch (confirmWaitErr) {
                       console.log('⚠️ Confirmation dialog timeout - trying alternative selectors');
@@ -519,7 +660,49 @@ export class WhatsAppService {
                 
               } catch (menuErr) {
                 console.log('Menu-based logout failed:', menuErr.message);
-                // Fallback to programmatic logout
+                
+                // Fallback: Try JavaScript evaluation to trigger internal logout
+                try {
+                  console.log('🔄 Attempting JavaScript-based logout...');
+                  await page.evaluate(() => {
+                    // Try to find WhatsApp's internal logout functions
+                    const possibleLogoutMethods = [
+                      'window.Store?.AppState?.logout',
+                      'window.Store?.State?.default?.logout', 
+                      'window.WA?.logout',
+                      'window.WAWeb?.logout'
+                    ];
+                    
+                    for (const methodPath of possibleLogoutMethods) {
+                      try {
+                        const method = eval(methodPath);
+                        if (typeof method === 'function') {
+                          console.log('Found logout method:', methodPath);
+                          method();
+                          return true;
+                        }
+                      } catch (e) {
+                        // Continue to next method
+                      }
+                    }
+                    
+                    // Alternative: Try to trigger logout event
+                    try {
+                      const event = new CustomEvent('logout');
+                      document.dispatchEvent(event);
+                      window.dispatchEvent(event);
+                    } catch (e) {
+                      console.log('Event dispatch failed');
+                    }
+                    
+                    return false;
+                  });
+                  console.log('✅ JavaScript logout attempt completed');
+                } catch (jsErr) {
+                  console.log('JavaScript logout failed:', jsErr.message);
+                }
+                
+                // Final fallback to programmatic logout
                 await this.client.logout();
               }
             } else {
