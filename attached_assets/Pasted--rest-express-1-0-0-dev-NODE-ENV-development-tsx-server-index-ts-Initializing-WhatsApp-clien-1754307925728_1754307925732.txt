@@ -1,0 +1,467 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+🚀 Initializing WhatsApp client...
+✅ Starting client initialization...
+11:40:40 AM [express] serving on port 5000
+📡 WebSocket client connected
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@GSCezHHXa993aZpC/e5CjrKE8hAnGbujlmE2/e2REoFKCNEyLL1pdwHDW1nb3QHZS3N954Lu8qT9MbFcEvtVi9u0jwpjcGIKQqQ=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+Signup error: error: relation "users" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserByUsername (/home/runner/workspace/server/storage.ts:255:20)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:71:38) {
+  length: 105,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '127',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+11:41:09 AM [express] POST /api/auth/signup 400 in 2589ms :: {"error":"Invalid request data"}
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@/K8u1Rj7YgS/2qONY7pixl4nQxWRngjyy4fW0qfHbI7xQAuzOJ19/il6C15O0GUEhuAkOfKn27mgjGbNqfTlQZld3EKZzIQqEV8=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@ZGzMJV0bN6RkC5Z0HEHDiEoDoKILz2FKRrAxIMKmubxwGbTyCE9FDQoyraI2BJm0LoJtWQqsNC4VZLSlHxugBhUdDzBpoQUrpSo=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@XA9aC/k3ciWT42hckGc7RhJswS++K7RsT8Z8Hxk4IsHVbmSoQegYp84GscJA2XVMLrqG9ZS9eMMZ+aZJO7PVxr07/Y5+ZYKzTyg=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@5C51+RjglOdqThsXTEYCqFrjWE7bAS9iYyCWkzcQataOOs2d4+ddL/tTaWzbvf0P1l0RtVlc5GubpPdUSJZZbb5+2hj5HJONYx4=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@uWR6UxGsFWz9i9Ta7l4OKTcHsF7593HAvH9xHTDWtLhvpCltC1Sw2kktEIHTliRe/RhgPKPJ703UqrXwHh2cZngLpQ3uTukCl8U=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+11:43:28 AM [vite] hmr update /src/pages/chat.tsx, /src/index.css?v=E162BSE7wcA6cCv22tChz
+11:43:30 AM [vite] hmr update /src/pages/signup.tsx, /src/index.css?v=E162BSE7wcA6cCv22tChz
+11:43:40 AM [vite] hmr update /src/pages/chat.tsx, /src/index.css?v=E162BSE7wcA6cCv22tChz
+📡 WebSocket client connected
+📱 New QR Code received from WhatsApp Web
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@uty6cI7sJSGbddfHSciWtZTPSBtFfhSQuDstM5ks038IA0l2axhysQ9yvtQmHmd1IuqpTCjDfs+KWMoo9VqlagF06a8XyzkUhss=,dE60SB//yIYyId/Ze...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 2 clients
+11:44:25 AM [express] POST /api/auth/signup 201 in 399ms :: {"message":"Account created successfully"…
+11:44:25 AM [express] GET /api/session-info 404 in 1ms :: {"error":"No active session"}
+11:44:25 AM [express] GET /api/bulk-campaigns 200 in 6ms
+11:44:25 AM [express] GET /api/contact-groups 200 in 62ms :: []
+file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:395
+0&&(o=t[0]),o instanceof Error)throw o;var u=new Error("Unhandled error."+(o?" ("+
+                               ^
+
+error: terminating connection due to administrator command
+    at cn.parseErrorMessage (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1182:6)
+    at cn.handlePacket (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1143:13)
+    at cn.parse (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1127:36)
+    at v.<anonymous> (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1190:16)
+    at v.emit (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:397:12)
+    at WebSocket.<anonymous> (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:987:80)
+    at callListener (/home/runner/workspace/node_modules/ws/lib/event-target.js:290:14)
+    at WebSocket.onMessage (/home/runner/workspace/node_modules/ws/lib/event-target.js:209:9)
+    at WebSocket.emit (node:events:524:28)
+    at Receiver.receiverOnMessage (/home/runner/workspace/node_modules/ws/lib/websocket.js:1220:20)
+    at Receiver.emit (node:events:524:28)
+    at Receiver.dataMessage (/home/runner/workspace/node_modules/ws/lib/receiver.js:569:14)
+    at Receiver.getData (/home/runner/workspace/node_modules/ws/lib/receiver.js:496:10)
+    at Receiver.startLoop (/home/runner/workspace/node_modules/ws/lib/receiver.js:167:16)
+    at Receiver._write (/home/runner/workspace/node_modules/ws/lib/receiver.js:94:10)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at TLSSocket.socketOnData (/home/runner/workspace/node_modules/ws/lib/websocket.js:1355:35)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  length: 116,
+  severity: 'FATAL',
+  code: '57P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'postgres.c',
+  line: '3289',
+  routine: 'ProcessInterrupts',
+  client: NeonClient {
+    _events: [Object: null prototype] { error: [Function (anonymous)] },
+    _eventsCount: 1,
+    _maxListeners: undefined,
+    connectionParameters: ConnectionParameters {
+      user: 'neondb_owner',
+      database: 'neondb',
+      port: 5432,
+      host: 'ep-twilight-frog-aep3i9iu.c-2.us-east-2.aws.neon.tech',
+      binary: false,
+      options: undefined,
+      ssl: {},
+      client_encoding: '',
+      replication: undefined,
+      isDomainSocket: false,
+      application_name: undefined,
+      fallback_application_name: undefined,
+      statement_timeout: false,
+      lock_timeout: false,
+      idle_in_transaction_session_timeout: false,
+      query_timeout: false,
+      connect_timeout: 0
+    },
+    user: 'neondb_owner',
+    database: 'neondb',
+    port: 5432,
+    host: 'ep-twilight-frog-aep3i9iu.c-2.us-east-2.aws.neon.tech',
+    replication: undefined,
+    _Promise: [Function: Promise],
+    _types: TypeOverrides {
+      _types: {
+        getTypeParser: [Function: getTypeParser],
+        setTypeParser: [Function: setTypeParser],
+        arrayParser: { create: [Function: create] },
+        builtins: {
+          BOOL: 16,
+          BYTEA: 17,
+          CHAR: 18,
+          INT8: 20,
+          INT2: 21,
+          INT4: 23,
+          REGPROC: 24,
+          TEXT: 25,
+          OID: 26,
+          TID: 27,
+          XID: 28,
+          CID: 29,
+          JSON: 114,
+          XML: 142,
+          PG_NODE_TREE: 194,
+          SMGR: 210,
+          PATH: 602,
+          POLYGON: 604,
+          CIDR: 650,
+          FLOAT4: 700,
+          FLOAT8: 701,
+          ABSTIME: 702,
+          RELTIME: 703,
+          TINTERVAL: 704,
+          CIRCLE: 718,
+          MACADDR8: 774,
+          MONEY: 790,
+          MACADDR: 829,
+          INET: 869,
+          ACLITEM: 1033,
+          BPCHAR: 1042,
+          VARCHAR: 1043,
+          DATE: 1082,
+          TIME: 1083,
+          TIMESTAMP: 1114,
+          TIMESTAMPTZ: 1184,
+          INTERVAL: 1186,
+          TIMETZ: 1266,
+          BIT: 1560,
+          VARBIT: 1562,
+          NUMERIC: 1700,
+          REFCURSOR: 1790,
+          REGPROCEDURE: 2202,
+          REGOPER: 2203,
+          REGOPERATOR: 2204,
+          REGCLASS: 2205,
+          REGTYPE: 2206,
+          UUID: 2950,
+          TXID_SNAPSHOT: 2970,
+          PG_LSN: 3220,
+          PG_NDISTINCT: 3361,
+          PG_DEPENDENCIES: 3402,
+          TSVECTOR: 3614,
+          TSQUERY: 3615,
+          GTSVECTOR: 3642,
+          REGCONFIG: 3734,
+          REGDICTIONARY: 3769,
+          JSONB: 3802,
+          REGNAMESPACE: 4089,
+          REGROLE: 4096
+        }
+      },
+      text: {},
+      binary: {}
+    },
+    _ending: true,
+    _connecting: false,
+    _connected: true,
+    _connectionError: false,
+    _queryable: false,
+    connection: Connection {
+      _events: [Object: null prototype] {
+        newListener: [Function (anonymous)],
+        connect: [ [Function (anonymous)], [Function (anonymous)] ],
+        sslconnect: [Function (anonymous)],
+        authenticationMD5Password: [Function: bound _handleAuthMD5Password],
+        authenticationSASL: [Function: bound _handleAuthSASL],
+        authenticationSASLContinue: [Function: bound _handleAuthSASLContinue] AsyncFunction,
+        authenticationSASLFinal: [Function: bound _handleAuthSASLFinal],
+        backendKeyData: [Function: bound _handleBackendKeyData],
+        error: [Function: bound _handleErrorEvent],
+        errorMessage: [Function: bound _handleErrorMessage],
+        notice: [Function: bound _handleNotice],
+        rowDescription: [Function: bound _handleRowDescription],
+        dataRow: [Function: bound _handleDataRow],
+        portalSuspended: [Function: bound _handlePortalSuspended],
+        emptyQuery: [Function: bound _handleEmptyQuery],
+        commandComplete: [Function: bound _handleCommandComplete],
+        parseComplete: [Function: bound _handleParseComplete],
+        copyInResponse: [Function: bound _handleCopyInResponse],
+        copyData: [Function: bound _handleCopyData],
+        notification: [Function: bound _handleNotification],
+        end: [
+          [Function: bound onceWrapper] {
+            listener: [Function (anonymous)]
+          },
+          [Function: bound onceWrapper] {
+            listener: [Function (anonymous)]
+          }
+        ],
+        readyForQuery: [Function: bound _handleReadyForQuery]
+      },
+      _eventsCount: 22,
+      _maxListeners: undefined,
+      stream: Socket {
+        _events: [Object: null prototype] {
+          error: [Function: reportStreamError],
+          close: [Function (anonymous)],
+          end: [ [Function (anonymous)], [Function (anonymous)] ],
+          data: [Function (anonymous)]
+        },
+        _eventsCount: 4,
+        _maxListeners: undefined,
+        opts: {},
+        connecting: false,
+        pending: false,
+        writable: true,
+        encrypted: false,
+        authorized: false,
+        destroyed: true,
+        ws: <ref *1> WebSocket {
+          _events: [Object: null prototype] {
+            error: [Function],
+            message: [Function],
+            close: [Function],
+            open: [Function]
+          },
+          _eventsCount: 4,
+          _maxListeners: undefined,
+          _binaryType: 'arraybuffer',
+          _closeCode: 1006,
+          _closeFrameReceived: false,
+          _closeFrameSent: false,
+          _closeMessage: Buffer(0) [Uint8Array] [],
+          _closeTimer: Timeout {
+            _idleTimeout: 30000,
+            _idlePrev: [TimersList],
+            _idleNext: [Timeout],
+            _idleStart: 231758,
+            _onTimeout: [Function: bound ],
+            _timerArgs: undefined,
+            _repeat: null,
+            _destroyed: false,
+            [Symbol(refed)]: true,
+            [Symbol(kHasPrimitive)]: false,
+            [Symbol(asyncId)]: 6715,
+            [Symbol(triggerId)]: 6583
+          },
+          _errorEmitted: false,
+          _extensions: {},
+          _paused: false,
+          _protocol: '',
+          _readyState: 2,
+          _receiver: Receiver {
+            _events: [Object],
+            _writableState: [WritableState],
+            _maxListeners: undefined,
+            _allowSynchronousEvents: true,
+            _binaryType: 'arraybuffer',
+            _extensions: {},
+            _isServer: false,
+            _maxPayload: 104857600,
+            _skipUTF8Validation: false,
+            _bufferedBytes: 0,
+            _buffers: [],
+            _compressed: false,
+            _payloadLength: 117,
+            _mask: undefined,
+            _fragmented: 0,
+            _masked: false,
+            _fin: true,
+            _opcode: 2,
+            _totalPayloadLength: 0,
+            _messageLength: 0,
+            _fragments: [],
+            _errored: false,
+            _loop: true,
+            _state: 4,
+            _eventsCount: 6,
+            [Symbol(shapeMode)]: true,
+            [Symbol(kCapture)]: false,
+            [Symbol(websocket)]: [Circular *1]
+          },
+          _sender: Sender {
+            _extensions: {},
+            _socket: [TLSSocket],
+            _firstFragment: true,
+            _compress: false,
+            _bufferedBytes: 0,
+            _queue: [],
+            _state: 0,
+            onerror: [Function: senderOnError],
+            [Symbol(websocket)]: [Circular *1]
+          },
+          _socket: TLSSocket {
+            _tlsOptions: [Object],
+            _secureEstablished: true,
+            _securePending: false,
+            _newSessionPending: false,
+            _controlReleased: true,
+            secureConnecting: false,
+            _SNICallback: null,
+            servername: 'ep-twilight-frog-aep3i9iu.c-2.us-east-2.aws.neon.tech',
+            alpnProtocol: false,
+            authorized: true,
+            authorizationError: null,
+            encrypted: true,
+            _events: [Object: null prototype],
+            _eventsCount: 6,
+            connecting: false,
+            _hadError: false,
+            _parent: null,
+            _host: 'ep-twilight-frog-aep3i9iu.c-2.us-east-2.aws.neon.tech',
+            _closeAfterHandlingError: false,
+            _readableState: [ReadableState],
+            _writableState: [WritableState],
+            allowHalfOpen: false,
+            _maxListeners: undefined,
+            _sockname: null,
+            _pendingData: null,
+            _pendingEncoding: '',
+            server: undefined,
+            _server: null,
+            ssl: [TLSWrap],
+            _requestCert: true,
+            _rejectUnauthorized: true,
+            parser: null,
+            _httpMessage: null,
+            autoSelectFamilyAttemptedAddresses: [Array],
+            timeout: 0,
+            [Symbol(alpncallback)]: null,
+            [Symbol(res)]: [TLSWrap],
+            [Symbol(verified)]: true,
+            [Symbol(pendingSession)]: null,
+            [Symbol(async_id_symbol)]: 6583,
+            [Symbol(kHandle)]: [TLSWrap],
+            [Symbol(lastWriteQueueSize)]: 6,
+            [Symbol(timeout)]: null,
+            [Symbol(kBuffer)]: null,
+            [Symbol(kBufferCb)]: null,
+            [Symbol(kBufferGen)]: null,
+            [Symbol(shapeMode)]: true,
+            [Symbol(kCapture)]: false,
+            [Symbol(kSetNoDelay)]: true,
+            [Symbol(kSetKeepAlive)]: false,
+            [Symbol(kSetKeepAliveInitialDelay)]: 0,
+            [Symbol(kBytesRead)]: 0,
+            [Symbol(kBytesWritten)]: 0,
+            [Symbol(connect-options)]: [Object],
+            [Symbol(websocket)]: [Circular *1]
+          },
+          _bufferedAmount: 0,
+          _isServer: false,
+          _redirects: 0,
+          _autoPong: true,
+          _url: 'wss://ep-twilight-frog-aep3i9iu.c-2.us-east-2.aws.neon.tech/v2',
+          _req: null,
+          [Symbol(shapeMode)]: false,
+          [Symbol(kCapture)]: false
+        },
+        writeBuffer: undefined,
+        tlsState: 0,
+        tlsRead: undefined,
+        tlsWrite: undefined
+      },
+      _keepAlive: false,
+      _keepAliveInitialDelayMillis: 0,
+      lastBuffer: false,
+      parsedStatements: {},
+      ssl: false,
+      _ending: true,
+      _emitMessage: false,
+      _connecting: true
+    },
+    queryQueue: [],
+    binary: false,
+    processID: 1925448455,
+    secretKey: 303373204,
+    ssl: false,
+    _connectionTimeoutMillis: 0,
+    config: {
+      connectionString: 'postgresql://neondb_owner:npg_pxO7LjB4KlYm@ep-twilight-frog-aep3i9iu.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require',
+      max: 10,
+      maxUses: Infinity,
+      allowExitOnIdle: false,
+      maxLifetimeSeconds: 0,
+      idleTimeoutMillis: 10000
+    },
+    _connectionCallback: null,
+    release: [Function (anonymous)],
+    activeQuery: null,
+    readyForQuery: true,
+    hasExecuted: true,
+    _poolUseCount: 4
+  }
+}
+
+Node.js v20.19.3
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
