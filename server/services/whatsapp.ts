@@ -426,7 +426,7 @@ export class WhatsAppService {
     }
   }
 
-  async getChatHistory(chatId: string, limit: number = 50): Promise<any[]> {
+  async getChatHistory(chatId: string, limit: number = 50): Promise<{contact: any, messages: any[]}> {
     if (!this.client || !this.isReady) {
       throw new Error('WhatsApp client is not ready');
     }
@@ -443,11 +443,26 @@ export class WhatsAppService {
         fromMe: msg.fromMe || false,
         type: msg.type || 'chat',
         author: msg.author || null,
-        hasMedia: msg.hasMedia || false
+        hasMedia: msg.hasMedia || false,
+        mediaUrl: msg.hasMedia ? null : undefined // Will be populated if media is downloaded
       }));
 
+      // Extract contact information from the chat
+      const contact = {
+        id: chat.id._serialized,
+        name: chat.name || chat.pushname || 'Unknown',
+        number: chat.id.user || chatId.split('@')[0],
+        isMyContact: false, // Will be determined by checking contacts
+        isWAContact: true,
+        profilePicUrl: null,
+        isGroup: chat.isGroup || false
+      };
+
       console.log(`✅ Retrieved ${messageData.length} messages for chat ${chatId}`);
-      return messageData;
+      return {
+        contact,
+        messages: messageData
+      };
     } catch (error: any) {
       console.error('❌ Failed to fetch chat history:', error.message);
       throw error;

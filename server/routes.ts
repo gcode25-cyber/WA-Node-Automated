@@ -237,8 +237,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { chatId } = req.params;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      const messages = await whatsappService.getChatHistory(chatId, limit);
-      res.json(messages);
+      const chatHistory = await whatsappService.getChatHistory(chatId, limit);
+      res.json(chatHistory);
     } catch (error: any) {
       console.error("Get chat history error:", error);
       res.status(500).json({ error: error.message || "Failed to get chat history" });
@@ -278,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const result = await whatsappService.sendMediaMessage(
         parsed.phoneNumber,
-        parsed.message,
+        parsed.message || '',
         req.file.path,
         req.file.originalname || 'media'
       );
