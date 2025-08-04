@@ -91,7 +91,7 @@ export default function Login() {
           <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
             <CardHeader className="space-y-4 text-center">
               <div className="flex justify-start mb-4">
-                <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto" />
+                <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto" loading="lazy" />
               </div>
               <div>
                 <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Login</CardTitle>
@@ -207,6 +207,7 @@ export default function Login() {
               src={formIllustration}
               alt="WhatsApp Messaging Illustration"
               className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-3 filter drop-shadow-2xl"
+              loading="lazy"
             />
             
             {/* Floating animated elements */}

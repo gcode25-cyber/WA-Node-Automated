@@ -13,7 +13,7 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto" />
+              <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto" loading="lazy" />
             </div>
             
             {/* Navigation Links */}
@@ -99,6 +99,7 @@ export default function Landing() {
                 src={heroIllustration}
                 alt="WhatsApp Community and Messaging Illustration"
                 className="w-96 h-96 lg:w-[500px] lg:h-[500px] object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-2 filter drop-shadow-2xl"
+                loading="lazy"
               />
               
               {/* Floating animated elements */}
