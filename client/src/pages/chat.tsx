@@ -194,6 +194,14 @@ export default function ChatPage() {
 
     // For groups, use the full group ID; for individuals, use their phone number
     const phoneNumber = contact.isGroup ? contact.id : (contact.number || contact.id.split('@')[0]);
+    
+    console.log('🐛 Debug - Contact info:', {
+      name: contact.name,
+      id: contact.id,
+      isGroup: contact.isGroup,
+      number: contact.number,
+      calculatedPhoneNumber: phoneNumber
+    });
 
     if (selectedFile) {
       sendMediaMutation.mutate({

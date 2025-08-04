@@ -582,7 +582,8 @@ export class WhatsAppService {
         isUser: contact.isUser,
         isWAContact: contact.isWAContact,
         profilePicUrl: null, // Will be loaded separately for performance
-        status: null // Will be loaded separately for performance
+        status: null, // Will be loaded separately for performance
+        isGroup: false // Contacts are not groups
       })).filter((contact: any) => contact.isWAContact); // Only WhatsApp contacts
 
       console.log(`✅ Retrieved ${contactData.length} contacts`);
@@ -628,7 +629,9 @@ export class WhatsAppService {
                 timestamp: group.lastMessage.timestamp,
                 fromMe: group.lastMessage.fromMe
               } : null,
-              profilePicUrl: null // Will be loaded separately for performance
+              profilePicUrl: null, // Will be loaded separately for performance
+              isGroup: true, // Mark as group for proper message routing
+              number: null // Groups don't have phone numbers
             };
           } catch (groupError: any) {
             console.log(`Group processing error for ${group.name}:`, groupError.message);
@@ -641,7 +644,9 @@ export class WhatsAppService {
               timestamp: group.timestamp,
               unreadCount: group.unreadCount,
               lastMessage: null,
-              profilePicUrl: null
+              profilePicUrl: null,
+              isGroup: true, // Mark as group for proper message routing
+              number: null // Groups don't have phone numbers
             };
           }
         })
