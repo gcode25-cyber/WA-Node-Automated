@@ -80,9 +80,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email already exists" });
       }
 
-      // Create user
-      const { confirmPassword, acceptTerms, ...userData } = validatedData;
-      const user = await storage.createUser(userData);
+      // Create user - map signup data to user insert schema
+      const { confirmPassword, acceptTerms, phone, ...baseUserData } = validatedData;
+      const userInsertData = {
+        ...baseUserData,
+        phone: phone,
+        whatsappNumber: phone, // Use the phone number as WhatsApp number too
+      };
+      const user = await storage.createUser(userInsertData);
       
       res.status(201).json({ 
         message: "Account created successfully", 
