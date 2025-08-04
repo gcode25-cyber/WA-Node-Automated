@@ -216,7 +216,9 @@ export class WhatsAppService {
         });
 
         // Full data synchronization after client is ready
-        this.performFullDataSync();
+        setTimeout(() => {
+          this.performFullDataSync();
+        }, 2000); // Wait 2 seconds to ensure client is fully ready
       });
 
       this.client.on('authenticated', () => {
@@ -464,6 +466,25 @@ export class WhatsAppService {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Reinitialize
+    await this.initializeClient();
+  }
+
+  async reconnectWithoutClearing() {
+    console.log('🔄 Starting WhatsApp client reconnection (preserving session)...');
+    
+    // Destroy existing client but preserve session files
+    if (this.client) {
+      try {
+        await this.client.destroy();
+      } catch (e: any) {
+        console.log('Client cleanup during reconnection:', e?.message);
+      }
+    }
+    this.client = null;
+    this.isReady = false;
+    this.isInitializing = false;
+    
+    // Don't clear session files or storage - just reinitialize
     await this.initializeClient();
   }
 
@@ -1061,10 +1082,34 @@ export class WhatsAppService {
   private async performFullDataSync() {
     console.log('🔄 Starting full data synchronization...');
     
-    try {
-      // Wait a moment for client to be fully ready
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!this.client || !this.isReady) {
+      console.log('⚠️ Client not ready for data sync, skipping...');
+      return;
+    }
+    
+    // Additional verification that client is fully connected
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    while (attempts < maxAttempts) {
+      try {
+        if (this.client.info && this.client.info.wid) {
+          break; // Client is ready
+        }
+      } catch (e) {
+        // Client info not available yet
+      }
       
+      attempts++;
+      console.log(`⏳ Waiting for client to be fully ready (${attempts}/${maxAttempts})...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    if (attempts >= maxAttempts) {
+      console.log('⚠️ Client not fully ready after waiting, attempting sync anyway...');
+    }
+    
+    try {
       console.log('📊 Syncing all WhatsApp data...');
       
       // Load all data in sequence with retries for reliability

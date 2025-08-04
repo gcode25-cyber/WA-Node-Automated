@@ -284,6 +284,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reconnect without clearing session files
+  app.post("/api/reconnect-whatsapp", async (req, res) => {
+    try {
+      await whatsappService.reconnectWithoutClearing();
+      res.json({ success: true, message: "WhatsApp service reconnection initiated" });
+    } catch (error) {
+      console.error("WhatsApp reconnect error:", error);
+      res.status(500).json({ error: "Failed to reconnect WhatsApp service" });
+    }
+  });
+
   // Logout from WhatsApp
   app.post("/api/logout", async (req, res) => {
     try {
@@ -316,16 +327,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Trigger data synchronization
   app.post("/api/sync-data", async (req, res) => {
     try {
+      const isReady = await whatsappService.isClientReady();
+      if (!isReady) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "WhatsApp client not connected. Please scan QR code first to authenticate." 
+        });
+      }
+      
       const sessionInfo = await whatsappService.getSessionInfo();
       if (!sessionInfo) {
-        return res.status(503).json({ error: "WhatsApp not connected" });
+        return res.status(503).json({ 
+          success: false, 
+          error: "WhatsApp session not available. Please reconnect by scanning QR code." 
+        });
       }
 
       await whatsappService.triggerDataSync();
-      res.json({ success: true, message: "Data synchronization completed" });
+      res.json({ success: true, message: "Data synchronization completed successfully" });
     } catch (error: any) {
       console.error("Data sync error:", error);
-      res.status(500).json({ error: error.message || "Failed to sync data" });
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || "Failed to sync data" 
+      });
     }
   });
 
