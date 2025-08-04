@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { storage } from '../storage';
 import fs from 'fs';
 import path from 'path';
+import type { WebSocket } from 'ws';
 
 export class WhatsAppService {
   private client: any = null;
@@ -15,6 +16,24 @@ export class WhatsAppService {
 
   constructor() {
     this.initializeClient();
+  }
+
+  // Helper method to broadcast WebSocket events
+  private broadcastToClients(eventType: string, data: any) {
+    try {
+      const wss = (global as any).wss;
+      if (wss && wss.clients) {
+        const message = JSON.stringify({ type: eventType, data });
+        wss.clients.forEach((client: any) => {
+          if (client.readyState === 1) { // WebSocket.OPEN
+            client.send(message);
+          }
+        });
+        console.log(`📡 Broadcasted ${eventType} to ${wss.clients.size} clients`);
+      }
+    } catch (error) {
+      console.error('Failed to broadcast WebSocket message:', error);
+    }
   }
 
   private async initializeClient() {
@@ -99,9 +118,22 @@ export class WhatsAppService {
   private setupEventHandlers() {
     if (!this.client) return;
 
-    this.client.on('qr', (qr: string) => {
+    this.client.on('qr', async (qr: string) => {
       console.log('📱 New QR Code received from WhatsApp Web');
-      this.qrCode = qr; // Store the raw QR string, not data URL
+      try {
+        // Use smaller QR code options to prevent data overflow
+        this.qrCode = await QRCode.toDataURL(qr, {
+          errorCorrectionLevel: 'L',
+          width: 256,
+          margin: 1
+        });
+        // Broadcast new QR code to connected clients
+        this.broadcastToClients('qr', { qr: this.qrCode });
+      } catch (err) {
+        console.error('QR code generation failed, using raw string:', err);
+        this.qrCode = qr; // Store raw QR string as fallback
+        this.broadcastToClients('qr', { qr: null });
+      }
       this.sessionInfo = null;
     });
 
@@ -109,6 +141,10 @@ export class WhatsAppService {
       console.log('WhatsApp client is ready');
       this.isReady = true;
       this.isInitializing = false;
+      this.qrCode = null;
+      
+      // Broadcast session connected event
+      this.broadcastToClients('connected', { connected: true });
       
       // Multiple attempts to get user info with different delays
       const getUserInfo = async (attempt = 1) => {
@@ -135,8 +171,8 @@ export class WhatsAppService {
             return;
           }
           
-          // Fallback to use info.pushname or session-based name
-          const userName = info.pushname || "Connected User";
+          // Fallback to use session-based name
+          const userName = "Connected User";
           this.sessionInfo = {
             name: userName,
             loginTime: this.sessionInfo?.loginTime || new Date().toISOString(),
@@ -145,10 +181,10 @@ export class WhatsAppService {
           
           await storage.clearAllSessions();
           await storage.createSession({
-            userId: info.wid?.user || 'unknown',
+            userId: 'fallback-user',
             userName: userName,
             loginTime: new Date(),
-            sessionData: JSON.stringify({ wid: info.wid }),
+            sessionData: JSON.stringify({ fallback: true }),
           });
           console.log('✅ Session saved for user:', userName);
           this.qrCode = null;
@@ -197,6 +233,9 @@ export class WhatsAppService {
       this.sessionInfo = null;
       this.messageCache.clear(); // Clear cached messages on disconnect
       storage.clearAllSessions();
+      
+      // Broadcast disconnection event
+      this.broadcastToClients('disconnected', { connected: false });
       
       // Reinitialize client on disconnect with delay
       setTimeout(() => {
@@ -291,24 +330,47 @@ export class WhatsAppService {
       // Clear storage
       await storage.clearAllSessions();
       
-      // Properly destroy client
+      // Properly destroy client and logout from WhatsApp Web
       if (this.client) {
         try {
-          console.log('🧹 Destroying WhatsApp client...');
+          console.log('🧹 Logging out from WhatsApp Web...');
+          // First logout from WhatsApp Web (this will disconnect from phone)
           await this.client.logout();
+          console.log('✅ WhatsApp Web logout successful');
+          
+          console.log('🧹 Destroying WhatsApp client...');
           await this.client.destroy();
-        } catch (clientError) {
-          console.log('Client destruction (expected):', clientError?.message);
+          console.log('✅ Client destroyed');
+        } catch (clientError: any) {
+          console.log('Client logout/destruction (expected):', clientError?.message);
         }
         this.client = null;
       }
       
+      // Clear session files manually to ensure complete logout
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const sessionPath = path.resolve('./.wwebjs_auth');
+        
+        if (fs.existsSync(sessionPath)) {
+          console.log('🗑️ Removing session files...');
+          fs.rmSync(sessionPath, { recursive: true, force: true });
+          console.log('✅ Session files cleared');
+        }
+      } catch (fsError) {
+        console.log('Session file cleanup (non-critical):', fsError?.message);
+      }
+      
       console.log('✅ Logout successful - reinitializing for new QR');
+      
+      // Broadcast logout event to clients immediately
+      this.broadcastToClients('logout', { connected: false });
       
       // Immediate reinitialize with slight delay to ensure cleanup is complete
       setTimeout(() => {
         this.initializeClient();
-      }, 1000);
+      }, 2000); // Increased delay to ensure proper cleanup
       
     } catch (error) {
       console.error('❌ Logout error:', error);
@@ -320,11 +382,24 @@ export class WhatsAppService {
       this.client = null;
       this.messageCache.clear(); // Clear cache on error too
       
+      // Force clear session files even on error
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const sessionPath = path.resolve('./.wwebjs_auth');
+        if (fs.existsSync(sessionPath)) {
+          fs.rmSync(sessionPath, { recursive: true, force: true });
+          console.log('🗑️ Force cleared session files after error');
+        }
+      } catch (fsError) {
+        console.log('Force session cleanup failed (non-critical):', fsError?.message);
+      }
+      
       // Still try to reinitialize
       setTimeout(() => {
         console.log('🔄 Force reinitializing after logout error...');
         this.initializeClient();
-      }, 1500);
+      }, 2500);
     }
   }
 

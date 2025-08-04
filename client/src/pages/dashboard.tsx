@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -123,6 +123,7 @@ export default function Dashboard() {
   const [newGroupDescription, setNewGroupDescription] = useState("");
   const [selectedContactGroup, setSelectedContactGroup] = useState("");
   const [bulkMessage, setBulkMessage] = useState("");
+  const wsRef = useRef<WebSocket | null>(null);
   
   // Update field values for placeholder visibility
   const fieldValues = {
@@ -174,6 +175,77 @@ export default function Dashboard() {
     queryKey: ['/api/bulk-campaigns'],
     refetchInterval: 30000,
   });
+
+  // WebSocket connection for real-time updates
+  useEffect(() => {
+    // Skip WebSocket in development mode to avoid conflicts with Vite HMR
+    if (import.meta.env.DEV) {
+      console.log('Skipping WebSocket in development mode');
+      return;
+    }
+    
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    const connectWebSocket = () => {
+      try {
+        wsRef.current = new WebSocket(wsUrl);
+        
+        wsRef.current.onopen = () => {
+          console.log('📡 WebSocket connected to', wsUrl);
+        };
+        
+        wsRef.current.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('📨 WebSocket message received:', data.type);
+            
+            switch (data.type) {
+              case 'qr':
+                // Invalidate QR-related queries to fetch new QR
+                queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+                break;
+              case 'connected':
+                // Invalidate session info when connected
+                queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+                break;
+              case 'disconnected':
+              case 'logout':
+                // Invalidate all session-related queries
+                queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+                break;
+            }
+          } catch (error) {
+            console.error('Failed to parse WebSocket message:', error);
+          }
+        };
+        
+        wsRef.current.onclose = (event) => {
+          console.log('📡 WebSocket disconnected:', event.code, event.reason);
+          // Reconnect after 3 seconds
+          setTimeout(connectWebSocket, 3000);
+        };
+        
+        wsRef.current.onerror = (error) => {
+          console.error('📡 WebSocket error:', error);
+        };
+      } catch (error) {
+        console.error('Failed to create WebSocket connection:', error);
+        // Retry after 5 seconds
+        setTimeout(connectWebSocket, 5000);
+      }
+    };
+    
+    connectWebSocket();
+    
+    // Cleanup on unmount
+    return () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+      }
+    };
+  }, [queryClient]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({

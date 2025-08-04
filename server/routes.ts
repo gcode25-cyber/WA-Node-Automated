@@ -140,11 +140,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const qr = await whatsappService.getQRCode();
       if (qr) {
-        // Convert QR string to base64 image
-        const qrDataURL = await QRCode.toDataURL(qr);
-        // Extract base64 part (remove "data:image/png;base64," prefix)
-        const base64QR = qrDataURL.split(',')[1];
-        res.json({ qr: base64QR });
+        try {
+          // Convert QR string to base64 image with smaller options
+          const qrDataURL = await QRCode.toDataURL(qr, {
+            errorCorrectionLevel: 'L',
+            width: 256,
+            margin: 1
+          });
+          // Extract base64 part (remove "data:image/png;base64," prefix)
+          const base64QR = qrDataURL.split(',')[1];
+          res.json({ qr: base64QR });
+        } catch (qrError) {
+          console.error("QR generation failed, returning raw string:", qrError);
+          // Return raw QR string if conversion fails
+          res.json({ qr: qr });
+        }
       } else {
         res.json({ qr: null });
       }

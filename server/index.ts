@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { WebSocketServer } from 'ws';
 
 const app = express();
 app.use(express.json());
@@ -51,6 +52,33 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // Setup WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server, path: '/ws' });
+  
+  wss.on('connection', (ws) => {
+    console.log('📡 WebSocket client connected');
+    
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('📨 Received WebSocket message:', data.type);
+      } catch (e) {
+        console.log('Invalid WebSocket message format');
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('📡 WebSocket client disconnected');
+    });
+    
+    ws.on('error', (error) => {
+      console.error('📡 WebSocket error:', error);
+    });
+  });
+
+  // Make WebSocket server available globally for WhatsApp service
+  (global as any).wss = wss;
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
