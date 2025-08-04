@@ -19,8 +19,7 @@ import formIllustration from "@assets/Gemini_Generated_Image_jkjufujkjufujkju-re
 
 // Country codes list
 const countryCodes = [
-  { code: "+1", country: "United States", flag: "🇺🇸", id: "us" },
-  { code: "+1", country: "Canada", flag: "🇨🇦", id: "ca" },
+  { code: "+1", country: "Canada and US", flag: "🇺🇸", id: "us" },
   { code: "+91", country: "India", flag: "🇮🇳", id: "in" },
   { code: "+44", country: "United Kingdom", flag: "🇬🇧", id: "gb" },
   { code: "+49", country: "Germany", flag: "🇩🇪", id: "de" },
@@ -113,19 +112,24 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
-        {/* Left Side - Signup Form */}
-        <div className="flex items-center justify-center">
-          <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
-            <CardHeader className="space-y-4 text-center">
-              <div className="flex justify-start mb-4">
-                <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto" loading="lazy" />
-              </div>
-              <div>
-                <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Signup</CardTitle>
-              </div>
-            </CardHeader>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Header with Logo */}
+      <div className="container mx-auto px-4 py-6">
+        <Link href="/">
+          <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
+        </Link>
+      </div>
+
+      <div className="flex items-center justify-center px-4">
+        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
+          {/* Left Side - Signup Form */}
+          <div className="flex items-center justify-center">
+            <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
+              <CardHeader className="space-y-4 text-center">
+                <div>
+                  <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Signup</CardTitle>
+                </div>
+              </CardHeader>
             
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -315,7 +319,7 @@ export default function Signup() {
                     className="mt-1"
                   />
                   <Label htmlFor="acceptTerms" className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Accept <button type="button" className="text-blue-600 hover:text-blue-800 underline" onClick={() => clearErrors("acceptTerms")}>Terms & Conditions</button>
+                    Accept <Link href="/terms" className="text-blue-600 hover:text-blue-800 underline">Terms & Conditions</Link>
                   </Label>
                 </div>
                 {errors.acceptTerms && (
@@ -346,8 +350,8 @@ export default function Signup() {
                 </Link>
               </div>
             </CardContent>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
         {/* Right Side - Animated Illustration */}
         <div className="hidden lg:flex items-center justify-center relative">
@@ -374,6 +378,7 @@ export default function Signup() {
         <div className="flex space-x-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Terms of Service</Link>
           <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Privacy Policy</Link>
+        </div>
         </div>
       </div>
     </div>

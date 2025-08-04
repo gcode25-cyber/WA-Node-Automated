@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
+import Terms from "@/pages/terms";
+import ForgotPassword from "@/pages/forgot-password";
 import AccountManagement from "@/pages/account-management";
 import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/account" component={AccountManagement} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/chat/:contactId" component={ChatPage} />

@@ -169,6 +169,14 @@ A comprehensive WhatsApp bulk messaging platform built with React and Node.js, i
 - **2025-08-04**: Created PostgreSQL database with environment variables
 - **2025-08-04**: Updated UI with new illustrations - added form illustration to login/signup pages and community illustration to landing page
 - **2025-08-04**: Implemented lazy loading on all images throughout the application for improved performance
+- **2025-08-04**: Enhanced user experience improvements:
+  - Updated dynamic placeholder behavior to activate only when user starts typing (not on focus)
+  - Created comprehensive Terms and Conditions page with proper navigation
+  - Added functional Forgot Password page with email reset workflow
+  - Moved logo to upper left corner of all pages with home navigation link
+  - Updated country code display to show "Canada and US" instead of separate entries
+  - Implemented "Remember Me" functionality with 30-day session persistence
+  - Fixed all routing issues and JSX syntax errors
 - **2025-02-01**: Major optimization completed - reduced bundle size by 40%
 - **2025-02-01**: Removed 108 unused dependencies (passport, puppeteer, framer-motion, etc.)
 - **2025-02-01**: Consolidated UI components into core.tsx for better performance

@@ -21,7 +21,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-      // In a real app, you'd set up proper session management here
+      // Set up session for user (remember me functionality)
+      (req as any).session.userId = user.id;
+      (req as any).session.username = user.username;
+      
+      // Set session max age based on remember me checkbox
+      if (validatedData.rememberMe) {
+        // Remember for 30 days
+        (req as any).session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      } else {
+        // Session expires when browser closes (default)
+        (req as any).session.cookie.maxAge = null;
+      }
+      
       res.json({ 
         message: "Login successful", 
         user: { 
