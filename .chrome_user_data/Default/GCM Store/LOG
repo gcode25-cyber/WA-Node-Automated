@@ -1,3 +1,2 @@
-2025/08/04-14:01:30.370 1b66 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/GCM Store/MANIFEST-000001
-2025/08/04-14:01:30.371 1b66 Recovering log #3
-2025/08/04-14:01:30.371 1b66 Reusing old log /home/runner/workspace/.chrome_user_data/Default/GCM Store/000003.log 
+2025/08/04-14:04:56.079 1efd Creating DB /home/runner/workspace/.chrome_user_data/Default/GCM Store since it was missing.
+2025/08/04-14:04:56.093 1efd Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/GCM Store/MANIFEST-000001
