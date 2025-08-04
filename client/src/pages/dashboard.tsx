@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
-import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3 } from "lucide-react";
+import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface Chat {
@@ -494,6 +494,29 @@ export default function Dashboard() {
     }
   };
 
+  // Data sync mutation
+  const syncDataMutation = useMutation({
+    mutationFn: () => apiRequest("/api/sync-data", "POST", {}),
+    onSuccess: () => {
+      // Invalidate all queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+      
+      toast({
+        title: "Data Synchronized",
+        description: "Your WhatsApp data has been refreshed successfully!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to synchronize data",
+        variant: "destructive",
+      });
+    },
+  });
+
   const exportContactsCSV = async () => {
     try {
       const response = await fetch('/api/contacts/download');
@@ -580,6 +603,18 @@ export default function Dashboard() {
                 <span className="whitespace-nowrap">{sessionInfo ? "Connected" : "Not Connected"}</span>
               </Badge>
             </div>
+            {sessionInfo && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => syncDataMutation.mutate()}
+                disabled={syncDataMutation.isPending}
+                className="ml-2 p-2"
+                data-testid="button-sync-data"
+              >
+                <RefreshCw className={`h-4 w-4 ${syncDataMutation.isPending ? 'animate-spin' : ''}`} />
+              </Button>
+            )}
           </div>
         </div>
         

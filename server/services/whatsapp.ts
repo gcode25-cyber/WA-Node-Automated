@@ -209,23 +209,8 @@ export class WhatsAppService {
           sessionInfo: this.sessionInfo 
         });
 
-        // Load and broadcast initial data immediately after connection
-        try {
-          console.log('📊 Loading initial data for fast UI updates...');
-          
-          // Load all data in parallel for maximum speed
-          const [chatsData, contactsData, groupsData] = await Promise.all([
-            this.getChats().catch(() => []),
-            this.getContacts().catch(() => []),
-            this.getGroups().catch(() => [])
-          ]);
-
-          console.log(`🚀 Initial data loaded: ${chatsData.length} chats, ${contactsData.length} contacts, ${groupsData.length} groups`);
-          
-          console.log('✅ WHATSAPP SESSION FULLY RESTORED - NO QR NEEDED!');
-        } catch (error: any) {
-          console.log('Initial data load failed (non-critical):', error.message);
-        }
+        // Full data synchronization after client is ready
+        this.performFullDataSync();
       });
 
       this.client.on('authenticated', () => {
@@ -1019,6 +1004,75 @@ export class WhatsAppService {
     }
 
     return profilePics;
+  }
+  // Comprehensive data synchronization method
+  private async performFullDataSync() {
+    console.log('🔄 Starting full data synchronization...');
+    
+    try {
+      // Wait a moment for client to be fully ready
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      console.log('📊 Syncing all WhatsApp data...');
+      
+      // Load all data in sequence with retries for reliability
+      const syncTasks = [
+        this.syncChats(),
+        this.syncContacts(), 
+        this.syncGroups()
+      ];
+      
+      await Promise.allSettled(syncTasks);
+      
+      console.log('✅ FULL DATA SYNCHRONIZATION COMPLETE');
+      
+    } catch (error: any) {
+      console.log('⚠️ Data sync encountered issues:', error.message);
+    }
+  }
+
+  private async syncChats() {
+    try {
+      console.log('📋 Synchronizing chats...');
+      const chats = await this.getChats();
+      console.log(`✅ Synchronized ${chats.length} chats`);
+      return chats;
+    } catch (error: any) {
+      console.log('❌ Chat sync failed:', error.message);
+      return [];
+    }
+  }
+
+  private async syncContacts() {
+    try {
+      console.log('👥 Synchronizing contacts...');
+      const contacts = await this.getContacts();
+      console.log(`✅ Synchronized ${contacts.length} contacts`);
+      return contacts;
+    } catch (error: any) {
+      console.log('❌ Contact sync failed:', error.message);
+      return [];
+    }
+  }
+
+  private async syncGroups() {
+    try {
+      console.log('👥 Synchronizing groups...');
+      const groups = await this.getGroups();
+      console.log(`✅ Synchronized ${groups.length} groups`);
+      return groups;
+    } catch (error: any) {
+      console.log('❌ Group sync failed:', error.message);
+      return [];
+    }
+  }
+
+  // Public method to trigger data sync manually
+  async triggerDataSync() {
+    if (!this.isReady) {
+      throw new Error('WhatsApp client not ready for sync');
+    }
+    return this.performFullDataSync();
   }
 }
 

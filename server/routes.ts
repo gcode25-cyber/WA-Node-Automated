@@ -297,6 +297,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trigger data synchronization
+  app.post("/api/sync-data", async (req, res) => {
+    try {
+      const sessionInfo = await whatsappService.getSessionInfo();
+      if (!sessionInfo) {
+        return res.status(503).json({ error: "WhatsApp not connected" });
+      }
+
+      await whatsappService.triggerDataSync();
+      res.json({ success: true, message: "Data synchronization completed" });
+    } catch (error: any) {
+      console.error("Data sync error:", error);
+      res.status(500).json({ error: error.message || "Failed to sync data" });
+    }
+  });
+
   // Get chat history for a specific chat
   app.get("/api/chats/:chatId/history", async (req, res) => {
     try {
