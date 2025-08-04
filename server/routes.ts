@@ -370,6 +370,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all chats from connected WhatsApp device (sorted oldest to newest as requested)
   app.get("/api/chats", async (req, res) => {
     try {
+      // Check if WhatsApp service is ready first
+      const sessionInfo = await whatsappService.getSessionInfo();
+      if (!sessionInfo) {
+        return res.status(503).json({ error: "WhatsApp not connected" });
+      }
+
       const chats = await whatsappService.getChats();
       // Sort chats oldest to newest (ascending timestamp)
       const sortedChats = chats.sort((a: any, b: any) => a.timestamp - b.timestamp);
@@ -383,6 +389,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all contacts from connected WhatsApp device
   app.get("/api/contacts", async (req, res) => {
     try {
+      // Check if WhatsApp service is ready first
+      const sessionInfo = await whatsappService.getSessionInfo();
+      if (!sessionInfo) {
+        return res.status(503).json({ error: "WhatsApp not connected" });
+      }
+
       const contacts = await whatsappService.getContacts();
       res.json(contacts);
     } catch (error: any) {
@@ -394,6 +406,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all groups from connected WhatsApp device
   app.get("/api/groups", async (req, res) => {
     try {
+      // Check if WhatsApp service is ready first
+      const sessionInfo = await whatsappService.getSessionInfo();
+      if (!sessionInfo) {
+        return res.status(503).json({ error: "WhatsApp not connected" });
+      }
+
       const groups = await whatsappService.getGroups();
       res.json(groups);
     } catch (error: any) {

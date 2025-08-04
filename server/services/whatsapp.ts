@@ -68,9 +68,9 @@ export class WhatsAppService {
       if (hasExistingSession) {
         console.log('🔍 Found existing session files, attempting automatic restoration...');
         
-        // If we have stored session info, use it immediately
+        // If we have stored session info, use it for immediate UI updates
         if (storedSessionInfo) {
-          console.log('📦 Restoring from stored session info');
+          console.log('📦 Restoring from stored session info for UI');
           this.sessionInfo = {
             number: storedSessionInfo.userId,
             name: storedSessionInfo.userName,
@@ -80,8 +80,8 @@ export class WhatsAppService {
           console.log('📋 Session files exist, will restore on WhatsApp ready event');
         }
         
-        // Always attempt to restore existing session automatically
-        this.isReady = false; // Will be set when client connects
+        // Don't mark as ready until client is actually connected and ready
+        this.isReady = false;
       } else {
         console.log('📱 No existing session found, will require QR authentication');
       }
@@ -770,13 +770,26 @@ export class WhatsAppService {
   // Fast data loading methods for chats, groups, and contacts
   async getChats(): Promise<any[]> {
     if (!this.client || !this.isReady) {
+      console.log('⚠️ WhatsApp client not ready for chat fetching');
       throw new Error('WhatsApp client is not ready');
+    }
+
+    // Additional check to ensure client is actually connected
+    if (!this.client.info || !this.client.info.wid) {
+      console.log('⚠️ WhatsApp client info not available, waiting for connection...');
+      throw new Error('WhatsApp client not fully connected');
     }
 
     try {
       console.log('📋 Fetching all chats...');
-      // Get all chats including archived ones and older conversations
-      const chats = await this.client.getChats();
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout fetching chats')), 30000);
+      });
+      
+      const chatsPromise = this.client.getChats();
+      const chats = await Promise.race([chatsPromise, timeoutPromise]);
       
       const chatData = chats.map((chat: any) => ({
         id: chat.id._serialized,
@@ -800,23 +813,38 @@ export class WhatsAppService {
       console.log(`✅ Retrieved ${chatData.length} chats (including archived: ${chatData.filter(c => c.isArchived).length})`);
       
       // Broadcast to WebSocket clients for real-time updates
-      this.broadcastToClients('chats_updated', { chats: sortedChats });
+      this.broadcastToClients('chats_updated', sortedChats);
       
       return sortedChats;
     } catch (error: any) {
       console.error('❌ Failed to fetch chats:', error.message);
+      console.log('Get chats error:', error);
       throw error;
     }
   }
 
   async getContacts(): Promise<any[]> {
     if (!this.client || !this.isReady) {
+      console.log('⚠️ WhatsApp client not ready for contact fetching');
       throw new Error('WhatsApp client is not ready');
+    }
+
+    // Additional check to ensure client is actually connected
+    if (!this.client.info || !this.client.info.wid) {
+      console.log('⚠️ WhatsApp client info not available, waiting for connection...');
+      throw new Error('WhatsApp client not fully connected');
     }
 
     try {
       console.log('👥 Fetching all contacts...');
-      const contacts = await this.client.getContacts();
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout fetching contacts')), 30000);
+      });
+      
+      const contactsPromise = this.client.getContacts();
+      const contacts = await Promise.race([contactsPromise, timeoutPromise]);
       
       const contactData = contacts.map((contact: any) => ({
         id: contact.id._serialized,
@@ -839,7 +867,7 @@ export class WhatsAppService {
       console.log(`✅ Retrieved ${contactData.length} contacts`);
       
       // Broadcast to WebSocket clients for real-time updates
-      this.broadcastToClients('contacts_updated', { contacts: contactData });
+      this.broadcastToClients('contacts_updated', contactData);
       
       return contactData;
     } catch (error: any) {
