@@ -100,15 +100,27 @@ export class WhatsAppService {
         console.log('🔍 QR String preview:', qr.substring(0, 120) + '...');
         
         try {
-          const qrBuffer = qrImage.image(qr, { type: 'png' });
-          let qrDataURL = 'data:image/png;base64,';
-          qrDataURL += Buffer.from(qrBuffer).toString('base64');
+          // Fix: qr-image returns a stream, we need to convert it properly
+          const qrStream = qrImage.image(qr, { type: 'png' });
+          const chunks: Buffer[] = [];
           
-          this.qrCode = qrDataURL;
-          console.log('✅ QR Code generated successfully with qr-image');
+          qrStream.on('data', (chunk: Buffer) => chunks.push(chunk));
+          qrStream.on('end', () => {
+            const qrBuffer = Buffer.concat(chunks);
+            const qrDataURL = 'data:image/png;base64,' + qrBuffer.toString('base64');
+            
+            this.qrCode = qrDataURL;
+            console.log('✅ QR Code generated successfully with qr-image');
+            
+            // Broadcast QR code to all connected WebSocket clients
+            this.broadcastToClients('qr', { qr: qrDataURL });
+          });
           
-          // Broadcast QR code to all connected WebSocket clients
-          this.broadcastToClients('qr', { qr: qrDataURL });
+          qrStream.on('error', (error: any) => {
+            console.error('❌ QR stream error:', error.message);
+            this.qrCode = null;
+          });
+          
         } catch (qrError: any) {
           console.error('❌ QR generation failed:', qrError.message);
           this.qrCode = null;
