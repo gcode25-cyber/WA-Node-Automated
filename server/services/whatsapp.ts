@@ -396,68 +396,171 @@ export class WhatsAppService {
         try {
           console.log('🧹 Logging out from WhatsApp Web and disconnecting phone...');
           
-          // Method 1: Try to terminate session completely
+          // Method 1: Try UI-based logout to properly notify phone
           try {
-            await this.client.logout();
-            console.log('✅ WhatsApp Web logout successful');
+            console.log('🎯 Attempting real UI logout to disconnect phone...');
+            const page = await this.client.pupPage;
+            
+            if (page) {
+              // Wait for page to be ready
+              await page.waitForSelector('body', { timeout: 5000 });
+              
+              // Method 1a: Try to click menu button first
+              try {
+                console.log('📱 Looking for menu button...');
+                await page.waitForSelector("span[data-icon='menu']", { timeout: 3000 });
+                await page.click("span[data-icon='menu']");
+                console.log('✅ Clicked menu button');
+                
+                // Wait for menu to appear
+                await page.waitForTimeout(1500);
+                
+                // Look for logout option using multiple selectors
+                const logoutSelectors = [
+                  "//div[contains(text(), 'Log out')]",
+                  "//div[contains(text(), 'Logout')]", 
+                  "//span[contains(text(), 'Log out')]",
+                  "//span[contains(text(), 'Logout')]",
+                  "[data-testid='menu-logout']"
+                ];
+                
+                let logoutClicked = false;
+                for (const selector of logoutSelectors) {
+                  try {
+                    if (selector.startsWith('//')) {
+                      const elements = await page.$x(selector);
+                      if (elements.length > 0) {
+                        await elements[0].click();
+                        console.log(`✅ Clicked logout using XPath: ${selector}`);
+                        logoutClicked = true;
+                        break;
+                      }
+                    } else {
+                      const element = await page.$(selector);
+                      if (element) {
+                        await element.click();
+                        console.log(`✅ Clicked logout using selector: ${selector}`);
+                        logoutClicked = true;
+                        break;
+                      }
+                    }
+                  } catch (e) {
+                    console.log(`Selector ${selector} failed:`, e.message);
+                  }
+                }
+                
+                if (logoutClicked) {
+                  // Wait for confirmation dialog and click confirm
+                  await page.waitForTimeout(1000);
+                  try {
+                    const confirmSelectors = [
+                      "[data-testid='popup-controls-ok']",
+                      "//div[contains(text(), 'Log out')]//parent::button",
+                      "button[class*='confirm']"
+                    ];
+                    
+                    for (const confirmSelector of confirmSelectors) {
+                      try {
+                        if (confirmSelector.startsWith('//')) {
+                          const confirmElements = await page.$x(confirmSelector);
+                          if (confirmElements.length > 0) {
+                            await confirmElements[0].click();
+                            console.log('✅ Confirmed logout dialog');
+                            break;
+                          }
+                        } else {
+                          const confirmElement = await page.$(confirmSelector);
+                          if (confirmElement) {
+                            await confirmElement.click();
+                            console.log('✅ Confirmed logout dialog');
+                            break;
+                          }
+                        }
+                      } catch (e) {
+                        console.log(`Confirm selector ${confirmSelector} failed:`, e.message);
+                      }
+                    }
+                  } catch (confirmErr) {
+                    console.log('No confirmation dialog needed or found');
+                  }
+                  
+                  console.log('✅ UI logout completed - phone should disconnect');
+                } else {
+                  console.log('⚠️ Could not find logout button, trying programmatic logout');
+                  await this.client.logout();
+                }
+                
+              } catch (menuErr) {
+                console.log('Menu-based logout failed:', menuErr.message);
+                // Fallback to programmatic logout
+                await this.client.logout();
+              }
+            } else {
+              console.log('No page available, using programmatic logout');
+              await this.client.logout();
+            }
+            
           } catch (logoutErr) {
-            console.log('Logout method failed, trying alternative:', logoutErr);
+            console.log('All logout methods failed, trying client.logout():', logoutErr.message);
+            try {
+              await this.client.logout();
+            } catch (finalErr) {
+              console.log('Final logout attempt failed:', finalErr.message);
+            }
           }
           
-          // Method 2: Force disconnect by executing WhatsApp Web logout commands
+          // Method 2: Clear browser storage and IndexedDB aggressively
           try {
-            const pages = await this.client.pupPage;
-            if (pages) {
-              await pages.evaluate(() => {
-                // Method 2a: Try to access WhatsApp's internal logout function
+            const page = await this.client.pupPage;
+            if (page) {
+              await page.evaluate(() => {
                 try {
-                  if (window.Store && window.Store.State) {
-                    window.Store.State.default.logout();
-                  }
-                } catch (e) {
-                  console.log('Store logout failed:', e);
-                }
-                
-                // Method 2b: Try to click logout button programmatically
-                try {
-                  const logoutButton = document.querySelector('[data-testid="menu"] [role="button"]');
-                  if (logoutButton) {
-                    logoutButton.click();
-                    setTimeout(() => {
-                      const confirmLogout = document.querySelector('[data-testid="popup-controls-ok"]');
-                      if (confirmLogout) {
-                        confirmLogout.click();
-                      }
-                    }, 500);
-                  }
-                } catch (e) {
-                  console.log('Button logout failed:', e);
-                }
-                
-                // Method 2c: Clear all storage and force reload
-                try {
-                  localStorage.clear();
-                  sessionStorage.clear();
-                  // Clear IndexedDB
+                  // Clear WhatsApp-specific IndexedDB
                   if (window.indexedDB && window.indexedDB.databases) {
                     window.indexedDB.databases().then(databases => {
                       databases.forEach(db => {
-                        if (db.name) {
+                        if (db.name && (db.name.includes('wawc') || db.name.includes('whatsapp'))) {
                           window.indexedDB.deleteDatabase(db.name);
+                          console.log('Deleted IndexedDB:', db.name);
                         }
                       });
                     });
                   }
-                  // Force reload to completely disconnect
-                  setTimeout(() => window.location.reload(), 1000);
-                } catch (e) {
-                  console.log('Storage clear failed:', e);
+                  
+                  // Clear all storage
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  
+                  // Clear specific WhatsApp storage keys
+                  const keysToRemove = ['WASecretBundle', 'WAToken1', 'WAToken2', 'WABrowserId'];
+                  keysToRemove.forEach(key => {
+                    try {
+                      localStorage.removeItem(key);
+                      sessionStorage.removeItem(key);
+                    } catch (e) {}
+                  });
+                  
+                  console.log('Storage and IndexedDB cleared');
+                } catch (storageErr) {
+                  console.log('Storage cleanup error:', storageErr);
                 }
               });
-              console.log('✅ Executed multiple force disconnect methods');
+              
+              // Delete browser cookies
+              try {
+                const cookies = await page.cookies();
+                if (cookies.length > 0) {
+                  await page.deleteCookie(...cookies);
+                  console.log('✅ Cleared browser cookies');
+                }
+              } catch (cookieErr) {
+                console.log('Cookie cleanup error:', cookieErr.message);
+              }
+              
+              console.log('✅ Aggressive storage cleanup completed');
             }
-          } catch (forceErr) {
-            console.log('Force disconnect method failed:', forceErr);
+          } catch (storageErr) {
+            console.log('Storage cleanup method failed:', storageErr.message);
           }
           
           console.log('🧹 Destroying WhatsApp client...');

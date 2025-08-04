@@ -176,6 +176,9 @@ A comprehensive WhatsApp bulk messaging platform built with React and Node.js, i
 - **2025-08-04**: Enhanced logout functionality to force phone disconnection from WhatsApp Web
 - **2025-08-04**: Added aggressive logout methods including browser session clearing and IndexedDB cleanup
 - **2025-08-04**: Implemented comprehensive logout detection with automatic QR regeneration after phone logout
+- **2025-08-04**: Added UI-based logout system that simulates clicking actual WhatsApp Web logout button
+- **2025-08-04**: Implemented multiple logout selectors and confirmation dialog handling for reliable phone disconnection
+- **2025-08-04**: Enhanced storage cleanup with WhatsApp-specific IndexedDB and cookie deletion
 - **2025-08-04**: Fixed database schema initialization and pushed all tables to PostgreSQL  
 - **2025-08-04**: Fixed UI alignment and improved dashboard sidebar layout:
   - Aligned first character badge with WhatsApp and RCS icons using consistent padding
