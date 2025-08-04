@@ -1,5 +1,13 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
+
+// Extend Express Request interface to include session
+declare module "express-session" {
+  interface SessionData {
+    userId?: string;
+    username?: string;
+  }
+}
 import { whatsappService } from "./services/whatsapp";
 import { sessionInfoSchema, qrResponseSchema, sendMessageSchema, sendMediaMessageSchema, loginSchema, signupSchema } from "@shared/schema";
 import type { WhatsappAccount } from "@shared/schema";
@@ -22,16 +30,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Set up session for user (remember me functionality)
-      (req as any).session.userId = user.id;
-      (req as any).session.username = user.username;
+      req.session.userId = user.id;
+      req.session.username = user.username;
       
       // Set session max age based on remember me checkbox
       if (validatedData.rememberMe) {
         // Remember for 30 days
-        (req as any).session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
       } else {
         // Session expires when browser closes (default)
-        (req as any).session.cookie.maxAge = null;
+        req.session.cookie.maxAge = undefined;
       }
       
       res.json({ 
