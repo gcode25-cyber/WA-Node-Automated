@@ -312,7 +312,7 @@ export class WhatsAppService {
     if (this.client) {
       try {
         await this.client.destroy();
-      } catch (e) {
+      } catch (e: any) {
         console.log('Client cleanup during force refresh:', e?.message);
       }
     }
@@ -374,7 +374,7 @@ export class WhatsAppService {
           fs.rmSync(sessionPath, { recursive: true, force: true });
           console.log('✅ Session files cleared');
         }
-      } catch (fsError) {
+      } catch (fsError: any) {
         console.log('Session file cleanup (non-critical):', fsError?.message);
       }
       
@@ -407,7 +407,7 @@ export class WhatsAppService {
           fs.rmSync(sessionPath, { recursive: true, force: true });
           console.log('🗑️ Force cleared session files after error');
         }
-      } catch (fsError) {
+      } catch (fsError: any) {
         console.log('Force session cleanup failed (non-critical):', fsError?.message);
       }
       

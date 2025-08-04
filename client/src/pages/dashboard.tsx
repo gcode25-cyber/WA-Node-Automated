@@ -178,12 +178,7 @@ export default function Dashboard() {
 
   // WebSocket connection for real-time updates
   useEffect(() => {
-    // Skip WebSocket in development mode to avoid conflicts with Vite HMR
-    if (import.meta.env.DEV) {
-      console.log('Skipping WebSocket in development mode');
-      return;
-    }
-    
+    // Enable WebSocket in all modes for real-time WhatsApp updates
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
