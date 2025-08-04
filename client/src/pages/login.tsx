@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginRequest } from "@shared/schema";
-import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
+import Navigation from "@/components/ui/navigation";
 import formIllustration from "@assets/Gemini_Generated_Image_jkjufujkjufujkju-removebg-preview_1754282049541.png";
 
 export default function Login() {
@@ -66,12 +66,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header with Logo */}
-      <div className="container mx-auto px-4 py-6">
-        <Link href="/">
-          <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
-        </Link>
-      </div>
+      <Navigation currentPage="login" />
 
       <div className="flex items-center justify-center px-4">
         <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">

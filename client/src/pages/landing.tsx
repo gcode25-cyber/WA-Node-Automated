@@ -1,53 +1,14 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Navigation from "@/components/ui/navigation";
 import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
 import heroIllustration from "@assets/Gemini_Generated_Image_heg2mwheg2mwheg2-removebg-preview_1754282049544.png";
 
 export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto" loading="lazy" />
-            </div>
-            
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="#" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Home
-              </Link>
-              <Link href="#features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Features
-              </Link>
-              <Link href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Pricing
-              </Link>
-              <Link href="#blogs" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Blogs
-              </Link>
-            </div>
-            
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg">
-                  Sign up
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation currentPage="home" />
 
       {/* Hero Section */}
       <section className="pt-32 pb-20">
@@ -75,19 +36,19 @@ export default function Landing() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
+                <Link href="/login">
                   <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
-                    Learn more
+                    Get start now
                   </Button>
                 </Link>
-                <Link href="/login">
+                <Link href="/features">
                   <Button size="lg" variant="outline" className="border-gray-300 dark:border-gray-600 px-8 py-3 text-lg">
-                    Get start now
+                    Learn more
                   </Button>
                 </Link>
               </div>
 
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-gray-400 dark:text-gray-500 font-light">
                 ⚡ No credit card required
               </div>
             </div>

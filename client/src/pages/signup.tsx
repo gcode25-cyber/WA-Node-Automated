@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
 import { signupSchema, type SignupRequest } from "@shared/schema";
-import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
+import Navigation from "@/components/ui/navigation";
 import formIllustration from "@assets/Gemini_Generated_Image_jkjufujkjufujkju-removebg-preview_1754282049541.png";
 
 // Country codes list
@@ -113,12 +113,7 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header with Logo */}
-      <div className="container mx-auto px-4 py-6">
-        <Link href="/">
-          <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
-        </Link>
-      </div>
+      <Navigation currentPage="signup" />
 
       <div className="flex items-center justify-center px-4">
         <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
@@ -200,9 +195,6 @@ export default function Signup() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm text-gray-700 dark:text-gray-300">
-                    Phone Number
-                  </Label>
                   <div className="flex space-x-2">
                     <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
                       <SelectTrigger className="w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">

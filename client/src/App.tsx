@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
+import Features from "@/pages/features";
+import Pricing from "@/pages/pricing";
+import Blogs from "@/pages/blogs";
 import Terms from "@/pages/terms";
 import ForgotPassword from "@/pages/forgot-password";
 import AccountManagement from "@/pages/account-management";
@@ -20,6 +23,9 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <Route path="/features" component={Features} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/blogs" component={Blogs} />
       <Route path="/terms" component={Terms} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/account" component={AccountManagement} />
