@@ -30,18 +30,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-      // Set up session for user (remember me functionality)
+      // Set up persistent session for user
       req.session.userId = user.id;
       req.session.username = user.username;
+      req.session.userEmail = user.email;
+      req.session.userFullName = user.fullName;
       
-      // Set session max age based on remember me checkbox
-      if (validatedData.rememberMe) {
-        // Remember for 30 days
-        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-      } else {
-        // Session expires when browser closes (default)
-        req.session.cookie.maxAge = undefined;
-      }
+      // Always remember sessions for 30 days (persistent across restarts)
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      
+      // Force session save to ensure persistence
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+        } else {
+          console.log('✅ Session saved to database for persistent authentication');
+        }
+      });
       
       res.json({ 
         message: "Login successful", 
@@ -90,6 +95,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Signup error:", error);
       res.status(400).json({ error: "Invalid request data" });
     }
+  });
+
+  // User authentication session info
+  app.get("/api/auth/session", (req, res) => {
+    if (req.session.userId) {
+      res.json({ 
+        authenticated: true, 
+        user: { 
+          id: req.session.userId, 
+          username: req.session.username,
+          email: req.session.userEmail,
+          fullName: req.session.userFullName
+        } 
+      });
+    } else {
+      res.status(401).json({ error: "No active session" });
+    }
+  });
+
+  // User authentication logout
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        return res.status(500).json({ error: "Failed to logout" });
+      }
+      res.clearCookie('connect.sid');
+      res.json({ message: "Logged out successfully" });
+    });
   });
   
   // Configure multer for file uploads

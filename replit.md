@@ -31,12 +31,22 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
 - **Bulk Message Campaigns:** Campaign creation, scheduling, delivery tracking.
 
 ## External Dependencies
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL with persistent session storage
 - **WhatsApp Integration:** `whatsapp-web.js` library
 - **File Storage:** Multer (local file system)
 - **Frontend Framework:** React
 - **Backend Framework:** Node.js (Express)
 - **ORM:** Drizzle ORM
+- **Session Management:** connect-pg-simple for database-backed session persistence
 - **UI Components:** shadcn/ui
 - **Styling:** TailwindCSS
 - **Module Bundler/Dev Server:** Vite
+
+## Recent Updates
+- **2025-08-04**: Implemented persistent authentication system that survives application restarts:
+  - Added PostgreSQL-backed session storage using connect-pg-simple
+  - Created sessions table with proper indexing for efficient management
+  - Configured 30-day session expiration with rolling renewal on activity
+  - Implemented secure session configuration with httpOnly and sameSite measures
+  - User sessions now persist across unlimited application restarts on the same device
+  - Sessions automatically save to database with comprehensive user information storage

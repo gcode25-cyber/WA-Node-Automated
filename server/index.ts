@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import connectPg from "connect-pg-simple";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { WebSocketServer } from 'ws';
@@ -8,15 +9,26 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration
+// Configure PostgreSQL session store
+const pgStore = connectPg(session);
+
+// Session configuration with PostgreSQL persistence
 app.use(session({
+  store: new pgStore({
+    conString: process.env.DATABASE_URL,
+    tableName: 'sessions',
+    createTableIfMissing: false, // We'll create it with Drizzle
+    ttl: 30 * 24 * 60 * 60, // 30 days default TTL
+  }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
+  rolling: true, // Reset expiration on activity
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: undefined // Will be set dynamically in login route
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days default
+    sameSite: 'lax'
   }
 }));
 
