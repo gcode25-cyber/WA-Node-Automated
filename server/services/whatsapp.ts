@@ -88,7 +88,7 @@ export class WhatsAppService {
             '--disable-blink-features=AutomationControlled',
             '--disable-extensions',
             '--disable-ipc-flooding-protection',
-            '--user-data-dir=/tmp/chrome-user-data',
+            `--user-data-dir=/tmp/chrome-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             '--disable-session-crashed-bubble',
             '--disable-infobars',
             '--force-no-sandbox',
@@ -293,6 +293,51 @@ export class WhatsAppService {
     this.client.on('group_leave', (notification: any) => {
       console.log('👋 Group leave event:', notification);
     });
+
+    // Listen for remote session logout (when user logs out from phone)
+    this.client.on('remote_session_saved', () => {
+      console.log('📱 Remote session saved');
+    });
+
+    // Listen for logout events from phone
+    this.client.on('logout', () => {
+      console.log('📱 Logout detected from phone');
+      this.handleLogout();
+    });
+
+    // Listen for authentication failure (also triggered by logout from phone)
+    this.client.on('auth_failure', (message: any) => {
+      console.log('🔐 Authentication failure:', message);
+      if (message === 'LOGOUT') {
+        this.handleLogout();
+      }
+    });
+  }
+
+  // Handle logout from phone or authentication failure
+  private handleLogout() {
+    console.log('🔥 Handling logout event...');
+    
+    // Clear all session data
+    this.sessionInfo = null;
+    this.qrCode = null;
+    this.isReady = false;
+    this.messageCache.clear();
+    
+    // Clear storage
+    storage.clearAllSessions();
+    
+    // Broadcast logout event to all connected clients
+    this.broadcastToClients('logout', { 
+      reason: 'Phone disconnected or user logged out',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Re-initialize client to generate new QR code
+    setTimeout(() => {
+      console.log('🔄 Re-initializing client after logout...');
+      this.initializeClient();
+    }, 1000);
   }
 
   async getQRCode(): Promise<string | null> {
