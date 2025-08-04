@@ -127,7 +127,7 @@ export class WhatsAppService {
         }
       });
 
-      this.client.on('ready', () => {
+      this.client.on('ready', async () => {
         console.log('✅ WhatsApp client is ready!');
         this.isReady = true;
         this.sessionInfo = {
@@ -141,6 +141,22 @@ export class WhatsAppService {
           connected: true, 
           sessionInfo: this.sessionInfo 
         });
+
+        // Load and broadcast initial data immediately after connection
+        try {
+          console.log('📊 Loading initial data for fast UI updates...');
+          
+          // Load all data in parallel for maximum speed
+          const [chatsData, contactsData, groupsData] = await Promise.all([
+            this.getChats().catch(() => []),
+            this.getContacts().catch(() => []),
+            this.getGroups().catch(() => [])
+          ]);
+
+          console.log(`🚀 Initial data loaded: ${chatsData.length} chats, ${contactsData.length} contacts, ${groupsData.length} groups`);
+        } catch (error: any) {
+          console.log('Initial data load failed (non-critical):', error.message);
+        }
       });
 
       this.client.on('authenticated', () => {
@@ -379,6 +395,65 @@ export class WhatsAppService {
     }
   }
 
+  async sendMediaMessage(phoneNumber: string, message: string, mediaPath: string, fileName: string): Promise<any> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      const MessageMedia = (await import('whatsapp-web.js')).MessageMedia;
+      const media = MessageMedia.fromFilePath(mediaPath);
+      
+      let formattedNumber = phoneNumber.replace(/\D/g, '');
+      if (formattedNumber.startsWith('1')) {
+        formattedNumber = formattedNumber;
+      } else if (formattedNumber.length === 10) {
+        formattedNumber = '1' + formattedNumber;
+      }
+      
+      const chatId = formattedNumber + '@c.us';
+      
+      console.log(`📤 Sending media message to ${formattedNumber}: ${fileName}`);
+      
+      const result = await this.client.sendMessage(chatId, media, { caption: message });
+      
+      console.log('✅ Media message sent successfully');
+      return { messageId: result.id?.id, fileName };
+      
+    } catch (error: any) {
+      console.error('❌ Failed to send media message:', error.message);
+      throw error;
+    }
+  }
+
+  async getChatHistory(chatId: string, limit: number = 50): Promise<any[]> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      console.log(`📋 Fetching chat history for ${chatId} (limit: ${limit})`);
+      const chat = await this.client.getChatById(chatId);
+      const messages = await chat.fetchMessages({ limit });
+      
+      const messageData = messages.map((msg: any) => ({
+        id: msg.id?.id || Date.now().toString(),
+        body: msg.body || '',
+        timestamp: msg.timestamp || Date.now(),
+        fromMe: msg.fromMe || false,
+        type: msg.type || 'chat',
+        author: msg.author || null,
+        hasMedia: msg.hasMedia || false
+      }));
+
+      console.log(`✅ Retrieved ${messageData.length} messages for chat ${chatId}`);
+      return messageData;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch chat history:', error.message);
+      throw error;
+    }
+  }
+
   private async storeRealtimeMessage(message: any) {
     try {
       if (!message) return;
@@ -416,6 +491,202 @@ export class WhatsAppService {
     } catch (error: any) {
       console.error('Failed to store realtime message:', error.message);
     }
+  }
+
+  // Fast data loading methods for chats, groups, and contacts
+  async getChats(): Promise<any[]> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      console.log('📋 Fetching all chats...');
+      const chats = await this.client.getChats();
+      
+      const chatData = chats.map((chat: any) => ({
+        id: chat.id._serialized,
+        name: chat.name || chat.id.user,
+        isGroup: chat.isGroup,
+        timestamp: chat.timestamp,
+        unreadCount: chat.unreadCount,
+        lastMessage: chat.lastMessage ? {
+          body: chat.lastMessage.body,
+          timestamp: chat.lastMessage.timestamp,
+          fromMe: chat.lastMessage.fromMe
+        } : null,
+        profilePicUrl: null // Will be loaded separately for performance
+      }));
+
+      console.log(`✅ Retrieved ${chatData.length} chats`);
+      
+      // Broadcast to WebSocket clients for real-time updates
+      this.broadcastToClients('chats_updated', { chats: chatData });
+      
+      return chatData;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch chats:', error.message);
+      throw error;
+    }
+  }
+
+  async getContacts(): Promise<any[]> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      console.log('👥 Fetching all contacts...');
+      const contacts = await this.client.getContacts();
+      
+      const contactData = contacts.map((contact: any) => ({
+        id: contact.id._serialized,
+        name: contact.name || contact.pushname || contact.id.user,
+        number: contact.number || contact.id.user,
+        isMyContact: contact.isMyContact,
+        isUser: contact.isUser,
+        isWAContact: contact.isWAContact,
+        profilePicUrl: null, // Will be loaded separately for performance
+        status: null // Will be loaded separately for performance
+      })).filter((contact: any) => contact.isWAContact); // Only WhatsApp contacts
+
+      console.log(`✅ Retrieved ${contactData.length} contacts`);
+      
+      // Broadcast to WebSocket clients for real-time updates
+      this.broadcastToClients('contacts_updated', { contacts: contactData });
+      
+      return contactData;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch contacts:', error.message);
+      throw error;
+    }
+  }
+
+  async getGroups(): Promise<any[]> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      console.log('👥 Fetching all groups...');
+      const chats = await this.client.getChats();
+      const groups = chats.filter((chat: any) => chat.isGroup);
+      
+      const groupData = await Promise.all(
+        groups.map(async (group: any) => {
+          try {
+            const participants = await group.participants || [];
+            return {
+              id: group.id._serialized,
+              name: group.name,
+              description: group.description || '',
+              participantCount: participants.length,
+              participants: participants.map((p: any) => ({
+                id: p.id._serialized,
+                isAdmin: p.isAdmin,
+                isSuperAdmin: p.isSuperAdmin
+              })),
+              timestamp: group.timestamp,
+              unreadCount: group.unreadCount,
+              lastMessage: group.lastMessage ? {
+                body: group.lastMessage.body,
+                timestamp: group.lastMessage.timestamp,
+                fromMe: group.lastMessage.fromMe
+              } : null,
+              profilePicUrl: null // Will be loaded separately for performance
+            };
+          } catch (groupError: any) {
+            console.log(`Group processing error for ${group.name}:`, groupError.message);
+            return {
+              id: group.id._serialized,
+              name: group.name,
+              description: group.description || '',
+              participantCount: 0,
+              participants: [],
+              timestamp: group.timestamp,
+              unreadCount: group.unreadCount,
+              lastMessage: null,
+              profilePicUrl: null
+            };
+          }
+        })
+      );
+
+      console.log(`✅ Retrieved ${groupData.length} groups`);
+      
+      // Broadcast to WebSocket clients for real-time updates
+      this.broadcastToClients('groups_updated', { groups: groupData });
+      
+      return groupData;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch groups:', error.message);
+      throw error;
+    }
+  }
+
+  // Method to get specific group participants for detailed view
+  async getGroupParticipants(groupId: string): Promise<any[]> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      console.log(`👥 Fetching participants for group ${groupId}...`);
+      const chat = await this.client.getChatById(groupId);
+      
+      if (!chat.isGroup) {
+        throw new Error('Chat is not a group');
+      }
+
+      const participants = chat.participants || [];
+      const participantData = participants.map((participant: any) => ({
+        id: participant.id._serialized,
+        number: participant.id.user,
+        isAdmin: participant.isAdmin,
+        isSuperAdmin: participant.isSuperAdmin,
+        name: null // Will be resolved from contacts
+      }));
+
+      console.log(`✅ Retrieved ${participantData.length} participants`);
+      return participantData;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch group participants:', error.message);
+      throw error;
+    }
+  }
+
+  // Method to preload profile pictures for better UX (called separately to avoid blocking main data load)
+  async loadProfilePictures(ids: string[]): Promise<Record<string, string>> {
+    if (!this.client || !this.isReady) {
+      return {};
+    }
+
+    const profilePics: Record<string, string> = {};
+    
+    // Process in batches to avoid overwhelming the API
+    const batchSize = 10;
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batch = ids.slice(i, i + batchSize);
+      
+      await Promise.all(
+        batch.map(async (id) => {
+          try {
+            const profilePicUrl = await this.client.getProfilePicUrl(id);
+            if (profilePicUrl) {
+              profilePics[id] = profilePicUrl;
+            }
+          } catch (error) {
+            // Profile pic not available or private - skip silently
+          }
+        })
+      );
+      
+      // Small delay between batches
+      if (i + batchSize < ids.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    return profilePics;
   }
 }
 

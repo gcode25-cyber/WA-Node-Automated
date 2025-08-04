@@ -150,25 +150,28 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  // Fetch chats
+  // Fetch chats with real-time updates
   const { data: chats = [], isLoading: chatsLoading } = useQuery<Chat[]>({
     queryKey: ['/api/chats'],
     enabled: !!sessionInfo,
-    refetchInterval: 30000,
+    refetchInterval: false, // Disable automatic refetch since we use WebSocket updates
+    staleTime: Infinity, // Data is always fresh from WebSocket
   });
 
-  // Fetch contacts  
+  // Fetch contacts with real-time updates
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
     enabled: !!sessionInfo,
-    refetchInterval: 30000,
+    refetchInterval: false, // Disable automatic refetch since we use WebSocket updates
+    staleTime: Infinity, // Data is always fresh from WebSocket
   });
 
-  // Fetch groups
+  // Fetch groups with real-time updates
   const { data: groups = [], isLoading: groupsLoading } = useQuery<Group[]>({
     queryKey: ['/api/groups'],
     enabled: !!sessionInfo,
-    refetchInterval: 30000,
+    refetchInterval: false, // Disable automatic refetch since we use WebSocket updates
+    staleTime: Infinity, // Data is always fresh from WebSocket
   });
 
   // Fetch bulk campaigns
@@ -186,14 +189,35 @@ export default function Dashboard() {
           queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
           break;
         case 'connected':
-          // Invalidate session info when connected
+          // Invalidate session info when connected and refresh data
           queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
           break;
         case 'disconnected':
         case 'logout':
           // Invalidate all session-related queries
           queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
           queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+          break;
+        case 'chats_updated':
+          // Update chats cache with real-time data
+          if (message.data?.chats) {
+            queryClient.setQueryData(['/api/chats'], message.data.chats);
+          }
+          break;
+        case 'contacts_updated':
+          // Update contacts cache with real-time data
+          if (message.data?.contacts) {
+            queryClient.setQueryData(['/api/contacts'], message.data.contacts);
+          }
+          break;
+        case 'groups_updated':
+          // Update groups cache with real-time data
+          if (message.data?.groups) {
+            queryClient.setQueryData(['/api/groups'], message.data.groups);
+          }
           break;
       }
     };

@@ -218,8 +218,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get system status
   app.get("/api/system-status", async (req, res) => {
     try {
+      const isReady = await whatsappService.isClientReady();
       const status = {
-        client: whatsappService.isClientReady() ? "Running" : "Initializing",
+        client: isReady ? "Running" : "Initializing",
         puppeteer: "Stable",
         storage: "Active",
         lastCheck: new Date().toISOString(),
@@ -231,14 +232,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Demo login endpoint for testing UI
-  app.post("/api/demo-login", async (req, res) => {
+  // Get chat history for a specific chat
+  app.get("/api/chats/:chatId/history", async (req, res) => {
     try {
-      await whatsappService.simulateLogin();
-      res.json({ success: true, message: "Demo login successful" });
-    } catch (error) {
-      console.error("Demo login error:", error);
-      res.status(500).json({ error: "Failed to demo login" });
+      const { chatId } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const messages = await whatsappService.getChatHistory(chatId, limit);
+      res.json(messages);
+    } catch (error: any) {
+      console.error("Get chat history error:", error);
+      res.status(500).json({ error: error.message || "Failed to get chat history" });
     }
   });
 
