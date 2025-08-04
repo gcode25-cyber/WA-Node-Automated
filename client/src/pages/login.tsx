@@ -14,7 +14,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginRequest } from "@shared/schema";
 import Navigation from "@/components/ui/navigation";
-import formIllustration from "@assets/Gemini_Generated_Image_jkjufujkjufujkju-removebg-preview_1754282049541.png";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -68,18 +67,19 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="login" />
 
-      <div className="flex items-center justify-center px-4">
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
-          {/* Left Side - Login Form */}
-          <div className="flex items-center justify-center">
-            <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
-              <CardHeader className="space-y-4 text-center">
-                <div>
-                  <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Login</CardTitle>
-                </div>
-              </CardHeader>
-            
-            <CardContent className="space-y-6">
+      <div className="pt-20 pb-12">
+        <div className="flex items-center justify-center px-4">
+          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
+            {/* Left Side - Login Form */}
+            <div className="flex items-center justify-center">
+              <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
+                <CardHeader className="space-y-4 text-center">
+                  <div>
+                    <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Login</CardTitle>
+                  </div>
+                </CardHeader>
+              
+                <CardContent className="space-y-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="relative">
                   <Input
@@ -172,29 +172,28 @@ export default function Login() {
                   Sign up
                 </Link>
               </div>
-            </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Side - Animated Illustration */}
+            <div className="hidden lg:flex items-center justify-center relative">
+              <div className="relative">
+                {/* Animated image */}
+                <img 
+                  src="/form-illustration.svg"
+                  alt="WhatsApp Messaging Illustration"
+                  className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-3 filter drop-shadow-2xl"
+                  loading="lazy"
+                />
+                
+                {/* Floating animated elements */}
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-pink-500 rounded-full opacity-20 animate-pulse"></div>
+                <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-purple-500 rounded-full opacity-20 animate-pulse"></div>
+                <div className="absolute top-1/2 -left-8 w-12 h-12 bg-blue-400 rounded-full opacity-30 animate-bounce"></div>
+              </div>
+            </div>
           </div>
-
-        {/* Right Side - Animated Illustration */}
-        <div className="hidden lg:flex items-center justify-center relative">
-          <div className="relative">
-            {/* Animated image */}
-            <img 
-              src={formIllustration}
-              alt="WhatsApp Messaging Illustration"
-              className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-3 filter drop-shadow-2xl"
-              loading="lazy"
-            />
-            
-            {/* Floating animated elements */}
-            <div className="absolute -top-4 -right-4 w-16 h-16 bg-pink-500 rounded-full opacity-20 animate-pulse"></div>
-            <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-purple-500 rounded-full opacity-20 animate-pulse"></div>
-            <div className="absolute top-1/2 -left-8 w-12 h-12 bg-blue-400 rounded-full opacity-30 animate-bounce"></div>
-          </div>
-
-
-        </div>
         </div>
       </div>
 

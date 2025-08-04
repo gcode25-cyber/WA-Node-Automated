@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -54,7 +53,7 @@ export default function ForgotPassword() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
           <Link href="/">
-            <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
+            <img src="/logo.svg" alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
           </Link>
           <Link href="/login">
             <Button variant="ghost" className="flex items-center space-x-2">

@@ -1,6 +1,5 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
 
 interface NavigationProps {
   showAuthButtons?: boolean;
@@ -35,7 +34,7 @@ export default function Navigation({ showAuthButtons = true, currentPage }: Navi
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <Link href="/">
-              <img src={hubwaleLogo} alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
+              <img src="/logo.svg" alt="HubWale" className="h-8 w-auto cursor-pointer" loading="lazy" />
             </Link>
           </div>
           

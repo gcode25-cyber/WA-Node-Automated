@@ -15,7 +15,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
 import { signupSchema, type SignupRequest } from "@shared/schema";
 import Navigation from "@/components/ui/navigation";
-import formIllustration from "@assets/Gemini_Generated_Image_jkjufujkjufujkju-removebg-preview_1754282049541.png";
 
 // Country codes list
 const countryCodes = [
@@ -115,18 +114,19 @@ export default function Signup() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="signup" />
 
-      <div className="flex items-center justify-center px-4">
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
-          {/* Left Side - Signup Form */}
-          <div className="flex items-center justify-center">
-            <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
-              <CardHeader className="space-y-4 text-center">
-                <div>
-                  <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Signup</CardTitle>
-                </div>
-              </CardHeader>
-            
-            <CardContent className="space-y-6">
+      <div className="pt-20 pb-12">
+        <div className="flex items-center justify-center px-4">
+          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full">
+            {/* Left Side - Signup Form */}
+            <div className="flex items-center justify-center">
+              <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
+                <CardHeader className="space-y-4 text-center">
+                  <div>
+                    <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Signup</CardTitle>
+                  </div>
+                </CardHeader>
+              
+                <CardContent className="space-y-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="relative">
                   <Input
@@ -341,27 +341,27 @@ export default function Signup() {
                   Login
                 </Link>
               </div>
-            </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Side - Animated Illustration */}
+            <div className="hidden lg:flex items-center justify-center relative">
+              <div className="relative">
+                {/* Animated image */}
+                <img 
+                  src="/form-illustration.svg"
+                  alt="WhatsApp Messaging Illustration"
+                  className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:-rotate-3 filter drop-shadow-2xl"
+                  loading="lazy"
+                />
+                
+                {/* Floating animated elements */}
+                <div className="absolute -top-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-20 animate-pulse"></div>
+                <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-green-500 rounded-full opacity-20 animate-pulse"></div>
+              </div>
+            </div>
           </div>
-
-        {/* Right Side - Animated Illustration */}
-        <div className="hidden lg:flex items-center justify-center relative">
-          <div className="relative">
-            {/* Animated image */}
-            <img 
-              src={formIllustration}
-              alt="WhatsApp Messaging Illustration"
-              className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:-rotate-3 filter drop-shadow-2xl"
-              loading="lazy"
-            />
-            
-            {/* Floating animated elements */}
-            <div className="absolute -top-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-20 animate-pulse"></div>
-            <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-green-500 rounded-full opacity-20 animate-pulse"></div>
-          </div>
-
-
         </div>
       </div>
 
@@ -370,7 +370,6 @@ export default function Signup() {
         <div className="flex space-x-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Terms of Service</Link>
           <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Privacy Policy</Link>
-        </div>
         </div>
       </div>
     </div>

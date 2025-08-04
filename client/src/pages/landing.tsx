@@ -2,8 +2,6 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/ui/navigation";
-import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
-import heroIllustration from "@assets/Gemini_Generated_Image_heg2mwheg2mwheg2-removebg-preview_1754282049544.png";
 
 export default function Landing() {
   return (
@@ -48,8 +46,12 @@ export default function Landing() {
                 </Link>
               </div>
 
-              <div className="text-sm text-gray-400 dark:text-gray-500 font-light">
-                ⚡ No credit card required
+              <div className="flex items-center justify-center sm:justify-start">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 border border-green-200 dark:border-green-700/50">
+                  <span className="text-lg font-semibold text-green-700 dark:text-green-300">
+                    ⚡ No credit card required
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -57,7 +59,7 @@ export default function Landing() {
             <div className="relative flex items-center justify-center">
               {/* Animated image */}
               <img 
-                src={heroIllustration}
+                src="/hero-illustration.svg"
                 alt="WhatsApp Community and Messaging Illustration"
                 className="w-96 h-96 lg:w-[500px] lg:h-[500px] object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-2 filter drop-shadow-2xl"
                 loading="lazy"
@@ -113,7 +115,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src={hubwaleLogo} alt="HubWale" className="h-6 w-auto" />
+              <img src="/logo.svg" alt="HubWale" className="h-6 w-auto" />
             </div>
             <div className="flex space-x-6 text-sm text-gray-600 dark:text-gray-400">
               <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Terms of Service</Link>
