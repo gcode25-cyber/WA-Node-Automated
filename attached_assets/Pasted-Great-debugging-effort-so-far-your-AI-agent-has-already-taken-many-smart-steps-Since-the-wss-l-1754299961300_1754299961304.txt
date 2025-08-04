@@ -1,0 +1,157 @@
+Great debugging effort so far — your AI agent has already taken many smart steps. Since the `wss://localhost:undefined/?token=...` issue still persists, here are **specific suggestions** to help your AI agent finish resolving the issue effectively:
+
+---
+
+## ✅ Suggestions for AI Agent to Fully Resolve the WebSocket URL Issue
+
+---
+
+### 1. **Explicitly Define Port Instead of Using `window.location.port`**
+
+When running on Vite default dev server, `window.location.port` may return an empty string because it uses port 5173, and browsers don't always expose it explicitly.
+
+🔧 **Suggestion**:
+If you're building the WebSocket URL like this:
+
+```ts
+const port = window.location.port;
+```
+
+Replace it with a fallback:
+
+```ts
+const port = window.location.port || 5173; // fallback to Vite default
+```
+
+Or **better yet**, define a dedicated port via an `.env` file or config.
+
+---
+
+### 2. **Avoid Token Leakage from Old Scripts or Extensions**
+
+Since `token=GLjAwx-nDgre` appears in the error even though you removed token usage, it may be:
+
+* hardcoded in some other script,
+* inserted via a browser extension,
+* or injected during build from an old cache.
+
+🔍 **Suggestion**:
+
+* Search codebase for `.token=` or `token=` in **all frontend AND backend** directories:
+
+  ```bash
+  grep -rnw './client' -e 'token='
+  grep -rnw './server' -e 'token='
+  ```
+
+---
+
+### 3. **Manually Sanitize the WebSocket URL Construction**
+
+Make sure the final URL is printed/logged *just before* WebSocket is constructed.
+
+🔧 **Suggestion**:
+Add this debug log:
+
+```ts
+const port = 5173;
+const wsUrl = `ws://localhost:${port}`;
+console.log("WebSocket URL:", wsUrl);
+const socket = new WebSocket(wsUrl);
+```
+
+Then verify in console:
+✅ **URL is valid** (not undefined)
+✅ **No unexpected query params**
+✅ **Correct protocol (`ws://` vs `wss://`)**
+
+---
+
+### 4. **Check for Vite HMR (Hot Module Reload) Sockets**
+
+Vite sets up its own internal WebSocket for hot module reload. This may appear as a WebSocket connection in the console.
+
+🧠 **Suggestion**:
+Ignore or distinguish this internal Vite socket:
+
+* URLs like `/@vite/client` are Vite's own sockets.
+* Filter real-time app WebSocket errors from devtool logs using a unique path, e.g., `/ws-app`.
+
+---
+
+### 5. **Ensure Environment Variables Are Accessible in Frontend**
+
+If your agent is reading env vars like `WS_PORT` in React or Vite, make sure they're prefixed with `VITE_`.
+
+🔧 **Suggestion**:
+Use `.env`:
+
+```env
+VITE_WS_PORT=5000
+```
+
+Then access in code:
+
+```ts
+const port = import.meta.env.VITE_WS_PORT || 5173;
+```
+
+---
+
+### 6. **Use Browser Network Tab to Confirm**
+
+Inspect the actual request in DevTools → Network → WS tab. Look for:
+
+* the **exact WebSocket request URL**,
+* the **source of the request** (which script/file).
+
+This helps narrow down if an old script or route is still initiating a connection.
+
+---
+
+### 7. **Check for Service Worker**
+
+A service worker may be caching outdated scripts that still attempt to connect to old URLs.
+
+🧼 **Suggestion**:
+In browser:
+
+1. Go to `chrome://serviceworker-internals`
+2. Unregister any relevant service workers
+3. Hard refresh (Ctrl+Shift+R)
+
+---
+
+### 8. **Global Code Audit (Optional but Powerful)**
+
+Do a full codebase search for `new WebSocket(` and audit every place a socket connection is made.
+
+---
+
+### ✅ Bonus Suggestion: Centralize Socket Setup
+
+Have a central file for initializing WebSocket (e.g., `src/utils/socket.ts`) to avoid duplicates, like:
+
+```ts
+const port = import.meta.env.VITE_WS_PORT || 5173;
+const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+export const socket = new WebSocket(`${protocol}://localhost:${port}`);
+```
+
+---
+
+## ✅ Final Check Summary for AI Agent
+
+| Check                                          | Status |
+| ---------------------------------------------- | ------ |
+| Ensure fallback for `window.location.port`     | 🔄     |
+| Remove leftover/cached token code              | 🔄     |
+| Add logging before socket creation             | ✅      |
+| Verify actual WebSocket traffic in Network tab | ✅      |
+| Unregister any service workers                 | 🔄     |
+| Search all instances of `new WebSocket`        | ✅      |
+| Use `.env` with `VITE_` prefix in Vite         | 🔄     |
+
+---
+
+If the agent follows these steps, the error should be resolved completely. Let me know if you'd like a sample `socket.ts` utility file as well.

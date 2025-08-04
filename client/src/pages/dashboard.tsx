@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
 import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -176,81 +177,33 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  // WebSocket connection for real-time updates
+  // WebSocket connection for real-time updates using centralized manager
   useEffect(() => {
-    // Enable WebSocket in all modes for real-time WhatsApp updates
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    // Fix for undefined port - use window.location.host which includes port, or fallback to 5000
-    const host = window.location.host || `${window.location.hostname}:5000`;
-    const wsUrl = `${protocol}//${host}/ws`;
-    
-    console.log('🔌 WebSocket URL details:', {
-      protocol,
-      host: window.location.host,
-      hostname: window.location.hostname,  
-      port: window.location.port,
-      finalHost: host,
-      finalUrl: wsUrl
-    });
-    
-    const connectWebSocket = () => {
-      try {
-        console.log('🔌 Attempting WebSocket connection to:', wsUrl);
-        wsRef.current = new WebSocket(wsUrl);
-        
-        wsRef.current.onopen = () => {
-          console.log('📡 WebSocket connected to', wsUrl);
-        };
-        
-        wsRef.current.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            console.log('📨 WebSocket message received:', data.type);
-            
-            switch (data.type) {
-              case 'qr':
-                // Invalidate QR-related queries to fetch new QR
-                queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
-                break;
-              case 'connected':
-                // Invalidate session info when connected
-                queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
-                break;
-              case 'disconnected':
-              case 'logout':
-                // Invalidate all session-related queries
-                queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
-                queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
-                break;
-            }
-          } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
-          }
-        };
-        
-        wsRef.current.onclose = (event) => {
-          console.log('📡 WebSocket disconnected:', event.code, event.reason);
-          // Reconnect after 3 seconds
-          setTimeout(connectWebSocket, 3000);
-        };
-        
-        wsRef.current.onerror = (error) => {
-          console.error('📡 WebSocket error:', error);
-        };
-      } catch (error) {
-        console.error('Failed to create WebSocket connection:', error);
-        // Retry after 5 seconds
-        setTimeout(connectWebSocket, 5000);
+    const handleWebSocketMessage = (message: WebSocketMessage) => {
+      switch (message.type) {
+        case 'qr':
+          // Invalidate QR-related queries to fetch new QR
+          queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+          break;
+        case 'connected':
+          // Invalidate session info when connected
+          queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+          break;
+        case 'disconnected':
+        case 'logout':
+          // Invalidate all session-related queries
+          queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+          break;
       }
     };
-    
-    connectWebSocket();
+
+    // Register event handler
+    websocketManager.addEventHandler(handleWebSocketMessage);
     
     // Cleanup on unmount
     return () => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.close();
-      }
+      websocketManager.removeEventHandler(handleWebSocketMessage);
     };
   }, [queryClient]);
 
