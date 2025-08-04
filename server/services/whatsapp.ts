@@ -125,11 +125,17 @@ export class WhatsAppService {
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
             '--disable-renderer-backgrounding',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--disable-ipc-flooding-protection',
+            '--memory-pressure-off',
+            '--max_old_space_size=4096',
             `--user-data-dir=/tmp/chrome-${Date.now()}-${Math.random().toString(36).substring(7)}`
           ],
           handleSIGINT: false,
           handleSIGTERM: false,
-          handleSIGHUP: false
+          handleSIGHUP: false,
+          timeout: 60000 // 60 second timeout for initialization
         }
       });
 
@@ -251,9 +257,20 @@ export class WhatsAppService {
 
     } catch (error: any) {
       console.error('❌ WhatsApp client initialization failed:', error.message);
+      console.error('Error details:', error);
       this.isReady = false;
       this.sessionInfo = null;
       this.qrCode = null;
+      
+      // Attempt retry after a delay for transient network issues
+      console.log('🔄 Scheduling retry in 10 seconds...');
+      setTimeout(() => {
+        if (!this.isReady && !this.isInitializing) {
+          console.log('🔄 Retrying WhatsApp client initialization...');
+          this.initializeClient();
+        }
+      }, 10000);
+      
       console.log('Browser failed to initialize - QR will be available when browser starts');
     } finally {
       this.isInitializing = false;
@@ -400,18 +417,53 @@ export class WhatsAppService {
 
   async forceRefreshQR() {
     console.log('🔄 Force refreshing QR code by reinitializing client...');
+    await this.completeRestart();
+  }
+
+  async completeRestart() {
+    console.log('🔄 Starting complete WhatsApp client restart...');
+    
+    // Reset all state
     this.qrCode = null;
     this.sessionInfo = null;
+    this.isReady = false;
+    this.isInitializing = false;
+    this.messageCache.clear();
     
+    // Destroy existing client
     if (this.client) {
       try {
         await this.client.destroy();
       } catch (e: any) {
-        console.log('Client cleanup during force refresh:', e?.message);
+        console.log('Client cleanup during restart:', e?.message);
       }
     }
     this.client = null;
     
+    // Clear session storage
+    try {
+      await storage.clearAllSessions();
+    } catch (e: any) {
+      console.log('Storage cleanup during restart:', e?.message);
+    }
+    
+    // Clear session files
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const sessionPath = path.resolve('./.wwebjs_auth');
+      if (fs.existsSync(sessionPath)) {
+        fs.rmSync(sessionPath, { recursive: true, force: true });
+        console.log('🗑️ Session files cleared');
+      }
+    } catch (fsError: any) {
+      console.log('Session file cleanup:', fsError.message);
+    }
+    
+    // Wait a moment for cleanup
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Reinitialize
     await this.initializeClient();
   }
 

@@ -273,6 +273,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Complete restart endpoint
+  app.post("/api/restart-whatsapp", async (req, res) => {
+    try {
+      await whatsappService.completeRestart();
+      res.json({ success: true, message: "WhatsApp service restarted completely" });
+    } catch (error) {
+      console.error("WhatsApp restart error:", error);
+      res.status(500).json({ error: "Failed to restart WhatsApp service" });
+    }
+  });
+
   // Logout from WhatsApp
   app.post("/api/logout", async (req, res) => {
     try {
