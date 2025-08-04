@@ -63,8 +63,6 @@ export default function Signup() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
   const [selectedCountryCode, setSelectedCountryCode] = useState("+91");
 
   const {
@@ -87,24 +85,7 @@ export default function Signup() {
     }
   });
 
-  const watchedValues = watch();
-
-  useEffect(() => {
-    setFieldValues(watchedValues);
-  }, [watchedValues]);
-
-  const handleFieldFocus = (fieldName: string) => {
-    setFocusedField(fieldName);
-    if (errors[fieldName as keyof typeof errors]) {
-      clearErrors(fieldName as keyof SignupRequest);
-    }
-  };
-
-  const handleFieldBlur = (fieldName: string) => {
-    if (!fieldValues[fieldName] || fieldValues[fieldName].length === 0) {
-      setFocusedField(null);
-    }
-  };
+  const fieldValues = watch();
 
   const signupMutation = useMutation({
     mutationFn: async (data: SignupRequest) => {
@@ -154,13 +135,11 @@ export default function Signup() {
                     type="text"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("fullName")}
-                    onFocus={() => handleFieldFocus("fullName")}
-                    onBlur={() => handleFieldBlur("fullName")}
                   />
                   <Label 
                     htmlFor="fullName" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "fullName" || fieldValues.fullName
+                      fieldValues.fullName
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -178,13 +157,11 @@ export default function Signup() {
                     type="text"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("username")}
-                    onFocus={() => handleFieldFocus("username")}
-                    onBlur={() => handleFieldBlur("username")}
                   />
                   <Label 
                     htmlFor="username" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "username" || fieldValues.username
+                      fieldValues.username
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -202,13 +179,11 @@ export default function Signup() {
                     type="email"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("email")}
-                    onFocus={() => handleFieldFocus("email")}
-                    onBlur={() => handleFieldBlur("email")}
                   />
                   <Label 
                     htmlFor="email" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "email" || fieldValues.email
+                      fieldValues.email
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -247,13 +222,11 @@ export default function Signup() {
                         type="tel"
                         className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                         {...register("phone")}
-                        onFocus={() => handleFieldFocus("phone")}
-                        onBlur={() => handleFieldBlur("phone")}
                       />
                       <Label 
                         htmlFor="phone" 
                         className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                          focusedField === "phone" || fieldValues.phone
+                          fieldValues.phone
                             ? "hidden"
                             : "top-3 text-sm text-gray-500 dark:text-gray-400"
                         }`}
@@ -275,13 +248,11 @@ export default function Signup() {
                     type={showPassword ? "text" : "password"}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3 pr-12"
                     {...register("password")}
-                    onFocus={() => handleFieldFocus("password")}
-                    onBlur={() => handleFieldBlur("password")}
                   />
                   <Label 
                     htmlFor="password" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "password" || fieldValues.password
+                      fieldValues.password
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -307,13 +278,11 @@ export default function Signup() {
                     type={showConfirmPassword ? "text" : "password"}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3 pr-12"
                     {...register("confirmPassword")}
-                    onFocus={() => handleFieldFocus("confirmPassword")}
-                    onBlur={() => handleFieldBlur("confirmPassword")}
                   />
                   <Label 
                     htmlFor="confirmPassword" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "confirmPassword" || fieldValues.confirmPassword
+                      fieldValues.confirmPassword
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -336,7 +305,7 @@ export default function Signup() {
                 <div className="flex items-start space-x-2">
                   <Checkbox 
                     id="acceptTerms"
-                    checked={watchedValues.acceptTerms}
+                    checked={fieldValues.acceptTerms}
                     onCheckedChange={(checked) => {
                       setValue("acceptTerms", checked === true);
                       if (checked && errors.acceptTerms) {

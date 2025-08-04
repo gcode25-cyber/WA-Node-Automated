@@ -124,9 +124,6 @@ export default function Dashboard() {
   const [selectedContactGroup, setSelectedContactGroup] = useState("");
   const [bulkMessage, setBulkMessage] = useState("");
   
-  // Dynamic placeholder management
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  
   // Update field values for placeholder visibility
   const fieldValues = {
     phoneNumber,
@@ -134,16 +131,6 @@ export default function Dashboard() {
     newGroupName,
     newGroupDescription,
     bulkMessage
-  };
-  
-  const handleFieldFocus = (fieldName: string) => {
-    setFocusedField(fieldName);
-  };
-  
-  const handleFieldBlur = (fieldName: string) => {
-    if (!fieldValues[fieldName as keyof typeof fieldValues] || fieldValues[fieldName as keyof typeof fieldValues].length === 0) {
-      setFocusedField(null);
-    }
   };
 
   // Fetch current session info
@@ -809,14 +796,12 @@ export default function Dashboard() {
                             type="tel"
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
-                            onFocus={() => handleFieldFocus("phoneNumber")}
-                            onBlur={() => handleFieldBlur("phoneNumber")}
                             className="w-full"
                           />
                           <Label 
                             htmlFor="phone-number" 
                             className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                              focusedField === "phoneNumber" || fieldValues.phoneNumber
+                              fieldValues.phoneNumber
                                 ? "hidden"
                                 : "top-3 text-sm text-gray-500 dark:text-gray-400"
                             }`}
@@ -838,14 +823,12 @@ export default function Dashboard() {
                           id="message"
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
-                          onFocus={() => handleFieldFocus("message")}
-                          onBlur={() => handleFieldBlur("message")}
                           rows={4}
                         />
                         <Label 
                           htmlFor="message" 
                           className={`absolute left-3 top-3 pointer-events-none transition-all duration-200 ${
-                            focusedField === "message" || fieldValues.message
+                            fieldValues.message
                               ? "hidden"
                               : "text-sm text-gray-500 dark:text-gray-400"
                           }`}
@@ -1528,13 +1511,11 @@ export default function Dashboard() {
                   id="group-name"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
-                  onFocus={() => handleFieldFocus("newGroupName")}
-                  onBlur={() => handleFieldBlur("newGroupName")}
                 />
                 <Label 
                   htmlFor="group-name" 
                   className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                    focusedField === "newGroupName" || fieldValues.newGroupName
+                    fieldValues.newGroupName
                       ? "hidden"
                       : "top-3 text-sm text-gray-500 dark:text-gray-400"
                   }`}
@@ -1550,14 +1531,12 @@ export default function Dashboard() {
                   id="group-description"
                   value={newGroupDescription}
                   onChange={(e) => setNewGroupDescription(e.target.value)}
-                  onFocus={() => handleFieldFocus("newGroupDescription")}
-                  onBlur={() => handleFieldBlur("newGroupDescription")}
                   rows={3}
                 />
                 <Label 
                   htmlFor="group-description" 
                   className={`absolute left-3 top-3 pointer-events-none transition-all duration-200 ${
-                    focusedField === "newGroupDescription" || fieldValues.newGroupDescription
+                    fieldValues.newGroupDescription
                       ? "hidden"
                       : "text-sm text-gray-500 dark:text-gray-400"
                   }`}
@@ -1626,14 +1605,12 @@ export default function Dashboard() {
                   id="bulk-message"
                   value={bulkMessage}
                   onChange={(e) => setBulkMessage(e.target.value)}
-                  onFocus={() => handleFieldFocus("bulkMessage")}
-                  onBlur={() => handleFieldBlur("bulkMessage")}
                   rows={4}
                 />
                 <Label 
                   htmlFor="bulk-message" 
                   className={`absolute left-3 top-3 pointer-events-none transition-all duration-200 ${
-                    focusedField === "bulkMessage" || fieldValues.bulkMessage
+                    fieldValues.bulkMessage
                       ? "hidden"
                       : "text-sm text-gray-500 dark:text-gray-400"
                   }`}

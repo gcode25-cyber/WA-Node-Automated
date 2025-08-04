@@ -20,8 +20,6 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
 
   const {
     register,
@@ -39,24 +37,7 @@ export default function Login() {
     }
   });
 
-  const watchedValues = watch();
-
-  useEffect(() => {
-    setFieldValues(watchedValues);
-  }, [watchedValues]);
-
-  const handleFieldFocus = (fieldName: string) => {
-    setFocusedField(fieldName);
-    if (errors[fieldName as keyof typeof errors]) {
-      clearErrors(fieldName as keyof LoginRequest);
-    }
-  };
-
-  const handleFieldBlur = (fieldName: string) => {
-    if (!fieldValues[fieldName] || fieldValues[fieldName].length === 0) {
-      setFocusedField(null);
-    }
-  };
+  const fieldValues = watch();
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginRequest) => {
@@ -106,13 +87,11 @@ export default function Login() {
                     type="text"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("usernameOrEmail")}
-                    onFocus={() => handleFieldFocus("usernameOrEmail")}
-                    onBlur={() => handleFieldBlur("usernameOrEmail")}
                   />
                   <Label 
                     htmlFor="usernameOrEmail" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "usernameOrEmail" || fieldValues.usernameOrEmail
+                      fieldValues.usernameOrEmail
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -130,13 +109,11 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3 pr-12"
                     {...register("password")}
-                    onFocus={() => handleFieldFocus("password")}
-                    onBlur={() => handleFieldBlur("password")}
                   />
                   <Label 
                     htmlFor="password" 
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
-                      focusedField === "password" || fieldValues.password
+                      fieldValues.password
                         ? "hidden"
                         : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
@@ -160,7 +137,7 @@ export default function Login() {
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                       id="rememberMe"
-                      checked={watchedValues.rememberMe}
+                      checked={fieldValues.rememberMe}
                       onCheckedChange={(checked) => setValue("rememberMe", checked === true)}
                     />
                     <Label htmlFor="rememberMe" className="text-sm text-gray-600 dark:text-gray-400">
