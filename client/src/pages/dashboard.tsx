@@ -219,6 +219,11 @@ export default function Dashboard() {
             queryClient.setQueryData(['/api/groups'], message.data.groups);
           }
           break;
+        case 'new_message':
+          // Refresh chat list when new message arrives to update last message and unread count
+          queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+          console.log('🔄 New message received, refreshing chat list...');
+          break;
       }
     };
 

@@ -184,6 +184,14 @@ export class WhatsAppService {
         this.storeRealtimeMessage(message);
       });
 
+      // Listen for outgoing messages sent from phone
+      this.client.on('message_create', (message: any) => {
+        if (message.fromMe) {
+          console.log('📱 Outgoing message from phone detected');
+          this.storeRealtimeMessage(message);
+        }
+      });
+
       console.log('✅ Starting client initialization...');
       await this.client.initialize();
 
@@ -488,6 +496,14 @@ export class WhatsAppService {
     try {
       if (!message) return;
       
+      console.log('💬 New real-time message received:', {
+        from: message.from,
+        to: message.to,
+        body: message.body?.substring(0, 50) + '...',
+        fromMe: message.fromMe,
+        type: message.type
+      });
+      
       // Extract contact ID from message
       let contactId = message.from || 'unknown';
       
@@ -505,7 +521,8 @@ export class WhatsAppService {
         fromMe: message.fromMe || false,
         type: message.type || 'chat',
         author: message.author || null,
-        to: message.to || contactId
+        to: message.to || contactId,
+        hasMedia: message.hasMedia || false
       };
       
       messages.push(messageData);
@@ -517,6 +534,15 @@ export class WhatsAppService {
       
       // Update cache
       this.messageCache.set(contactId, messages);
+      
+      // Broadcast new message to all WebSocket clients for real-time updates
+      this.broadcastToClients('new_message', {
+        chatId: message.from, // Full chat ID (with @c.us or @g.us)
+        message: messageData,
+        contactName: message._data?.notifyName || message.from
+      });
+      
+      console.log('✅ Real-time message stored and broadcasted');
       
     } catch (error: any) {
       console.error('Failed to store realtime message:', error.message);

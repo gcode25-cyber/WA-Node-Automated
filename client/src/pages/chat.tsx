@@ -80,6 +80,32 @@ export default function ChatPage() {
     staleTime: 3000,
   });
 
+  // Listen for real-time messages via WebSocket
+  useEffect(() => {
+    if (!contactId) return;
+
+    const handleNewMessage = (message: any) => {
+      if (message.type === 'new_message' && message.data.chatId === contactId) {
+        // Invalidate and refetch chat history when new message arrives for this chat
+        queryClient.invalidateQueries({ queryKey: ['/api/chat-history', contactId] });
+        
+        console.log('🔄 New message received for current chat, refreshing...');
+      }
+    };
+
+    // Import WebSocket manager dynamically to avoid issues
+    import('../lib/websocket').then(({ websocketManager }) => {
+      websocketManager.addEventHandler(handleNewMessage);
+    });
+
+    // Cleanup function
+    return () => {
+      import('../lib/websocket').then(({ websocketManager }) => {
+        websocketManager.removeEventHandler(handleNewMessage);
+      });
+    };
+  }, [contactId, queryClient]);
+
   // Send text message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { phoneNumber: string; message: string }) => {
