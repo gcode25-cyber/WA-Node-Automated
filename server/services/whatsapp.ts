@@ -371,18 +371,25 @@ export class WhatsAppService {
     }
 
     try {
-      // Format phone number properly
-      let formattedNumber = phoneNumber.replace(/\D/g, '');
+      let chatId: string;
       
-      if (formattedNumber.startsWith('1')) {
-        formattedNumber = formattedNumber;
-      } else if (formattedNumber.length === 10) {
-        formattedNumber = '1' + formattedNumber;
+      // Check if it's already a WhatsApp ID (group or individual)
+      if (phoneNumber.includes('@')) {
+        chatId = phoneNumber;
+        console.log(`📤 Sending message to chat ID ${phoneNumber}: ${message.substring(0, 50)}...`);
+      } else {
+        // Format phone number properly for individual contacts
+        let formattedNumber = phoneNumber.replace(/\D/g, '');
+        
+        if (formattedNumber.startsWith('1')) {
+          formattedNumber = formattedNumber;
+        } else if (formattedNumber.length === 10) {
+          formattedNumber = '1' + formattedNumber;
+        }
+        
+        chatId = formattedNumber + '@c.us';
+        console.log(`📤 Sending message to ${formattedNumber}: ${message.substring(0, 50)}...`);
       }
-      
-      const chatId = formattedNumber + '@c.us';
-      
-      console.log(`📤 Sending message to ${formattedNumber}: ${message.substring(0, 50)}...`);
       
       const result = await this.client.sendMessage(chatId, message);
       
@@ -404,16 +411,24 @@ export class WhatsAppService {
       const MessageMedia = (await import('whatsapp-web.js')).MessageMedia;
       const media = MessageMedia.fromFilePath(mediaPath);
       
-      let formattedNumber = phoneNumber.replace(/\D/g, '');
-      if (formattedNumber.startsWith('1')) {
-        formattedNumber = formattedNumber;
-      } else if (formattedNumber.length === 10) {
-        formattedNumber = '1' + formattedNumber;
+      let chatId: string;
+      
+      // Check if it's already a WhatsApp ID (group or individual)
+      if (phoneNumber.includes('@')) {
+        chatId = phoneNumber;
+        console.log(`📤 Sending media message to chat ID ${phoneNumber}: ${fileName}`);
+      } else {
+        // Format phone number properly for individual contacts
+        let formattedNumber = phoneNumber.replace(/\D/g, '');
+        if (formattedNumber.startsWith('1')) {
+          formattedNumber = formattedNumber;
+        } else if (formattedNumber.length === 10) {
+          formattedNumber = '1' + formattedNumber;
+        }
+        
+        chatId = formattedNumber + '@c.us';
+        console.log(`📤 Sending media message to ${formattedNumber}: ${fileName}`);
       }
-      
-      const chatId = formattedNumber + '@c.us';
-      
-      console.log(`📤 Sending media message to ${formattedNumber}: ${fileName}`);
       
       const result = await this.client.sendMessage(chatId, media, { caption: message });
       
@@ -516,14 +531,17 @@ export class WhatsAppService {
 
     try {
       console.log('📋 Fetching all chats...');
+      // Get all chats including archived ones and older conversations
       const chats = await this.client.getChats();
       
       const chatData = chats.map((chat: any) => ({
         id: chat.id._serialized,
-        name: chat.name || chat.id.user,
+        name: chat.name || chat.pushname || chat.id.user,
         isGroup: chat.isGroup,
         timestamp: chat.timestamp,
         unreadCount: chat.unreadCount,
+        isArchived: chat.archived,
+        isPinned: chat.pinned,
         lastMessage: chat.lastMessage ? {
           body: chat.lastMessage.body,
           timestamp: chat.lastMessage.timestamp,
@@ -532,12 +550,15 @@ export class WhatsAppService {
         profilePicUrl: null // Will be loaded separately for performance
       }));
 
-      console.log(`✅ Retrieved ${chatData.length} chats`);
+      // Sort chats by timestamp (most recent first for better UX)
+      const sortedChats = chatData.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+
+      console.log(`✅ Retrieved ${chatData.length} chats (including archived: ${chatData.filter(c => c.isArchived).length})`);
       
       // Broadcast to WebSocket clients for real-time updates
-      this.broadcastToClients('chats_updated', { chats: chatData });
+      this.broadcastToClients('chats_updated', { chats: sortedChats });
       
-      return chatData;
+      return sortedChats;
     } catch (error: any) {
       console.error('❌ Failed to fetch chats:', error.message);
       throw error;
