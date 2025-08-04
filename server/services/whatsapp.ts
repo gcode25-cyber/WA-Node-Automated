@@ -459,6 +459,14 @@ export class WhatsAppService {
       const chat = await this.client.getChatById(chatId);
       const messages = await chat.fetchMessages({ limit });
       
+      // First, get all contacts for name resolution
+      let allContacts: any[] = [];
+      try {
+        allContacts = await this.client.getContacts();
+      } catch (error) {
+        console.log('Failed to get contacts for name resolution:', error);
+      }
+
       const messageData = messages
         .filter((msg: any) => {
           // Filter out system messages, notifications, and messages that are just phone numbers
@@ -473,17 +481,43 @@ export class WhatsAppService {
           // Keep real chat messages, media messages, and system messages with meaningful content
           return !isSystemMessage && !isPhoneNumberOnly && !isEmpty;
         })
-        .map((msg: any) => ({
-          id: msg.id?.id || Date.now().toString(),
-          body: msg.body || (msg.hasMedia ? '[Media]' : ''),
-          timestamp: msg.timestamp || Date.now(),
-          fromMe: msg.fromMe || false,
-          type: msg.type || 'chat',
-          author: msg.author || (msg.fromMe ? null : (msg._data?.notifyName || 'Unknown')),
-          hasMedia: msg.hasMedia || false,
-          mediaUrl: msg.hasMedia ? `/api/media/${msg.id?.id}` : undefined,
-          fileName: msg.hasMedia && msg._data?.filename ? msg._data.filename : undefined
-        }));
+        .map((msg: any) => {
+          // Enhanced contact name resolution for group messages
+          let authorName = null;
+          if (!msg.fromMe && msg.author) {
+            // Look for the contact in the pre-fetched contacts list
+            const matchingContact = allContacts.find((contact: any) => 
+              contact.id._serialized === msg.author
+            );
+            
+            if (matchingContact) {
+              // Prioritize saved contact name over pushname
+              if (matchingContact.isMyContact && matchingContact.name && matchingContact.name !== matchingContact.id.user) {
+                authorName = matchingContact.name;
+              } else if (matchingContact.pushname && matchingContact.pushname !== matchingContact.id.user) {
+                authorName = matchingContact.pushname;
+              } else {
+                // Fallback to formatted phone number
+                authorName = this.formatPhoneNumber(msg.author);
+              }
+            } else {
+              // If no contact found, use notify name or format phone number
+              authorName = msg._data?.notifyName || this.formatPhoneNumber(msg.author);
+            }
+          }
+
+          return {
+            id: msg.id?.id || Date.now().toString(),
+            body: msg.body || (msg.hasMedia ? '[Media]' : ''),
+            timestamp: msg.timestamp || Date.now(),
+            fromMe: msg.fromMe || false,
+            type: msg.type || 'chat',
+            author: authorName,
+            hasMedia: msg.hasMedia || false,
+            mediaUrl: msg.hasMedia ? `/api/media/${msg.id?.id}` : undefined,
+            fileName: msg.hasMedia && msg._data?.filename ? msg._data.filename : undefined
+          };
+        });
 
       // Extract contact information from the chat
       const contact = {
@@ -696,7 +730,13 @@ export class WhatsAppService {
         profilePicUrl: null, // Will be loaded separately for performance
         status: null, // Will be loaded separately for performance
         isGroup: false // Contacts are not groups
-      })).filter((contact: any) => contact.isWAContact); // Only WhatsApp contacts
+      })).filter((contact: any) => 
+        contact.isWAContact && 
+        contact.isMyContact && 
+        contact.name && 
+        contact.name !== contact.number && 
+        contact.name !== contact.id
+      ); // Only saved WhatsApp contacts with proper names
 
       console.log(`✅ Retrieved ${contactData.length} contacts`);
       
@@ -805,6 +845,19 @@ export class WhatsAppService {
       console.error('❌ Failed to fetch group participants:', error.message);
       throw error;
     }
+  }
+
+  // Helper method to format phone numbers nicely
+  private formatPhoneNumber(author: string): string {
+    if (typeof author === 'string' && author.includes('@')) {
+      const phoneNumber = author.split('@')[0];
+      // Format phone number nicely
+      if (phoneNumber.length > 7) {
+        return phoneNumber.replace(/^(\d{1,3})(\d{3,4})(\d{3,4})(\d{4})$/, '+$1 $2 $3 $4');
+      }
+      return phoneNumber;
+    }
+    return author || 'Unknown';
   }
 
   // Method to preload profile pictures for better UX (called separately to avoid blocking main data load)
