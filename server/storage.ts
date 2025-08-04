@@ -20,6 +20,8 @@ export interface IStorage {
   
   // WhatsApp session methods
   getActiveSession(): Promise<WhatsappSession | undefined>;
+  getActiveSessions(): Promise<WhatsappSession[]>;
+  saveSession(session: InsertWhatsappSession): Promise<WhatsappSession>;
   createSession(session: InsertWhatsappSession): Promise<WhatsappSession>;
   updateSession(id: string, updates: Partial<WhatsappSession>): Promise<WhatsappSession | undefined>;
   deactivateSession(id: string): Promise<void>;
@@ -101,6 +103,16 @@ export class MemStorage implements IStorage {
     return Array.from(this.whatsappSessions.values()).find(
       (session) => session.isActive
     );
+  }
+
+  async getActiveSessions(): Promise<WhatsappSession[]> {
+    return Array.from(this.whatsappSessions.values()).filter(
+      (session) => session.isActive
+    );
+  }
+
+  async saveSession(insertSession: InsertWhatsappSession): Promise<WhatsappSession> {
+    return this.createSession(insertSession);
   }
 
   async createSession(insertSession: InsertWhatsappSession): Promise<WhatsappSession> {
@@ -288,6 +300,17 @@ export class DatabaseStorage implements IStorage {
       .from(whatsappSessions)
       .where(eq(whatsappSessions.isActive, true));
     return session || undefined;
+  }
+
+  async getActiveSessions(): Promise<WhatsappSession[]> {
+    return await db
+      .select()
+      .from(whatsappSessions)
+      .where(eq(whatsappSessions.isActive, true));
+  }
+
+  async saveSession(insertSession: InsertWhatsappSession): Promise<WhatsappSession> {
+    return this.createSession(insertSession);
   }
 
   async createSession(insertSession: InsertWhatsappSession): Promise<WhatsappSession> {

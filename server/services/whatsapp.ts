@@ -47,6 +47,39 @@ export class WhatsAppService {
       this.isInitializing = true;
       console.log('🚀 Initializing WhatsApp client...');
 
+      // Check if there's an existing session
+      const fs = await import('fs');
+      const path = await import('path');
+      const sessionPath = path.resolve('./.wwebjs_auth');
+      const hasExistingSession = fs.existsSync(sessionPath);
+      
+      // Also check for stored session info in database
+      let storedSessionInfo = null;
+      try {
+        const activeSessions = await storage.getActiveSessions();
+        if (activeSessions.length > 0) {
+          storedSessionInfo = activeSessions[0];
+          console.log('📦 Found stored session info:', storedSessionInfo.userId);
+        }
+      } catch (error: any) {
+        console.log('Session info retrieval failed:', error.message);
+      }
+      
+      if (hasExistingSession && storedSessionInfo) {
+        console.log('🔍 Found existing session and stored info, attempting to restore...');
+        // Pre-populate session info from storage for immediate availability
+        this.sessionInfo = {
+          number: storedSessionInfo.userId,
+          name: storedSessionInfo.userName,
+          loginTime: storedSessionInfo.loginTime
+        };
+        this.isReady = false; // Will be set to true when client is actually ready
+      } else if (hasExistingSession) {
+        console.log('🔍 Found existing session files, attempting to restore...');
+      } else {
+        console.log('📱 No existing session found, will require QR authentication');
+      }
+
       // Clean up existing client
       if (this.client) {
         try {
@@ -57,10 +90,12 @@ export class WhatsAppService {
         this.client = null;
       }
 
-      // Reset all state
+      // Reset state but preserve session info if we're restoring
       this.qrCode = null;
-      this.sessionInfo = null;
-      this.isReady = false;
+      if (!hasExistingSession && !storedSessionInfo) {
+        this.sessionInfo = null;
+        this.isReady = false;
+      }
       this.messageCache.clear(); // Clear message cache on reinitialize
 
       // Use full puppeteer with proper configuration to fix execution context issues
@@ -135,6 +170,22 @@ export class WhatsAppService {
           name: this.client.info?.pushname || 'unknown',
           loginTime: new Date().toISOString()
         };
+        
+        // Clear QR code since we're now authenticated
+        this.qrCode = null;
+        
+        // Save session info to storage for persistence
+        try {
+          await storage.saveSession({
+            id: this.sessionInfo.number,
+            sessionData: JSON.stringify(this.sessionInfo),
+            loginTime: this.sessionInfo.loginTime,
+            isActive: true
+          });
+          console.log('💾 Session info saved to storage');
+        } catch (error: any) {
+          console.log('Session save failed (non-critical):', error.message);
+        }
         
         // Broadcast connection status
         this.broadcastToClients('connected', { 
