@@ -70,7 +70,7 @@ export class WhatsAppService {
           dataPath: "./.wwebjs_auth" // Explicit data path
         }),
         puppeteer: {
-          headless: true,
+          headless: true, // Keep headless for production (set to false for local debugging)
           executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
           args: [
             '--no-sandbox',
@@ -405,89 +405,116 @@ export class WhatsAppService {
               // Wait for page to be ready
               await page.waitForSelector('body', { timeout: 5000 });
               
-              // Method 1a: Try to click menu button first
+              // Method 1a: Refined UI logout with proper timing and confirmation handling
               try {
-                console.log('📱 Looking for menu button...');
-                await page.waitForSelector("span[data-icon='menu']", { timeout: 3000 });
+                console.log('📱 Starting refined UI logout process...');
+                
+                // Take screenshot before logout for debugging
+                try {
+                  await page.screenshot({ path: './logout-before.png' });
+                  console.log('📸 Screenshot taken: logout-before.png');
+                } catch (screenshotErr) {
+                  console.log('Screenshot failed (non-critical):', screenshotErr.message);
+                }
+                
+                // Step 1: Click menu button with proper wait
+                console.log('🔍 Looking for menu button...');
+                await page.waitForSelector("span[data-icon='menu']", { timeout: 5000 });
                 await page.click("span[data-icon='menu']");
                 console.log('✅ Clicked menu button');
                 
-                // Wait for menu to appear
-                await page.waitForTimeout(1500);
+                // Step 2: Wait for menu to fully load
+                await page.waitForTimeout(2000);
                 
-                // Look for logout option using multiple selectors
-                const logoutSelectors = [
-                  "//div[contains(text(), 'Log out')]",
-                  "//div[contains(text(), 'Logout')]", 
-                  "//span[contains(text(), 'Log out')]",
-                  "//span[contains(text(), 'Logout')]",
-                  "[data-testid='menu-logout']"
-                ];
+                // Step 3: Look for logout button with visibility filter
+                console.log('🔍 Looking for logout button in menu...');
+                const logoutXPath = "//div[contains(text(), 'Log out') and not(ancestor::div[contains(@style, 'display: none')])]";
                 
-                let logoutClicked = false;
-                for (const selector of logoutSelectors) {
-                  try {
-                    if (selector.startsWith('//')) {
-                      const elements = await page.$x(selector);
-                      if (elements.length > 0) {
-                        await elements[0].click();
-                        console.log(`✅ Clicked logout using XPath: ${selector}`);
-                        logoutClicked = true;
-                        break;
-                      }
-                    } else {
-                      const element = await page.$(selector);
-                      if (element) {
-                        await element.click();
-                        console.log(`✅ Clicked logout using selector: ${selector}`);
-                        logoutClicked = true;
-                        break;
-                      }
-                    }
-                  } catch (e) {
-                    console.log(`Selector ${selector} failed:`, e.message);
-                  }
-                }
-                
-                if (logoutClicked) {
-                  // Wait for confirmation dialog and click confirm
-                  await page.waitForTimeout(1000);
-                  try {
-                    const confirmSelectors = [
-                      "[data-testid='popup-controls-ok']",
-                      "//div[contains(text(), 'Log out')]//parent::button",
-                      "button[class*='confirm']"
-                    ];
+                try {
+                  await page.waitForXPath(logoutXPath, { timeout: 5000 });
+                  const [logoutBtn] = await page.$x(logoutXPath);
+                  
+                  if (logoutBtn) {
+                    await logoutBtn.click();
+                    console.log('✅ Clicked initial logout button');
                     
-                    for (const confirmSelector of confirmSelectors) {
-                      try {
-                        if (confirmSelector.startsWith('//')) {
-                          const confirmElements = await page.$x(confirmSelector);
-                          if (confirmElements.length > 0) {
-                            await confirmElements[0].click();
-                            console.log('✅ Confirmed logout dialog');
-                            break;
-                          }
-                        } else {
-                          const confirmElement = await page.$(confirmSelector);
-                          if (confirmElement) {
-                            await confirmElement.click();
-                            console.log('✅ Confirmed logout dialog');
-                            break;
-                          }
+                    // Take screenshot after clicking logout
+                    try {
+                      await page.screenshot({ path: './logout-after-click.png' });
+                      console.log('📸 Screenshot taken: logout-after-click.png');
+                    } catch (screenshotErr) {
+                      console.log('Screenshot failed (non-critical):', screenshotErr.message);
+                    }
+                    
+                    // Step 4: Wait for and handle confirmation dialog
+                    console.log('🔍 Waiting for confirmation dialog...');
+                    await page.waitForTimeout(2000);
+                    
+                    // Look for confirmation dialog logout button
+                    const confirmXPath = "//div[contains(text(), 'Log out') and ancestor::div[@role='dialog']]";
+                    
+                    try {
+                      await page.waitForXPath(confirmXPath, { timeout: 5000 });
+                      const [confirmBtn] = await page.$x(confirmXPath);
+                      
+                      if (confirmBtn) {
+                        await confirmBtn.click();
+                        console.log('✅ Confirmed logout in dialog - phone should disconnect!');
+                        
+                        // Take final screenshot
+                        try {
+                          await page.screenshot({ path: './logout-confirmed.png' });
+                          console.log('📸 Screenshot taken: logout-confirmed.png');
+                        } catch (screenshotErr) {
+                          console.log('Screenshot failed (non-critical):', screenshotErr.message);
                         }
-                      } catch (e) {
-                        console.log(`Confirm selector ${confirmSelector} failed:`, e.message);
+                        
+                        // Wait for logout to complete
+                        await page.waitForTimeout(3000);
+                        
+                      } else {
+                        console.log('⚠️ Confirmation button not found, logout may not be complete');
+                      }
+                      
+                    } catch (confirmWaitErr) {
+                      console.log('⚠️ Confirmation dialog timeout - trying alternative selectors');
+                      
+                      // Fallback: try other confirmation selectors
+                      const altConfirmSelectors = [
+                        "//button[contains(text(), 'Log out')]",
+                        "//div[@role='button'][contains(text(), 'Log out')]",
+                        "[data-testid='popup-controls-ok']"
+                      ];
+                      
+                      for (const selector of altConfirmSelectors) {
+                        try {
+                          if (selector.startsWith('//')) {
+                            const [element] = await page.$x(selector);
+                            if (element) {
+                              await element.click();
+                              console.log(`✅ Confirmed logout using: ${selector}`);
+                              break;
+                            }
+                          } else {
+                            const element = await page.$(selector);
+                            if (element) {
+                              await element.click();
+                              console.log(`✅ Confirmed logout using: ${selector}`);
+                              break;
+                            }
+                          }
+                        } catch (altErr) {
+                          console.log(`Alternative selector ${selector} failed`);
+                        }
                       }
                     }
-                  } catch (confirmErr) {
-                    console.log('No confirmation dialog needed or found');
+                    
+                  } else {
+                    console.log('❌ Logout button not found in menu');
                   }
                   
-                  console.log('✅ UI logout completed - phone should disconnect');
-                } else {
-                  console.log('⚠️ Could not find logout button, trying programmatic logout');
-                  await this.client.logout();
+                } catch (logoutWaitErr) {
+                  console.log('❌ Logout button wait timeout:', logoutWaitErr.message);
                 }
                 
               } catch (menuErr) {
