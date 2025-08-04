@@ -136,6 +136,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     fs.mkdirSync('uploads');
   }
   
+  // Media download endpoint
+  app.get('/api/media/:messageId', async (req, res) => {
+    try {
+      const messageId = req.params.messageId;
+      
+      if (!whatsappService.isClientReady()) {
+        return res.status(503).json({ error: 'WhatsApp client not ready' });
+      }
+
+      // Get the message and download its media
+      const mediaData = await whatsappService.downloadMessageMedia(messageId);
+      
+      if (!mediaData) {
+        return res.status(404).json({ error: 'Media not found' });
+      }
+
+      // Set appropriate headers
+      res.setHeader('Content-Type', mediaData.mimetype || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `inline; filename="${mediaData.filename || 'media'}"`);
+      
+      // Send the media data
+      res.send(mediaData.data);
+      
+    } catch (error: any) {
+      console.error('Failed to download media:', error.message);
+      res.status(500).json({ error: 'Failed to download media' });
+    }
+  });
+  
   // Get QR code for WhatsApp authentication
   app.get("/api/get-qr", async (req, res) => {
     try {

@@ -459,16 +459,31 @@ export class WhatsAppService {
       const chat = await this.client.getChatById(chatId);
       const messages = await chat.fetchMessages({ limit });
       
-      const messageData = messages.map((msg: any) => ({
-        id: msg.id?.id || Date.now().toString(),
-        body: msg.body || '',
-        timestamp: msg.timestamp || Date.now(),
-        fromMe: msg.fromMe || false,
-        type: msg.type || 'chat',
-        author: msg.author || null,
-        hasMedia: msg.hasMedia || false,
-        mediaUrl: msg.hasMedia ? null : undefined // Will be populated if media is downloaded
-      }));
+      const messageData = messages
+        .filter((msg: any) => {
+          // Filter out system messages, notifications, and messages that are just phone numbers
+          const isSystemMessage = msg.type === 'e2e_notification' || 
+                                   msg.type === 'notification_template' ||
+                                   msg.type === 'call_log' ||
+                                   msg.type === 'protocol';
+          
+          const isPhoneNumberOnly = msg.body && /^[\d@c.us]+$/.test(msg.body.replace(/\s/g, ''));
+          const isEmpty = !msg.body || msg.body.trim() === '';
+          
+          // Keep real chat messages, media messages, and system messages with meaningful content
+          return !isSystemMessage && !isPhoneNumberOnly && !isEmpty;
+        })
+        .map((msg: any) => ({
+          id: msg.id?.id || Date.now().toString(),
+          body: msg.body || (msg.hasMedia ? '[Media]' : ''),
+          timestamp: msg.timestamp || Date.now(),
+          fromMe: msg.fromMe || false,
+          type: msg.type || 'chat',
+          author: msg.author || (msg.fromMe ? null : (msg._data?.notifyName || 'Unknown')),
+          hasMedia: msg.hasMedia || false,
+          mediaUrl: msg.hasMedia ? `/api/media/${msg.id?.id}` : undefined,
+          fileName: msg.hasMedia && msg._data?.filename ? msg._data.filename : undefined
+        }));
 
       // Extract contact information from the chat
       const contact = {
@@ -478,7 +493,11 @@ export class WhatsAppService {
         isMyContact: false, // Will be determined by checking contacts
         isWAContact: true,
         profilePicUrl: null,
-        isGroup: chat.isGroup || false
+        isGroup: chat.isGroup || false,
+        // Add group-specific properties
+        participants: chat.isGroup ? (chat.participants || []) : undefined,
+        onlyAdminsCanMessage: chat.isGroup ? (chat.groupMetadata?.restrict || false) : false,
+        isAdmin: chat.isGroup ? this.isUserGroupAdmin(chat) : false
       };
 
       console.log(`✅ Retrieved ${messageData.length} messages for chat ${chatId}`);
@@ -488,6 +507,73 @@ export class WhatsAppService {
       };
     } catch (error: any) {
       console.error('❌ Failed to fetch chat history:', error.message);
+      throw error;
+    }
+  }
+
+  // Helper method to check if user is admin in a group
+  private isUserGroupAdmin(chat: any): boolean {
+    try {
+      if (!chat.isGroup || !chat.participants) return false;
+      
+      const myNumber = this.sessionInfo?.number;
+      if (!myNumber) return false;
+      
+      const myParticipant = chat.participants.find((p: any) => 
+        p.id._serialized.includes(myNumber) || p.id.user === myNumber
+      );
+      
+      return myParticipant?.isAdmin || myParticipant?.isSuperAdmin || false;
+    } catch (error) {
+      console.log('Error checking admin status:', error);
+      return false;
+    }
+  }
+
+  // Download media from a message
+  async downloadMessageMedia(messageId: string): Promise<any> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      console.log(`📥 Downloading media for message ${messageId}`);
+      
+      // Find the message across all chats
+      const chats = await this.client.getChats();
+      let targetMessage = null;
+      
+      for (const chat of chats) {
+        const messages = await chat.fetchMessages({ limit: 100 });
+        targetMessage = messages.find((msg: any) => msg.id?.id === messageId);
+        if (targetMessage) break;
+      }
+      
+      if (!targetMessage) {
+        throw new Error('Message not found');
+      }
+      
+      if (!targetMessage.hasMedia) {
+        throw new Error('Message has no media');
+      }
+      
+      // Download the media
+      const media = await targetMessage.downloadMedia();
+      
+      if (!media) {
+        throw new Error('Failed to download media');
+      }
+      
+      console.log(`✅ Media downloaded successfully for message ${messageId}`);
+      
+      return {
+        data: Buffer.from(media.data, 'base64'),
+        mimetype: media.mimetype,
+        filename: media.filename || `media_${messageId}`
+      };
+      
+    } catch (error: any) {
+      console.error('❌ Failed to download media:', error.message);
       throw error;
     }
   }

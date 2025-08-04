@@ -384,29 +384,57 @@ export default function ChatPage() {
                   )}
                   
                   {/* Handle media messages */}
-                  {msg.hasMedia && msg.mediaUrl ? (
+                  {msg.hasMedia ? (
                     <div className="space-y-2">
-                      {msg.type === 'image' ? (
-                        <img src={msg.mediaUrl} alt="Media" className="max-w-full rounded" />
-                      ) : msg.type === 'video' ? (
-                        <video src={msg.mediaUrl} controls className="max-w-full rounded" />
-                      ) : msg.type === 'audio' ? (
-                        <audio src={msg.mediaUrl} controls className="max-w-full" />
+                      {/* Display media based on type */}
+                      {msg.type === 'image' && msg.mediaUrl ? (
+                        <div className="relative">
+                          <img 
+                            src={msg.mediaUrl} 
+                            alt="Image" 
+                            className="max-w-full rounded-lg shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                            loading="lazy"
+                            onClick={() => window.open(msg.mediaUrl, '_blank')}
+                          />
+                        </div>
+                      ) : msg.type === 'video' && msg.mediaUrl ? (
+                        <video 
+                          src={msg.mediaUrl} 
+                          controls 
+                          className="max-w-full rounded-lg shadow-sm"
+                          preload="metadata"
+                        />
+                      ) : msg.type === 'audio' || msg.type === 'ptt' ? (
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Music className="h-5 w-5 text-blue-500" />
+                          {msg.mediaUrl ? (
+                            <audio src={msg.mediaUrl} controls className="flex-1" />
+                          ) : (
+                            <span className="text-sm font-medium">Voice Message</span>
+                          )}
+                        </div>
+                      ) : msg.type === 'document' ? (
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                          <FileText className="h-5 w-5 text-red-500" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{(msg as any).fileName || 'Document'}</p>
+                            <p className="text-xs text-muted-foreground">Click to download</p>
+                          </div>
+                        </div>
                       ) : (
-                        <div className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                          <File className="h-4 w-4" />
-                          <span className="text-sm">Media File</span>
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <File className="h-5 w-5 text-gray-500" />
+                          <span className="text-sm font-medium">Media File</span>
                         </div>
                       )}
-                      {msg.body && <p className="text-sm">{msg.body}</p>}
-                    </div>
-                  ) : msg.body === '[Media]' ? (
-                    <div className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                      <File className="h-4 w-4" />
-                      <span className="text-sm">Media File</span>
+                      
+                      {/* Show caption if present */}
+                      {msg.body && msg.body !== '[Media]' && (
+                        <p className="text-sm mt-2">{msg.body}</p>
+                      )}
                     </div>
                   ) : (
-                    <p className="text-sm">{msg.body}</p>
+                    <p className="text-sm whitespace-pre-wrap">{msg.body}</p>
                   )}
                   
                   <p className={`text-xs mt-1 ${
