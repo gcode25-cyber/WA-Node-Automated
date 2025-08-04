@@ -182,8 +182,17 @@ export default function Dashboard() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
+    console.log('🔌 WebSocket URL details:', {
+      protocol,
+      host: window.location.host,
+      hostname: window.location.hostname,  
+      port: window.location.port,
+      finalUrl: wsUrl
+    });
+    
     const connectWebSocket = () => {
       try {
+        console.log('🔌 Attempting WebSocket connection to:', wsUrl);
         wsRef.current = new WebSocket(wsUrl);
         
         wsRef.current.onopen = () => {
