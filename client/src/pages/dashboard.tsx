@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
-import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw } from "lucide-react";
+import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface Chat {
@@ -126,6 +126,29 @@ export default function Dashboard() {
   const [bulkMessage, setBulkMessage] = useState("");
   const wsRef = useRef<WebSocket | null>(null);
   
+  // Contact selection dropdown state
+  const [showContactsDropdown, setShowContactsDropdown] = useState(false);
+  const [contactSearchTerm, setContactSearchTerm] = useState("");
+  const contactsDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Close contacts dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (contactsDropdownRef.current && !contactsDropdownRef.current.contains(event.target as Node)) {
+        setShowContactsDropdown(false);
+        setContactSearchTerm("");
+      }
+    };
+    
+    if (showContactsDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showContactsDropdown]);
+  
   // Update field values for placeholder visibility
   const fieldValues = {
     phoneNumber,
@@ -179,6 +202,41 @@ export default function Dashboard() {
     queryKey: ['/api/bulk-campaigns'],
     refetchInterval: 30000,
   });
+
+  // Helper function to filter and format contacts for dropdown
+  const filteredContacts = contacts.filter((contact: Contact) => 
+    contact.isMyContact && // Only show saved contacts
+    (contact.name.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
+     contact.number.includes(contactSearchTerm))
+  );
+  
+  // Helper function to handle contact selection
+  const handleContactSelect = (contact: Contact) => {
+    // Extract the phone number without country code formatting
+    const phoneNumber = contact.number.replace(/\D/g, ''); // Remove all non-digits
+    
+    // Try to determine country code from the number
+    let extractedCountryCode = "+91"; // Default
+    let extractedPhoneNumber = phoneNumber;
+    
+    // Check for common country codes
+    if (phoneNumber.startsWith('91') && phoneNumber.length === 12) {
+      extractedCountryCode = "+91";
+      extractedPhoneNumber = phoneNumber.substring(2);
+    } else if (phoneNumber.startsWith('1') && phoneNumber.length === 11) {
+      extractedCountryCode = "+1";
+      extractedPhoneNumber = phoneNumber.substring(1);
+    } else if (phoneNumber.startsWith('44') && phoneNumber.length >= 11) {
+      extractedCountryCode = "+44";
+      extractedPhoneNumber = phoneNumber.substring(2);
+    }
+    // Add more country code detection as needed
+    
+    setCountryCode(extractedCountryCode);
+    setPhoneNumber(extractedPhoneNumber);
+    setShowContactsDropdown(false);
+    setContactSearchTerm("");
+  };
 
   // WebSocket connection for real-time updates using centralized manager
   useEffect(() => {
@@ -886,13 +944,13 @@ export default function Dashboard() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <div className="flex-1 relative">
+                        <div className="flex-1 relative" ref={contactsDropdownRef}>
                           <Input
                             id="phone-number"
                             type="tel"
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
-                            className="w-full"
+                            className="w-full pr-12"
                           />
                           <Label 
                             htmlFor="phone-number" 
@@ -904,6 +962,65 @@ export default function Dashboard() {
                           >
                             1234567890
                           </Label>
+                          
+                          {/* Contacts Button */}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={() => setShowContactsDropdown(!showContactsDropdown)}
+                            disabled={!sessionInfo || contacts.length === 0}
+                          >
+                            <UserCheck className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          </Button>
+                          
+                          {/* Contacts Dropdown */}
+                          {showContactsDropdown && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-64 overflow-hidden">
+                              {/* Search Input */}
+                              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                                <div className="relative">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                  <Input
+                                    placeholder="Search contacts..."
+                                    value={contactSearchTerm}
+                                    onChange={(e) => setContactSearchTerm(e.target.value)}
+                                    className="pl-10 h-8"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Contacts List */}
+                              <div className="max-h-48 overflow-y-auto">
+                                {filteredContacts.length === 0 ? (
+                                  <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    {contactSearchTerm ? 'No contacts found' : 'No saved contacts available'}
+                                  </div>
+                                ) : (
+                                  filteredContacts.map((contact: Contact) => (
+                                    <button
+                                      key={contact.id}
+                                      onClick={() => handleContactSelect(contact)}
+                                      className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 flex items-center space-x-3"
+                                    >
+                                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                        <Phone className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-gray-900 dark:text-white truncate">
+                                          {contact.name}
+                                        </div>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                          {contact.number}
+                                        </div>
+                                      </div>
+                                    </button>
+                                  ))
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">
