@@ -394,10 +394,71 @@ export class WhatsAppService {
       // Properly destroy client and logout from WhatsApp Web
       if (this.client) {
         try {
-          console.log('🧹 Logging out from WhatsApp Web...');
-          // First logout from WhatsApp Web (this will disconnect from phone)
-          await this.client.logout();
-          console.log('✅ WhatsApp Web logout successful');
+          console.log('🧹 Logging out from WhatsApp Web and disconnecting phone...');
+          
+          // Method 1: Try to terminate session completely
+          try {
+            await this.client.logout();
+            console.log('✅ WhatsApp Web logout successful');
+          } catch (logoutErr) {
+            console.log('Logout method failed, trying alternative:', logoutErr);
+          }
+          
+          // Method 2: Force disconnect by executing WhatsApp Web logout commands
+          try {
+            const pages = await this.client.pupPage;
+            if (pages) {
+              await pages.evaluate(() => {
+                // Method 2a: Try to access WhatsApp's internal logout function
+                try {
+                  if (window.Store && window.Store.State) {
+                    window.Store.State.default.logout();
+                  }
+                } catch (e) {
+                  console.log('Store logout failed:', e);
+                }
+                
+                // Method 2b: Try to click logout button programmatically
+                try {
+                  const logoutButton = document.querySelector('[data-testid="menu"] [role="button"]');
+                  if (logoutButton) {
+                    logoutButton.click();
+                    setTimeout(() => {
+                      const confirmLogout = document.querySelector('[data-testid="popup-controls-ok"]');
+                      if (confirmLogout) {
+                        confirmLogout.click();
+                      }
+                    }, 500);
+                  }
+                } catch (e) {
+                  console.log('Button logout failed:', e);
+                }
+                
+                // Method 2c: Clear all storage and force reload
+                try {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  // Clear IndexedDB
+                  if (window.indexedDB && window.indexedDB.databases) {
+                    window.indexedDB.databases().then(databases => {
+                      databases.forEach(db => {
+                        if (db.name) {
+                          window.indexedDB.deleteDatabase(db.name);
+                        }
+                      });
+                    });
+                  }
+                  // Force reload to completely disconnect
+                  setTimeout(() => window.location.reload(), 1000);
+                } catch (e) {
+                  console.log('Storage clear failed:', e);
+                }
+              });
+              console.log('✅ Executed multiple force disconnect methods');
+            }
+          } catch (forceErr) {
+            console.log('Force disconnect method failed:', forceErr);
+          }
           
           console.log('🧹 Destroying WhatsApp client...');
           await this.client.destroy();
@@ -408,16 +469,28 @@ export class WhatsAppService {
         this.client = null;
       }
       
-      // Clear session files manually to ensure complete logout
+      // Clear session files manually to ensure complete logout and force phone disconnect
       try {
         const fs = await import('fs');
         const path = await import('path');
         const sessionPath = path.resolve('./.wwebjs_auth');
         
         if (fs.existsSync(sessionPath)) {
-          console.log('🗑️ Removing session files...');
+          console.log('🗑️ Removing session files to force phone disconnect...');
           fs.rmSync(sessionPath, { recursive: true, force: true });
-          console.log('✅ Session files cleared');
+          console.log('✅ Session files cleared - phone should disconnect');
+        }
+        
+        // Also clear any Chrome user data directories to ensure clean slate
+        const tmpDir = '/tmp';
+        const chromeDataDirs = fs.readdirSync(tmpDir).filter(dir => dir.startsWith('chrome-'));
+        for (const dir of chromeDataDirs) {
+          try {
+            fs.rmSync(path.join(tmpDir, dir), { recursive: true, force: true });
+            console.log(`🗑️ Cleared Chrome data: ${dir}`);
+          } catch (e) {
+            // Non-critical cleanup
+          }
         }
       } catch (fsError: any) {
         console.log('Session file cleanup (non-critical):', fsError?.message);

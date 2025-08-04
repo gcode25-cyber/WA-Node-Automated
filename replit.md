@@ -173,6 +173,9 @@ A comprehensive WhatsApp bulk messaging platform built with React and Node.js, i
 - **2025-08-04**: Implemented centralized WebSocket manager to prevent connection issues
 - **2025-08-04**: Fixed WebSocket URL construction with explicit port handling
 - **2025-08-04**: Eliminated undefined port issues in WebSocket connections
+- **2025-08-04**: Enhanced logout functionality to force phone disconnection from WhatsApp Web
+- **2025-08-04**: Added aggressive logout methods including browser session clearing and IndexedDB cleanup
+- **2025-08-04**: Implemented comprehensive logout detection with automatic QR regeneration after phone logout
 - **2025-08-04**: Fixed database schema initialization and pushed all tables to PostgreSQL  
 - **2025-08-04**: Fixed UI alignment and improved dashboard sidebar layout:
   - Aligned first character badge with WhatsApp and RCS icons using consistent padding
