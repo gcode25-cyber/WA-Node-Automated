@@ -16,6 +16,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import QRCode from "qrcode";
+import * as qr from 'qr-image';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -141,18 +142,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const qr = await whatsappService.getQRCode();
       if (qr) {
         try {
-          // Convert QR string to base64 image with smaller options
+          // Convert QR string to base64 image with most aggressive compression
           const qrDataURL = await QRCode.toDataURL(qr, {
-            errorCorrectionLevel: 'L',
-            width: 256,
-            margin: 1
+            errorCorrectionLevel: 'L', // Lowest error correction
+            type: 'image/png',
+            quality: 0.92,
+            margin: 1,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            },
+            width: 512, // Larger width to accommodate more data
+            scale: 1 // Minimal scale
           });
-          // Return full data URL instead of just base64 part
           res.json({ qr: qrDataURL });
         } catch (qrError) {
-          console.error("QR generation failed, returning null:", qrError);
-          // Return null if conversion fails completely
-          res.json({ qr: null });
+          console.error("Standard QR generation failed, trying alternative approach:", qrError);
+          try {
+            // Alternative: Try with even more aggressive settings
+            const alternativeQR = await QRCode.toDataURL(qr, {
+              errorCorrectionLevel: 'L',
+              margin: 0,
+              width: 1024, // Even larger to fit more data
+              scale: 1
+            });
+            res.json({ qr: alternativeQR });
+          } catch (secondError) {
+            console.error("Standard QR libraries failed, trying qr-image:", secondError);
+            try {
+              // Final fallback: Use qr-image library which handles large data better
+              const qrBuffer = qr.imageSync(qr, { type: 'png', size: 10, margin: 1 });
+              const qrBase64 = `data:image/png;base64,${qrBuffer.toString('base64')}`;
+              res.json({ qr: qrBase64 });
+            } catch (finalError) {
+              console.error("All QR generation methods failed:", finalError);
+              // Return the raw QR string so client can handle it
+              res.json({ qr: null, rawQr: qr });
+            }
+          }
         }
       } else {
         res.json({ qr: null });

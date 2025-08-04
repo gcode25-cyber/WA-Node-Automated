@@ -1,6 +1,7 @@
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia } = pkg as any;
 import QRCode from 'qrcode';
+import * as qr from 'qr-image';
 import { storage } from '../storage';
 import fs from 'fs';
 import path from 'path';
@@ -118,21 +119,31 @@ export class WhatsAppService {
   private setupEventHandlers() {
     if (!this.client) return;
 
-    this.client.on('qr', async (qr: string) => {
+    this.client.on('qr', async (qrString: string) => {
       console.log('📱 New QR Code received from WhatsApp Web');
       try {
-        // Use smaller QR code options to prevent data overflow
-        this.qrCode = await QRCode.toDataURL(qr, {
-          errorCorrectionLevel: 'L',
-          width: 256,
-          margin: 1
+        // Use most aggressive QR code compression settings
+        this.qrCode = await QRCode.toDataURL(qrString, {
+          errorCorrectionLevel: 'L', // Lowest error correction
+          margin: 0, // No margin
+          width: 1024, // Large width to accommodate data
+          scale: 1 // Minimal scale
         });
-        // Broadcast new QR code to connected clients
+        console.log('✅ QR Code generated successfully');
         this.broadcastToClients('qr', { qr: this.qrCode });
       } catch (err) {
-        console.error('QR code generation failed, using raw string:', err);
-        this.qrCode = qr; // Store raw QR string as fallback
-        this.broadcastToClients('qr', { qr: null });
+        console.error('Standard QR generation failed, trying qr-image:', err);
+        try {
+          // Fallback to qr-image library
+          const qrBuffer = qr.imageSync(qrString, { type: 'png', size: 10, margin: 1 });
+          this.qrCode = `data:image/png;base64,${qrBuffer.toString('base64')}`;
+          console.log('✅ QR Code generated with qr-image fallback');
+          this.broadcastToClients('qr', { qr: this.qrCode });
+        } catch (finalErr) {
+          console.error('All QR generation methods failed:', finalErr);
+          this.qrCode = qrString; // Store raw QR string as last resort
+          this.broadcastToClients('qr', { qr: null, rawQr: qrString });
+        }
       }
       this.sessionInfo = null;
     });
