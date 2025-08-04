@@ -24,10 +24,21 @@ class WebSocketManager {
 
   private connect() {
     try {
-      // Use Replit's proxy routing without explicit port
+      // Determine the appropriate WebSocket URL
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const hostname = window.location.hostname;
-      const wsUrl = `${protocol}//${hostname}/ws`;
+      const currentLocation = window.location.href;
+      
+      // For Replit, use the full hostname; for localhost, include port
+      let wsUrl: string;
+      if (hostname.includes('replit.dev') || hostname.includes('repl.it')) {
+        wsUrl = `${protocol}//${hostname}/ws`;
+      } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        const port = window.location.port || (protocol === 'wss:' ? '443' : '80');
+        wsUrl = `${protocol}//${hostname}:${port}/ws`;
+      } else {
+        wsUrl = `${protocol}//${hostname}/ws`;
+      }
       
       console.log('🔌 WebSocket connecting to:', wsUrl);
       console.log('🔌 Connection details:', {

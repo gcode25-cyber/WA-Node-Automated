@@ -58,3 +58,11 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Added fallback phone number formatting for better readability
   - Fixed Express session type interface to include all required user properties
   - Application successfully running with database integration and WhatsApp connectivity
+
+- **2025-08-04**: Enhanced session persistence and contact filtering:
+  - Implemented robust WhatsApp session persistence across page refreshes
+  - Enhanced session restoration logic to maintain authentication state
+  - Fixed contact filtering to only display saved contacts (isMyContact = true)
+  - Improved contact name resolution in chat messages using WhatsApp contact data
+  - Fixed WebSocket connection URL construction for proper Replit domain handling
+  - Added session storage mechanisms to database for better persistence
