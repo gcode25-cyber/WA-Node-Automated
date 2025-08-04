@@ -114,9 +114,8 @@ export default function Signup() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="signup" />
 
-      <div className="pt-20 pb-12 min-h-[calc(100vh-5rem)]">
-        <div className="flex items-center justify-center px-4 h-full">
-          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full items-center">
+      <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4">
+        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full items-center">
             {/* Left Side - Signup Form */}
             <div className="flex items-center justify-center">
               <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
@@ -361,7 +360,6 @@ export default function Signup() {
                 <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-green-500 rounded-full opacity-20 animate-pulse"></div>
               </div>
             </div>
-          </div>
         </div>
       </div>
 
