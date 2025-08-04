@@ -6,6 +6,8 @@ declare module "express-session" {
   interface SessionData {
     userId?: string;
     username?: string;
+    userEmail?: string;
+    userFullName?: string;
   }
 }
 import { whatsappService } from "./services/whatsapp";

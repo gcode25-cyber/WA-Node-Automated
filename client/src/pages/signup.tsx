@@ -106,8 +106,13 @@ export default function Signup() {
   });
 
   const onSubmit = (data: SignupRequest) => {
-    console.log("Signup form submitted with data:", data);
-    signupMutation.mutate(data);
+    // Combine country code with phone number
+    const formattedData = {
+      ...data,
+      phone: selectedCountryCode + data.phone
+    };
+    console.log("Signup form submitted with data:", formattedData);
+    signupMutation.mutate(formattedData);
   };
 
   return (

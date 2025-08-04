@@ -328,10 +328,10 @@ export default function ChatPage() {
                 <div>
                   <CardTitle className="text-lg">{contact.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {/* Hide group ID for admin-only groups */}
-                    {contact.isGroup && (contact as any).onlyAdminsCanMessage && !(contact as any).isAdmin 
+                    {/* Never display IDs - show meaningful information instead */}
+                    {contact.isGroup 
                       ? `${(contact as any).participants?.length || 0} participants`
-                      : (contact.number || contact.id)
+                      : contact.number ? contact.number : "WhatsApp Contact"
                     }
                   </p>
                 </div>
@@ -379,7 +379,22 @@ export default function ChatPage() {
                   {/* Show sender name for group messages that are not from me */}
                   {contact?.isGroup && !msg.fromMe && (msg as any).author && (
                     <p className="text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">
-                      {(msg as any).author}
+                      {/* Display username instead of ID - extract name from author info */}
+                      {(() => {
+                        const author = (msg as any).author;
+                        // If author is a phone number like "916351079783@c.us", extract the number part
+                        if (typeof author === 'string' && author.includes('@')) {
+                          const phoneNumber = author.split('@')[0];
+                          // Try to find the contact name from the participant or use the formatted phone number
+                          const contact = (msg as any).participant;
+                          if (contact && typeof contact === 'object' && contact.name) {
+                            return contact.name;
+                          }
+                          // Format phone number nicely if no name available
+                          return phoneNumber.replace(/^(\d{1,3})/, '+$1 ').replace(/(\d{3,4})(\d{3,4})(\d{4})$/, '$1 $2 $3');
+                        }
+                        return author;
+                      })()}
                     </p>
                   )}
                   
