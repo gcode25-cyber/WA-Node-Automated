@@ -123,6 +123,28 @@ export default function Dashboard() {
   const [newGroupDescription, setNewGroupDescription] = useState("");
   const [selectedContactGroup, setSelectedContactGroup] = useState("");
   const [bulkMessage, setBulkMessage] = useState("");
+  
+  // Dynamic placeholder management
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  
+  // Update field values for placeholder visibility
+  const fieldValues = {
+    phoneNumber,
+    message,
+    newGroupName,
+    newGroupDescription,
+    bulkMessage
+  };
+  
+  const handleFieldFocus = (fieldName: string) => {
+    setFocusedField(fieldName);
+  };
+  
+  const handleFieldBlur = (fieldName: string) => {
+    if (!fieldValues[fieldName as keyof typeof fieldValues] || fieldValues[fieldName as keyof typeof fieldValues].length === 0) {
+      setFocusedField(null);
+    }
+  };
 
   // Fetch current session info
   const { data: sessionInfo } = useQuery<{
@@ -781,14 +803,27 @@ export default function Dashboard() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <Input
-                          id="phone-number"
-                          type="tel"
-                          placeholder="1234567890"
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
-                          className="flex-1"
-                        />
+                        <div className="flex-1 relative">
+                          <Input
+                            id="phone-number"
+                            type="tel"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                            onFocus={() => handleFieldFocus("phoneNumber")}
+                            onBlur={() => handleFieldBlur("phoneNumber")}
+                            className="w-full"
+                          />
+                          <Label 
+                            htmlFor="phone-number" 
+                            className={`absolute left-3 pointer-events-none transition-all duration-200 ${
+                              focusedField === "phoneNumber" || fieldValues.phoneNumber
+                                ? "hidden"
+                                : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                            }`}
+                          >
+                            1234567890
+                          </Label>
+                        </div>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Select country code and enter phone number (numbers only)
@@ -798,13 +833,26 @@ export default function Dashboard() {
                     {/* Message */}
                     <div className="space-y-2">
                       <Label htmlFor="message">Message</Label>
-                      <Textarea
-                        id="message"
-                        placeholder="Enter your message here... (optional if sending media)"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        rows={4}
-                      />
+                      <div className="relative">
+                        <Textarea
+                          id="message"
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          onFocus={() => handleFieldFocus("message")}
+                          onBlur={() => handleFieldBlur("message")}
+                          rows={4}
+                        />
+                        <Label 
+                          htmlFor="message" 
+                          className={`absolute left-3 top-3 pointer-events-none transition-all duration-200 ${
+                            focusedField === "message" || fieldValues.message
+                              ? "hidden"
+                              : "text-sm text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          Enter your message here... (optional if sending media)
+                        </Label>
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {message.length}/1000 characters
                       </p>
@@ -1475,22 +1523,48 @@ export default function Dashboard() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="group-name">Group Name</Label>
-              <Input
-                id="group-name"
-                placeholder="Enter group name"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="group-name"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  onFocus={() => handleFieldFocus("newGroupName")}
+                  onBlur={() => handleFieldBlur("newGroupName")}
+                />
+                <Label 
+                  htmlFor="group-name" 
+                  className={`absolute left-3 pointer-events-none transition-all duration-200 ${
+                    focusedField === "newGroupName" || fieldValues.newGroupName
+                      ? "hidden"
+                      : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  Enter group name
+                </Label>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="group-description">Description (Optional)</Label>
-              <Textarea
-                id="group-description"
-                placeholder="Enter group description"
-                value={newGroupDescription}
-                onChange={(e) => setNewGroupDescription(e.target.value)}
-                rows={3}
-              />
+              <div className="relative">
+                <Textarea
+                  id="group-description"
+                  value={newGroupDescription}
+                  onChange={(e) => setNewGroupDescription(e.target.value)}
+                  onFocus={() => handleFieldFocus("newGroupDescription")}
+                  onBlur={() => handleFieldBlur("newGroupDescription")}
+                  rows={3}
+                />
+                <Label 
+                  htmlFor="group-description" 
+                  className={`absolute left-3 top-3 pointer-events-none transition-all duration-200 ${
+                    focusedField === "newGroupDescription" || fieldValues.newGroupDescription
+                      ? "hidden"
+                      : "text-sm text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  Enter group description
+                </Label>
+              </div>
             </div>
             <div className="flex justify-end space-x-2">
               <Button
@@ -1547,13 +1621,26 @@ export default function Dashboard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="bulk-message">Message</Label>
-              <Textarea
-                id="bulk-message"
-                placeholder="Enter your message..."
-                value={bulkMessage}
-                onChange={(e) => setBulkMessage(e.target.value)}
-                rows={4}
-              />
+              <div className="relative">
+                <Textarea
+                  id="bulk-message"
+                  value={bulkMessage}
+                  onChange={(e) => setBulkMessage(e.target.value)}
+                  onFocus={() => handleFieldFocus("bulkMessage")}
+                  onBlur={() => handleFieldBlur("bulkMessage")}
+                  rows={4}
+                />
+                <Label 
+                  htmlFor="bulk-message" 
+                  className={`absolute left-3 top-3 pointer-events-none transition-all duration-200 ${
+                    focusedField === "bulkMessage" || fieldValues.bulkMessage
+                      ? "hidden"
+                      : "text-sm text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  Enter your message...
+                </Label>
+              </div>
               <p className="text-sm text-muted-foreground">
                 {bulkMessage.length}/1000 characters
               </p>

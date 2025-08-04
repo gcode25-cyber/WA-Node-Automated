@@ -245,12 +245,21 @@ export default function Signup() {
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder="Enter phone number"
                         className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                         {...register("phone")}
                         onFocus={() => handleFieldFocus("phone")}
                         onBlur={() => handleFieldBlur("phone")}
                       />
+                      <Label 
+                        htmlFor="phone" 
+                        className={`absolute left-3 pointer-events-none transition-all duration-200 ${
+                          focusedField === "phone" || fieldValues.phone
+                            ? "hidden"
+                            : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        Enter phone number
+                      </Label>
                     </div>
                   </div>
                   {errors.phone && (
