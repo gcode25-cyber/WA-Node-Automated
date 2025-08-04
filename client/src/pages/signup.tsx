@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
 import { signupSchema, type SignupRequest } from "@shared/schema";
 import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
+import formIllustration from "@assets/Gemini_Generated_Image_jkjufujkjufujkju-removebg-preview_1754282049541.png";
 
 // Country codes list
 const countryCodes = [
@@ -375,8 +376,8 @@ export default function Signup() {
           <div className="relative">
             {/* Animated image */}
             <img 
-              src="/attached_assets/image_1754117706199.png"
-              alt="Social Media Marketing Illustration"
+              src={formIllustration}
+              alt="WhatsApp Messaging Illustration"
               className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:-rotate-3 filter drop-shadow-2xl"
             />
             

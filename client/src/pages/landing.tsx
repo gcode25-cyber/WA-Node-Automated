@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import hubwaleLogo from "@assets/hw_logo_1754050125326.png";
+import heroIllustration from "@assets/Gemini_Generated_Image_heg2mwheg2mwheg2-removebg-preview_1754282049544.png";
 
 export default function Landing() {
   return (
@@ -95,8 +96,8 @@ export default function Landing() {
             <div className="relative flex items-center justify-center">
               {/* Animated image */}
               <img 
-                src="/attached_assets/image_1754117706199.png"
-                alt="WhatsApp Automation Success Illustration"
+                src={heroIllustration}
+                alt="WhatsApp Community and Messaging Illustration"
                 className="w-96 h-96 lg:w-[500px] lg:h-[500px] object-contain transform hover:scale-110 transition-all duration-700 hover:rotate-2 filter drop-shadow-2xl"
               />
               
