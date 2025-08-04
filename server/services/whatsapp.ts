@@ -130,7 +130,7 @@ export class WhatsAppService {
             '--disable-ipc-flooding-protection',
             '--memory-pressure-off',
             '--max_old_space_size=4096',
-            `--user-data-dir=/tmp/chrome-${Date.now()}-${Math.random().toString(36).substring(7)}`
+            `--user-data-dir=./.chrome_user_data` // Use persistent directory
           ],
           handleSIGINT: false,
           handleSIGTERM: false,
@@ -142,6 +142,7 @@ export class WhatsAppService {
       // Event handlers
       this.client.on('qr', (qr: string) => {
         console.log('📱 New QR Code received from WhatsApp Web');
+        console.log('⚠️ Note: QR code means session was not restored or has expired');
         console.log('🔍 QR String type:', typeof qr);
         console.log('🔍 QR String length:', qr.length);
         console.log('🔍 QR String preview:', qr.substring(0, 120) + '...');
@@ -205,6 +206,22 @@ export class WhatsAppService {
             sessionData: JSON.stringify(freshSessionInfo)
           });
           console.log('💾 Session info saved to storage for future persistence');
+          
+          // Create a backup marker file to indicate successful session
+          try {
+            const fs = await import('fs');
+            const sessionMarker = {
+              sessionId: 'main_session',
+              userId: freshSessionInfo.number,
+              userName: freshSessionInfo.name,
+              timestamp: new Date().toISOString(),
+              status: 'active'
+            };
+            fs.writeFileSync('./.session_backup.json', JSON.stringify(sessionMarker, null, 2));
+            console.log('📄 Session backup marker created');
+          } catch (fsError: any) {
+            console.log('Session marker creation failed:', fsError.message);
+          }
         } catch (error: any) {
           console.log('Session save failed (non-critical):', error.message);
         }
@@ -222,7 +239,8 @@ export class WhatsAppService {
       });
 
       this.client.on('authenticated', () => {
-        console.log('🔐 WhatsApp client authenticated');
+        console.log('🔐 WhatsApp client authenticated successfully');
+        console.log('✅ Session restoration successful - no QR code needed');
       });
 
       this.client.on('auth_failure', (msg: any) => {
@@ -234,11 +252,18 @@ export class WhatsAppService {
       this.client.on('disconnected', (reason: any) => {
         console.log('🔌 WhatsApp client disconnected:', reason);
         this.isReady = false;
-        this.sessionInfo = null;
+        
+        // Don't clear session info on disconnect - keep it for reconnection
+        // this.sessionInfo = null;
         this.qrCode = null;
         
         // Broadcast disconnection
         this.broadcastToClients('disconnected', { connected: false, reason });
+        
+        // Don't auto-reconnect immediately after disconnect to avoid infinite loops
+        // User can manually trigger reconnection via the API
+        console.log('📋 Use /api/reconnect-whatsapp to attempt reconnection with preserved session');
+        console.log('📋 Use /api/force-restart-whatsapp to start fresh with QR code');
       });
 
       // Real-time message handling
@@ -423,7 +448,7 @@ export class WhatsAppService {
   }
 
   async completeRestart() {
-    console.log('🔄 Starting complete WhatsApp client restart...');
+    console.log('🔄 Starting complete WhatsApp client restart (CLEARING SESSION)...');
     
     // Reset all state
     this.qrCode = null;
@@ -449,14 +474,21 @@ export class WhatsAppService {
       console.log('Storage cleanup during restart:', e?.message);
     }
     
-    // Clear session files
+    // Clear session files - ONLY when doing complete restart
     try {
       const fs = await import('fs');
       const path = await import('path');
       const sessionPath = path.resolve('./.wwebjs_auth');
+      const chromeDataPath = path.resolve('./.chrome_user_data');
+      
       if (fs.existsSync(sessionPath)) {
         fs.rmSync(sessionPath, { recursive: true, force: true });
-        console.log('🗑️ Session files cleared');
+        console.log('🗑️ WhatsApp session files cleared');
+      }
+      
+      if (fs.existsSync(chromeDataPath)) {
+        fs.rmSync(chromeDataPath, { recursive: true, force: true });
+        console.log('🗑️ Chrome user data cleared');
       }
     } catch (fsError: any) {
       console.log('Session file cleanup:', fsError.message);
@@ -470,7 +502,17 @@ export class WhatsAppService {
   }
 
   async reconnectWithoutClearing() {
-    console.log('🔄 Starting WhatsApp client reconnection (preserving session)...');
+    console.log('🔄 Starting WhatsApp client reconnection (PRESERVING SESSION)...');
+    
+    // Check if we have valid session files before attempting reconnection
+    const fs = await import('fs');
+    const sessionPath = './.wwebjs_auth/session-main_session';
+    
+    // Reset state but keep session info for restoration
+    const preservedSessionInfo = this.sessionInfo;
+    this.qrCode = null;
+    this.isReady = false;
+    this.isInitializing = false;
     
     // Destroy existing client but preserve session files
     if (this.client) {
@@ -481,8 +523,21 @@ export class WhatsAppService {
       }
     }
     this.client = null;
-    this.isReady = false;
-    this.isInitializing = false;
+    
+    // Restore session info
+    this.sessionInfo = preservedSessionInfo;
+    
+    if (fs.existsSync(sessionPath)) {
+      const sessionContents = fs.readdirSync(sessionPath);
+      if (sessionContents.length > 0) {
+        console.log('📱 Reconnecting with preserved session files...');
+        console.log('📄 Session files found:', sessionContents.length, 'files');
+      } else {
+        console.log('⚠️ Session directory exists but is empty - QR scan will be required');
+      }
+    } else {
+      console.log('⚠️ No session files found - QR scan will be required');
+    }
     
     // Don't clear session files or storage - just reinitialize
     await this.initializeClient();

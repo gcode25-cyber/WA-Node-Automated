@@ -287,11 +287,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reconnect without clearing session files
   app.post("/api/reconnect-whatsapp", async (req, res) => {
     try {
+      console.log('🔄 API: Reconnecting WhatsApp without clearing session...');
       await whatsappService.reconnectWithoutClearing();
-      res.json({ success: true, message: "WhatsApp service reconnection initiated" });
+      res.json({ success: true, message: "WhatsApp service reconnection initiated (session preserved)" });
     } catch (error) {
       console.error("WhatsApp reconnect error:", error);
       res.status(500).json({ error: "Failed to reconnect WhatsApp service" });
+    }
+  });
+
+  // Force restart with session clearing
+  app.post("/api/force-restart-whatsapp", async (req, res) => {
+    try {
+      console.log('🔄 API: Force restarting WhatsApp with session clearing...');
+      await whatsappService.completeRestart();
+      res.json({ success: true, message: "WhatsApp service force restarted (session cleared)" });
+    } catch (error) {
+      console.error("WhatsApp force restart error:", error);
+      res.status(500).json({ error: "Failed to force restart WhatsApp service" });
     }
   });
 

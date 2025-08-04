@@ -1,0 +1,8 @@
+{
+  "sessionId": "main_session",
+  "userId": "919428463575",
+  "userName": "Parth",
+  "timestamp": "2025-08-04T13:53:00.000Z",
+  "status": "expired_needs_qr",
+  "note": "Previous session was active but session files were cleared during restart"
+}
