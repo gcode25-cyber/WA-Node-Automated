@@ -1,7 +1,7 @@
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia } = pkg as any;
 import QRCode from 'qrcode';
-import * as qr from 'qr-image';
+import qrImage from 'qr-image';
 import { storage } from '../storage';
 import fs from 'fs';
 import path from 'path';
@@ -121,27 +121,32 @@ export class WhatsAppService {
 
     this.client.on('qr', async (qrString: string) => {
       console.log('📱 New QR Code received from WhatsApp Web');
-      try {
-        // Use most aggressive QR code compression settings
-        this.qrCode = await QRCode.toDataURL(qrString, {
-          errorCorrectionLevel: 'L', // Lowest error correction
-          margin: 0, // No margin
-          width: 1024, // Large width to accommodate data
-          scale: 1 // Minimal scale
-        });
-        console.log('✅ QR Code generated successfully');
+      console.log('🔍 QR String type:', typeof qrString);
+      console.log('🔍 QR String length:', qrString.length);
+      console.log('🔍 QR String preview:', qrString.substring(0, 100) + '...');
+      
+      // Check if qrString is already a base64 data URL (WhatsApp Web sometimes provides this)
+      if (qrString.startsWith('data:image/')) {
+        console.log('✅ QR Code already in base64 format from WhatsApp Web');
+        this.qrCode = qrString;
         this.broadcastToClients('qr', { qr: this.qrCode });
-      } catch (err) {
-        console.error('Standard QR generation failed, trying qr-image:', err);
+      } else {
+        // Try to generate QR code from the string
         try {
-          // Fallback to qr-image library
-          const qrBuffer = qr.imageSync(qrString, { type: 'png', size: 10, margin: 1 });
+          // Use qr-image library directly since it handles large data better
+          const qrBuffer = qrImage.imageSync(qrString, { 
+            type: 'png', 
+            size: 20, // Larger size for better scanning
+            margin: 2,
+            ec_level: 'L' // Low error correction for maximum data capacity
+          });
           this.qrCode = `data:image/png;base64,${qrBuffer.toString('base64')}`;
-          console.log('✅ QR Code generated with qr-image fallback');
+          console.log('✅ QR Code generated successfully with qr-image');
           this.broadcastToClients('qr', { qr: this.qrCode });
-        } catch (finalErr) {
-          console.error('All QR generation methods failed:', finalErr);
-          this.qrCode = qrString; // Store raw QR string as last resort
+        } catch (err) {
+          console.error('QR image generation failed:', err);
+          // Last resort: store the raw string and let client handle it
+          this.qrCode = qrString;
           this.broadcastToClients('qr', { qr: null, rawQr: qrString });
         }
       }
