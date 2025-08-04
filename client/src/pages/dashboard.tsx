@@ -180,13 +180,16 @@ export default function Dashboard() {
   useEffect(() => {
     // Enable WebSocket in all modes for real-time WhatsApp updates
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    // Fix for undefined port - use window.location.host which includes port, or fallback to 5000
+    const host = window.location.host || `${window.location.hostname}:5000`;
+    const wsUrl = `${protocol}//${host}/ws`;
     
     console.log('🔌 WebSocket URL details:', {
       protocol,
       host: window.location.host,
       hostname: window.location.hostname,  
       port: window.location.port,
+      finalHost: host,
       finalUrl: wsUrl
     });
     
