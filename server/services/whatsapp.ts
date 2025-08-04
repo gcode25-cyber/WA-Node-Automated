@@ -65,17 +65,23 @@ export class WhatsAppService {
         console.log('Session info retrieval failed:', error.message);
       }
       
-      if (hasExistingSession && storedSessionInfo) {
-        console.log('🔍 Found existing session and stored info, attempting to restore...');
-        // Pre-populate session info from storage for immediate availability
-        this.sessionInfo = {
-          number: storedSessionInfo.userId,
-          name: storedSessionInfo.userName,
-          loginTime: storedSessionInfo.loginTime
-        };
-        this.isReady = false; // Will be set to true when client is actually ready
-      } else if (hasExistingSession) {
-        console.log('🔍 Found existing session files, attempting to restore...');
+      if (hasExistingSession) {
+        console.log('🔍 Found existing session files, attempting automatic restoration...');
+        
+        // If we have stored session info, use it immediately
+        if (storedSessionInfo) {
+          console.log('📦 Restoring from stored session info');
+          this.sessionInfo = {
+            number: storedSessionInfo.userId,
+            name: storedSessionInfo.userName,
+            loginTime: storedSessionInfo.loginTime
+          };
+        } else {
+          console.log('📋 Session files exist, will restore on WhatsApp ready event');
+        }
+        
+        // Always attempt to restore existing session automatically
+        this.isReady = false; // Will be set when client connects
       } else {
         console.log('📱 No existing session found, will require QR authentication');
       }
@@ -163,31 +169,41 @@ export class WhatsAppService {
       });
 
       this.client.on('ready', async () => {
-        console.log('✅ WhatsApp client is ready!');
+        console.log('✅ WhatsApp client is ready - session restored successfully!');
         this.isReady = true;
-        this.sessionInfo = {
-          number: this.client.info?.wid?.user || 'unknown',
-          name: this.client.info?.pushname || 'unknown',
-          loginTime: new Date().toISOString()
+        
+        // Update session info with fresh data from client
+        const freshSessionInfo = {
+          number: this.client.info?.wid?.user || this.sessionInfo?.number || 'unknown',
+          name: this.client.info?.pushname || this.sessionInfo?.name || 'unknown',
+          loginTime: this.sessionInfo?.loginTime || new Date().toISOString()
         };
+        
+        this.sessionInfo = freshSessionInfo;
         
         // Clear QR code since we're now authenticated
         this.qrCode = null;
         
-        // Save session info to storage for persistence
+        console.log('🎉 Session restored automatically! User:', freshSessionInfo.name, 'Number:', freshSessionInfo.number);
+        
+        // Save/update session info to storage for future persistence
         try {
+          // First clear any old sessions
+          await storage.clearAllSessions();
+          
+          // Save the current active session
           await storage.saveSession({
-            id: this.sessionInfo.number,
-            sessionData: JSON.stringify(this.sessionInfo),
-            loginTime: this.sessionInfo.loginTime,
-            isActive: true
+            userId: freshSessionInfo.number,
+            userName: freshSessionInfo.name,
+            loginTime: new Date(freshSessionInfo.loginTime),
+            sessionData: JSON.stringify(freshSessionInfo)
           });
-          console.log('💾 Session info saved to storage');
+          console.log('💾 Session info saved to storage for future persistence');
         } catch (error: any) {
           console.log('Session save failed (non-critical):', error.message);
         }
         
-        // Broadcast connection status
+        // Broadcast connection status immediately
         this.broadcastToClients('connected', { 
           connected: true, 
           sessionInfo: this.sessionInfo 
@@ -205,6 +221,8 @@ export class WhatsAppService {
           ]);
 
           console.log(`🚀 Initial data loaded: ${chatsData.length} chats, ${contactsData.length} contacts, ${groupsData.length} groups`);
+          
+          console.log('✅ WHATSAPP SESSION FULLY RESTORED - NO QR NEEDED!');
         } catch (error: any) {
           console.log('Initial data load failed (non-critical):', error.message);
         }
@@ -413,11 +431,40 @@ export class WhatsAppService {
   }
 
   async getSessionInfo() {
-    if (this.sessionInfo) {
+    // First check in-memory session
+    if (this.sessionInfo && this.isReady) {
       return this.sessionInfo;
-    } else {
-      return null;
     }
+    
+    // If no in-memory session, try to restore from storage
+    try {
+      const activeSessions = await storage.getActiveSessions();
+      if (activeSessions.length > 0) {
+        const storedSession = activeSessions[0];
+        console.log('📦 Restoring session info from storage');
+        
+        this.sessionInfo = {
+          number: storedSession.userId,
+          name: storedSession.userName,
+          loginTime: storedSession.loginTime
+        };
+        
+        // If we have session files and stored session, mark as ready
+        const fs = await import('fs');
+        const path = await import('path');
+        const sessionPath = path.resolve('./.wwebjs_auth');
+        
+        if (fs.existsSync(sessionPath)) {
+          this.isReady = true;
+          console.log('✅ Session restored from storage with file verification');
+          return this.sessionInfo;
+        }
+      }
+    } catch (error: any) {
+      console.log('Session restoration failed:', error.message);
+    }
+    
+    return null;
   }
 
   async isClientReady(): Promise<boolean> {
