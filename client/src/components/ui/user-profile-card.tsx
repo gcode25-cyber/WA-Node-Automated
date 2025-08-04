@@ -23,11 +23,9 @@ export function UserProfileCard({ user, isLoading = false }: UserProfileCardProp
     return (
       <div className="bg-muted rounded-lg p-6">
         <div className="flex items-center space-x-4">
-          <Avatar className="w-12 h-12">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              <Loader2 className="w-6 h-6 animate-spin" />
-            </AvatarFallback>
-          </Avatar>
+          <div className="w-12 h-12 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
           <div className="flex-1">
             <div className="h-5 bg-gray-300 rounded animate-pulse mb-2"></div>
             <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
@@ -40,8 +38,8 @@ export function UserProfileCard({ user, isLoading = false }: UserProfileCardProp
   return (
     <div className="bg-muted rounded-lg p-6">
       <div className="flex flex-col items-center text-center space-y-4">
-        <Avatar className="w-16 h-16">
-          <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+        <Avatar className="w-16 h-16 rounded-full">
+          <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold rounded-full">
             {getFirstCharacter(user.name)}
           </AvatarFallback>
         </Avatar>

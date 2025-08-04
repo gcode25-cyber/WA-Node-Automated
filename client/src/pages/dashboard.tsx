@@ -515,7 +515,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 text-center">
               <Badge variant={sessionInfo ? "default" : "secondary"} className="text-base px-4 py-1 cursor-pointer">
-                <Smartphone className="h-4 w-4 mr-2" />
+                <div className={`w-3 h-3 rounded-full mr-2 ${sessionInfo ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
                 <span>{sessionInfo ? "Connected" : "Not Connected"}</span>
               </Badge>
             </div>
