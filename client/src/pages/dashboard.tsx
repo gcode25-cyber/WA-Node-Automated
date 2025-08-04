@@ -501,7 +501,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div 
-            className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors"
+            className="flex items-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
             onClick={() => setLocation('/account')}
           >
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -513,7 +513,7 @@ export default function Dashboard() {
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               )}
             </div>
-            <div className="flex-1 text-center">
+            <div className="flex-1 text-center ml-3">
               <Badge variant={sessionInfo ? "default" : "secondary"} className="text-base px-4 py-1 cursor-pointer">
                 <div className={`w-3 h-3 rounded-full mr-2 ${sessionInfo ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
                 <span>{sessionInfo ? "Connected" : "Not Connected"}</span>

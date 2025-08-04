@@ -164,7 +164,9 @@ A comprehensive WhatsApp bulk messaging platform built with React and Node.js, i
 - Clean, maintainable code structure
 
 ## Recent Changes
-- **2025-08-04**: Successfully completed migration from Replit Agent to standard Replit environment
+- **2025-08-04**: Successfully completed migration from Replit Agent to Replit environment
+- **2025-08-04**: Fixed database schema initialization and pushed all tables to PostgreSQL
+- **2025-08-04**: Fixed UI alignment - aligned first character badge with WhatsApp and RCS icons in dashboard sidebar
 - **2025-08-04**: Installed required Node.js packages (tsx, typescript, drizzle-kit, esbuild, vite)
 - **2025-08-04**: Created PostgreSQL database with environment variables
 - **2025-08-04**: Updated UI with new illustrations - added form illustration to login/signup pages and community illustration to landing page
