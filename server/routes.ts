@@ -147,13 +147,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             width: 256,
             margin: 1
           });
-          // Extract base64 part (remove "data:image/png;base64," prefix)
-          const base64QR = qrDataURL.split(',')[1];
-          res.json({ qr: base64QR });
+          // Return full data URL instead of just base64 part
+          res.json({ qr: qrDataURL });
         } catch (qrError) {
-          console.error("QR generation failed, returning raw string:", qrError);
-          // Return raw QR string if conversion fails
-          res.json({ qr: qr });
+          console.error("QR generation failed, returning null:", qrError);
+          // Return null if conversion fails completely
+          res.json({ qr: null });
         }
       } else {
         res.json({ qr: null });

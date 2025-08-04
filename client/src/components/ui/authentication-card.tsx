@@ -69,7 +69,7 @@ export function AuthenticationCard({
             <div className="mb-8">
               <div className="bg-white p-8 rounded-2xl shadow-xl inline-block border">
                 <img
-                  src={`data:image/png;base64,${qrData.qr}`}
+                  src={qrData.qr && qrData.qr.startsWith('data:') ? qrData.qr : `data:image/png;base64,${qrData.qr}`}
                   alt="QR Code for WhatsApp Authentication"
                   className="w-80 h-80 mx-auto rounded-xl"
                   loading="lazy"
