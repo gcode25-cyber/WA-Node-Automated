@@ -514,9 +514,9 @@ export default function Dashboard() {
               )}
             </div>
             <div className="flex-1 text-center ml-3">
-              <Badge variant={sessionInfo ? "default" : "secondary"} className="text-base px-4 py-1 cursor-pointer">
-                <div className={`w-3 h-3 rounded-full mr-2 ${sessionInfo ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
-                <span>{sessionInfo ? "Connected" : "Not Connected"}</span>
+              <Badge variant={sessionInfo ? "default" : "secondary"} className="text-sm px-3 py-1 cursor-pointer">
+                <div className={`w-2 h-2 rounded-full mr-2 ${sessionInfo ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
+                <span className="whitespace-nowrap">{sessionInfo ? "Connected" : "Not Connected"}</span>
               </Badge>
             </div>
           </div>
