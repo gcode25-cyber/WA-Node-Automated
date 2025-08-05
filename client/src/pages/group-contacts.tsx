@@ -208,16 +208,29 @@ export default function GroupContacts() {
             <Button
               variant="outline"
               onClick={exportContacts}
+              className="flex items-center space-x-2"
             >
               <Download className="h-4 w-4" />
+              <span>Export CSV</span>
             </Button>
             
             <Button
               variant="destructive"
               onClick={() => deleteSelectedMutation.mutate(selectedContacts)}
               disabled={selectedContacts.length === 0 || deleteSelectedMutation.isPending}
+              className="flex items-center space-x-2"
             >
-              <Trash2 className="h-4 w-4" />
+              {deleteSelectedMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete</span>
+                </>
+              )}
             </Button>
           </div>
         </div>
