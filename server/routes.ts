@@ -723,6 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let invalidContacts = 0;
       let duplicateContacts = 0;
       const processedNumbers = new Set();
+      const membersToInsert: { groupId: string; phoneNumber: string; name: null; status: 'valid' | 'invalid' }[] = [];
 
       for (const line of lines) {
         if (!line.trim()) continue;
@@ -756,12 +757,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         processedNumbers.add(phoneNumber);
         validContacts++;
 
-        await storage.createContactGroupMember({
+        membersToInsert.push({
           groupId,
           phoneNumber,
           name: null, // No name in the CSV format
           status: "valid"
         });
+      }
+
+      // Bulk insert all valid members at once
+      if (membersToInsert.length > 0) {
+        await storage.createContactGroupMembersBulk(membersToInsert);
       }
 
       // Update group statistics
@@ -955,10 +961,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Contact group not found" });
       }
 
-      // Delete selected members
-      for (const memberId of memberIds) {
-        await storage.deleteContactGroupMember(memberId);
-      }
+      // Bulk delete all selected members at once
+      await storage.deleteContactGroupMembersBulk(memberIds);
 
       // Update group member counts
       const remainingMembers = await storage.getContactGroupMembers(groupId);

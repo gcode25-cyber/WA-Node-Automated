@@ -1,3 +1,6 @@
-2025/08/05-06:29:51.047 1634 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/MANIFEST-000001
-2025/08/05-06:29:51.048 1634 Recovering log #3
-2025/08/05-06:29:51.051 1634 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/000003.log 
+2025/08/05-06:34:46.602 188b Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/MANIFEST-000001
+2025/08/05-06:34:46.603 188b Recovering log #3
+2025/08/05-06:34:46.604 188b Reusing old log /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/000003.log 
+2025/08/05-06:35:46.605 188b Level-0 table #5: started
+2025/08/05-06:35:46.630 188b Level-0 table #5: 17402 bytes OK
+2025/08/05-06:35:46.636 188b Delete type=0 #3

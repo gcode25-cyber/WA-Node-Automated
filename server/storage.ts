@@ -8,7 +8,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Authentication methods
@@ -37,8 +37,10 @@ export interface IStorage {
   // Contact group member methods
   getContactGroupMembers(groupId: string): Promise<ContactGroupMember[]>;
   createContactGroupMember(member: InsertContactGroupMember): Promise<ContactGroupMember>;
+  createContactGroupMembersBulk(members: InsertContactGroupMember[]): Promise<ContactGroupMember[]>;
   deleteContactGroupMembers(groupId: string): Promise<void>;
   deleteContactGroupMember(memberId: string): Promise<void>;
+  deleteContactGroupMembersBulk(memberIds: string[]): Promise<void>;
   
   // Bulk message campaign methods
   getBulkMessageCampaigns(): Promise<BulkMessageCampaign[]>;
@@ -392,6 +394,14 @@ export class DatabaseStorage implements IStorage {
     return member;
   }
 
+  async createContactGroupMembersBulk(insertMembers: InsertContactGroupMember[]): Promise<ContactGroupMember[]> {
+    if (insertMembers.length === 0) return [];
+    return await db
+      .insert(contactGroupMembers)
+      .values(insertMembers)
+      .returning();
+  }
+
   async deleteContactGroupMembers(groupId: string): Promise<void> {
     await db
       .delete(contactGroupMembers)
@@ -402,6 +412,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(contactGroupMembers)
       .where(eq(contactGroupMembers.id, memberId));
+  }
+
+  async deleteContactGroupMembersBulk(memberIds: string[]): Promise<void> {
+    if (memberIds.length === 0) return;
+    await db
+      .delete(contactGroupMembers)
+      .where(inArray(contactGroupMembers.id, memberIds));
   }
 
   async getBulkMessageCampaigns(): Promise<BulkMessageCampaign[]> {
