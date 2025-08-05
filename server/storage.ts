@@ -227,6 +227,29 @@ export class MemStorage implements IStorage {
     this.contactGroupMembers.delete(memberId);
   }
 
+  async createContactGroupMembersBulk(insertMembers: InsertContactGroupMember[]): Promise<ContactGroupMember[]> {
+    const members: ContactGroupMember[] = [];
+    insertMembers.forEach(insertMember => {
+      const id = randomUUID();
+      const member: ContactGroupMember = { 
+        ...insertMember, 
+        id,
+        name: insertMember.name || null,
+        status: insertMember.status || "valid",
+        createdAt: new Date()
+      };
+      this.contactGroupMembers.set(id, member);
+      members.push(member);
+    });
+    return members;
+  }
+
+  async deleteContactGroupMembersBulk(memberIds: string[]): Promise<void> {
+    memberIds.forEach(memberId => {
+      this.contactGroupMembers.delete(memberId);
+    });
+  }
+
   // Bulk message campaign methods
   async getBulkMessageCampaigns(): Promise<BulkMessageCampaign[]> {
     return Array.from(this.bulkMessageCampaigns.values());
