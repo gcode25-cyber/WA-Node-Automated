@@ -1794,15 +1794,39 @@ export default function Dashboard() {
                         </p>
                       </div>
                     ) : (
-                      <div className="text-center p-8">
-                        <span className="text-purple-600 text-4xl mb-4 block">📱</span>
-                        <h3 className="text-lg font-semibold mb-2">Status Updates</h3>
-                        <p className="text-muted-foreground mb-4">
-                          View and manage WhatsApp status updates from your contacts with full media support.
-                        </p>
-                        <Button onClick={() => setLocation('/status')}>
-                          View Status Updates
-                        </Button>
+                      <div className="space-y-4">
+                        {/* Preview of status list design */}
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 p-0.5">
+                                <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                  <User className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm">Contact Status Updates</h4>
+                                <p className="text-xs text-muted-foreground">View recent status updates</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 p-0.5">
+                                <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                  <User className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm">Recent Updates</h4>
+                                <p className="text-xs text-muted-foreground">50 status updates available</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <Button onClick={() => setLocation('/status')}>
+                            View All Status Updates
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </CardContent>

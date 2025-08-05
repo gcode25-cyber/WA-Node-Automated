@@ -1,3 +1,3 @@
-2025/08/05-10:21:21.911 c92 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/MANIFEST-000001
-2025/08/05-10:21:21.912 c92 Recovering log #7
-2025/08/05-10:21:21.916 c92 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/000007.log 
+2025/08/05-10:22:12.715 dfc Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/MANIFEST-000001
+2025/08/05-10:22:12.716 dfc Recovering log #7
+2025/08/05-10:22:12.716 dfc Reusing old log /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/000007.log 
