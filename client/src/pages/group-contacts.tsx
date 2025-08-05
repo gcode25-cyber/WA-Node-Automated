@@ -40,6 +40,7 @@ export default function GroupContacts() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newContact, setNewContact] = useState({ name: '', phoneNumber: '' });
   const [validationErrors, setValidationErrors] = useState({ name: '', phoneNumber: '' });
+  const [isImporting, setIsImporting] = useState(false);
   const queryClient = useQueryClient();
 
   const groupId = params?.groupId;
@@ -87,6 +88,7 @@ export default function GroupContacts() {
   // Import CSV mutation
   const importCsvMutation = useMutation({
     mutationFn: async (file: File) => {
+      setIsImporting(true); // Set local importing state
       const formData = new FormData();
       formData.append('csv', file);
       const response = await fetch(`/api/contact-groups/${groupId}/import-csv`, {
@@ -106,6 +108,7 @@ export default function GroupContacts() {
         title: "Import Successful",
         description: `Imported ${data.validContacts} valid contacts, ${data.duplicateContacts} duplicates found`,
       });
+      setIsImporting(false); // Clear importing state
       // Force immediate refresh of all related queries
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
@@ -117,6 +120,7 @@ export default function GroupContacts() {
         description: error.message || "Failed to import contacts",
         variant: "destructive",
       });
+      setIsImporting(false); // Clear importing state on error
     },
     onSettled: () => {
       // Reset the file input
@@ -282,10 +286,10 @@ export default function GroupContacts() {
             <Button
               variant="outline"
               onClick={() => document.getElementById('csv-import')?.click()}
-              disabled={importCsvMutation.isPending}
+              disabled={isImporting}
               className="flex items-center space-x-2"
             >
-              {importCsvMutation.isPending ? (
+              {isImporting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Importing...</span>

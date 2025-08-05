@@ -124,6 +124,7 @@ export default function Dashboard() {
   const [newGroupDescription, setNewGroupDescription] = useState("");
   const [selectedContactGroup, setSelectedContactGroup] = useState("");
   const [bulkMessage, setBulkMessage] = useState("");
+  const [importingGroupId, setImportingGroupId] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   
   // Contact selection dropdown state
@@ -489,6 +490,7 @@ export default function Dashboard() {
   // Import CSV mutation
   const importCsvMutation = useMutation({
     mutationFn: async ({ groupId, file }: { groupId: string; file: File }) => {
+      setImportingGroupId(groupId); // Set the specific group being imported
       const formData = new FormData();
       formData.append('csv', file);
       const response = await fetch(`/api/contact-groups/${groupId}/import-csv`, {
@@ -508,6 +510,7 @@ export default function Dashboard() {
         title: "CSV Imported Successfully",
         description: `Imported ${data.validContacts} valid contacts, ${data.invalidContacts} invalid, ${data.duplicateContacts} duplicates`,
       });
+      setImportingGroupId(null); // Clear importing state
       // Invalidate all related queries including the specific group
       queryClient.invalidateQueries({ queryKey: ['/api/contact-groups'] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${variables.groupId}`] });
@@ -519,6 +522,7 @@ export default function Dashboard() {
         description: error.message || "Failed to import CSV file",
         variant: "destructive",
       });
+      setImportingGroupId(null); // Clear importing state on error
     },
   });
 
@@ -1351,10 +1355,10 @@ export default function Dashboard() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => document.getElementById(`csv-upload-${group.id}`)?.click()}
-                                  disabled={importCsvMutation.isPending}
+                                  disabled={importingGroupId === group.id}
                                   className="flex items-center space-x-2"
                                 >
-                                  {importCsvMutation.isPending ? (
+                                  {importingGroupId === group.id ? (
                                     <>
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                       <span>Importing...</span>
