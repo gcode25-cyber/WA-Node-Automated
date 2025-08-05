@@ -64,6 +64,8 @@ export default function GroupContacts() {
       setSelectAll(false);
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
     },
     onError: (error: any) => {
       toast({
@@ -96,11 +98,9 @@ export default function GroupContacts() {
         title: "Import Successful",
         description: `Imported ${data.validContacts} valid contacts, ${data.duplicateContacts} duplicates found`,
       });
-      // Force immediate refresh of both queries
+      // Force immediate refresh of all related queries
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
-      
-      // Also refresh the contact groups list
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
     },
     onError: (error: any) => {

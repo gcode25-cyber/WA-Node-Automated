@@ -1,15 +1,15 @@
-2025/08/05-06:10:14.705 cf9 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/08/05-06:10:14.706 cf9 Recovering log #162
-2025/08/05-06:10:14.707 cf9 Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000162.log 
-2025/08/05-06:10:16.149 cf9 Level-0 table #169: started
-2025/08/05-06:10:16.156 cf9 Level-0 table #169: 46272 bytes OK
-2025/08/05-06:10:16.160 cf9 Delete type=0 #162
-2025/08/05-06:10:16.161 cf9 Manual compaction at level-0 from '\x00?\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00@\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/08/05-06:10:17.778 cfb Compacting 1@1 + 2@2 files
-2025/08/05-06:10:18.163 cfb Generated table #170@1: 48107 keys, 2211928 bytes
-2025/08/05-06:10:18.176 cfb Generated table #171@1: 6202 keys, 238250 bytes
-2025/08/05-06:10:18.176 cfb Compacted 1@1 + 2@2 files => 2450178 bytes
-2025/08/05-06:10:18.183 cfb compacted to: files[ 0 0 2 0 0 0 0 ]
-2025/08/05-06:10:18.185 cfb Delete type=2 #165
-2025/08/05-06:10:18.185 cfb Delete type=2 #166
-2025/08/05-06:10:18.185 cfb Delete type=2 #169
+2025/08/05-06:10:35.364 db9 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/08/05-06:10:35.364 db9 Recovering log #168
+2025/08/05-06:10:35.381 db9 Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000168.log 
+2025/08/05-06:10:36.848 dc2 Level-0 table #174: started
+2025/08/05-06:10:36.867 dc2 Level-0 table #174: 234401 bytes OK
+2025/08/05-06:10:36.872 dc2 Delete type=0 #168
+2025/08/05-06:10:36.872 db9 Manual compaction at level-0 from '\x00@\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00A\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/05-06:10:38.888 db9 Compacting 1@1 + 2@2 files
+2025/08/05-06:10:39.221 db9 Generated table #175@1: 48926 keys, 2213426 bytes
+2025/08/05-06:10:39.240 db9 Generated table #176@1: 6421 keys, 248535 bytes
+2025/08/05-06:10:39.240 db9 Compacted 1@1 + 2@2 files => 2461961 bytes
+2025/08/05-06:10:39.245 db9 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/05-06:10:39.246 db9 Delete type=2 #170
+2025/08/05-06:10:39.247 db9 Delete type=2 #171
+2025/08/05-06:10:39.247 db9 Delete type=2 #174
