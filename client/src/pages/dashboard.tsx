@@ -654,6 +654,7 @@ export default function Dashboard() {
       setSelectedGroupsForAdd(new Set());
       setShowAddToGroupsDialog(false);
       queryClient.invalidateQueries({ queryKey: ["/api/contact-groups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/contacts/bulk-group-memberships"] });
     },
     onError: (error: any) => {
       toast({
@@ -694,6 +695,7 @@ export default function Dashboard() {
         return newMap;
       });
       queryClient.invalidateQueries({ queryKey: ["/api/contact-groups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/contacts/bulk-group-memberships"] });
     },
     onError: (error: any) => {
       toast({
@@ -704,44 +706,38 @@ export default function Dashboard() {
     },
   });
 
-  // Function to fetch contact group memberships for a contact
-  const fetchContactGroupMemberships = async (contactNumber: string): Promise<ContactGroup[]> => {
-    try {
-      const response = await fetch(`/api/contacts/${contactNumber}/groups`);
-      if (response.ok) {
-        return await response.json();
-      }
-      return [];
-    } catch (error) {
-      console.error('Failed to fetch contact group memberships:', error);
-      return [];
-    }
-  };
+  // Load contact group memberships using bulk endpoint
+  const { data: bulkMemberships } = useQuery<Record<string, ContactGroup[]>>({
+    queryKey: ['/api/contacts/bulk-group-memberships'],
+    enabled: !contactsLoading && contacts && contacts.length > 0,
+    staleTime: 30000, // Cache for 30 seconds
+  });
 
-  // Load contact group memberships when contacts are loaded
+  // Process bulk memberships when data is available
   useEffect(() => {
-    const loadContactGroupMemberships = async () => {
-      if (contacts && contacts.length > 0) {
-        const membershipsMap = new Map<string, ContactGroup[]>();
-        
-        // Only load for contacts that are "My Contacts"
-        const myContacts = deduplicateContacts(contacts).filter(contact => contact.isMyContact);
-        
-        for (const contact of myContacts) {
-          const groups = await fetchContactGroupMemberships(contact.number);
-          if (groups.length > 0) {
-            membershipsMap.set(contact.id, groups);
-          }
+    if (bulkMemberships && contacts && contacts.length > 0) {
+      const membershipsMap = new Map<string, ContactGroup[]>();
+      
+      // Only process contacts that are "My Contacts"
+      const myContacts = deduplicateContacts(contacts).filter(contact => contact.isMyContact);
+      
+      for (const contact of myContacts) {
+        // Clean the contact number for matching (same logic as backend)
+        let cleanNumber = contact.number.replace(/[^0-9+]/g, '');
+        if (cleanNumber && !cleanNumber.startsWith('+') && cleanNumber.length === 10) {
+          cleanNumber = '+91' + cleanNumber;
         }
         
-        setContactGroupMemberships(membershipsMap);
+        // Check if this contact has group memberships
+        const groups = bulkMemberships[cleanNumber] || [];
+        if (groups.length > 0) {
+          membershipsMap.set(contact.id, groups);
+        }
       }
-    };
-
-    if (contacts && !contactsLoading) {
-      loadContactGroupMemberships();
+      
+      setContactGroupMemberships(membershipsMap);
     }
-  }, [contacts, contactsLoading]);
+  }, [bulkMemberships, contacts, contactsLoading]);
 
   // Export all groups CSV
   const exportAllGroupsCSV = async () => {

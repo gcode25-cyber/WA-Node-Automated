@@ -1172,6 +1172,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all contact group memberships (bulk endpoint)
+  app.get("/api/contacts/bulk-group-memberships", async (req, res) => {
+    try {
+      // Get all contact groups and their members
+      const groups = await storage.getContactGroups();
+      const contactGroupMemberships: Record<string, ContactGroup[]> = {};
+      
+      // Build a map of phone number to groups
+      for (const group of groups) {
+        const members = await storage.getContactGroupMembers(group.id);
+        
+        for (const member of members) {
+          if (!contactGroupMemberships[member.phoneNumber]) {
+            contactGroupMemberships[member.phoneNumber] = [];
+          }
+          contactGroupMemberships[member.phoneNumber].push(group);
+        }
+      }
+      
+      res.json(contactGroupMemberships);
+      
+    } catch (error: any) {
+      console.error("Get bulk contact groups error:", error);
+      res.status(500).json({ error: error.message || "Failed to get bulk contact groups" });
+    }
+  });
+
   // Get contact groups for a specific contact
   app.get("/api/contacts/:contactNumber/groups", async (req, res) => {
     try {
