@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all chats from connected WhatsApp device (sorted oldest to newest as requested)
+  // Get all chats from connected WhatsApp device (sorted by latest activity)
   app.get("/api/chats", async (req, res) => {
     try {
       // Check if WhatsApp service is ready first
@@ -453,10 +453,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(503).json({ error: "WhatsApp not connected" });
       }
 
+      // Disable caching for chats to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const chats = await whatsappService.getChats();
-      // Sort chats oldest to newest (ascending timestamp)
-      const sortedChats = chats.sort((a: any, b: any) => a.timestamp - b.timestamp);
-      res.json(sortedChats);
+      // Chats are already sorted by latest activity in the service layer
+      res.json(chats);
     } catch (error: any) {
       console.error("Get chats error:", error);
       res.status(500).json({ error: error.message || "Failed to get chats" });
@@ -561,6 +565,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(503).json({ error: "WhatsApp not connected" });
       }
 
+      // Disable caching for groups to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const groups = await whatsappService.getGroups();
       res.json(groups);
     } catch (error: any) {
