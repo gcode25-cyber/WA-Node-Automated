@@ -248,15 +248,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current session information
   app.get("/api/session-info", async (req, res) => {
     try {
+      // Check if client is actually ready (connected)
+      const isReady = await whatsappService.isClientReady();
       const sessionInfo = await whatsappService.getSessionInfo();
-      if (sessionInfo) {
-        res.json(sessionInfo);
+      
+      // Only return session info if both exist AND client is ready
+      if (sessionInfo && isReady) {
+        res.json({
+          ...sessionInfo,
+          connected: true
+        });
       } else {
-        res.status(404).json({ error: "No active session" });
+        res.status(404).json({ error: "No active session", connected: false });
       }
     } catch (error) {
       console.error("Session info error:", error);
-      res.status(500).json({ error: "Failed to get session info" });
+      res.status(500).json({ error: "Failed to get session info", connected: false });
     }
   });
 

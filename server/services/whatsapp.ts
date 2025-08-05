@@ -14,9 +14,11 @@ export class WhatsAppService {
   private isReady: boolean = false;
   private isInitializing: boolean = false;
   private messageCache: Map<string, any[]> = new Map(); // Cache for real-time messages
+  private connectionCheckInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.initializeClient();
+    this.startConnectionMonitoring();
   }
 
   // Helper method to broadcast WebSocket events
@@ -253,17 +255,31 @@ export class WhatsAppService {
         console.log('🔌 WhatsApp client disconnected:', reason);
         this.isReady = false;
         
-        // Don't clear session info on disconnect - keep it for reconnection
-        // this.sessionInfo = null;
+        // Clear session info on logout/UNPAIRED - critical for real-time updates
+        if (reason === 'UNPAIRED' || reason === 'LOGOUT') {
+          console.log('📱 User logged out from phone - clearing session data');
+          this.sessionInfo = null;
+          this.clearStoredSession();
+        }
         this.qrCode = null;
         
-        // Broadcast disconnection
-        this.broadcastToClients('disconnected', { connected: false, reason });
+        // Broadcast disconnection with detailed reason
+        this.broadcastToClients('disconnected', { 
+          connected: false, 
+          reason,
+          requiresNewAuth: reason === 'UNPAIRED' || reason === 'LOGOUT'
+        });
         
-        // Don't auto-reconnect immediately after disconnect to avoid infinite loops
-        // User can manually trigger reconnection via the API
-        console.log('📋 Use /api/reconnect-whatsapp to attempt reconnection with preserved session');
-        console.log('📋 Use /api/force-restart-whatsapp to start fresh with QR code');
+        // If user logged out from phone, restart with QR immediately
+        if (reason === 'UNPAIRED' || reason === 'LOGOUT') {
+          console.log('🔄 Phone logout detected - restarting for new QR');
+          setTimeout(() => {
+            this.initializeClient();
+          }, 2000);
+        } else {
+          console.log('📋 Use /api/reconnect-whatsapp to attempt reconnection with preserved session');
+          console.log('📋 Use /api/force-restart-whatsapp to start fresh with QR code');
+        }
       });
 
       // Real-time message handling
@@ -389,6 +405,12 @@ export class WhatsAppService {
         this.client = null;
       }
       
+      // Stop connection monitoring
+      if (this.connectionCheckInterval) {
+        clearInterval(this.connectionCheckInterval);
+        this.connectionCheckInterval = null;
+      }
+      
       // Clear session files manually
       try {
         const fs = await import('fs');
@@ -436,8 +458,82 @@ export class WhatsAppService {
     }
   }
 
-  // ... rest of the methods remain the same as before ...
-  
+  private async clearStoredSession(): Promise<void> {
+    try {
+      await storage.clearAllSessions();
+      console.log('🗑️ Cleared stored session data from database');
+    } catch (error: any) {
+      console.log('Session clear failed:', error.message);
+    }
+  }
+
+  private startConnectionMonitoring(): void {
+    // Check connection status every 30 seconds
+    this.connectionCheckInterval = setInterval(async () => {
+      if (this.client && this.isReady) {
+        try {
+          // Try to get client state to detect if connection is still alive
+          const state = await this.client.getState();
+          if (state !== 'CONNECTED') {
+            console.log('🔌 Connection state changed to:', state);
+            
+            if (state === 'UNPAIRED' || state === 'UNPAIRED_IDLE') {
+              console.log('📱 Phone disconnection detected via state monitoring');
+              this.handlePhoneLogout();
+            }
+          }
+        } catch (error: any) {
+          // If we can't get state, connection might be lost
+          console.log('🔌 Connection check failed:', error.message);
+          
+          if (error.message.includes('Session closed') || 
+              error.message.includes('Protocol error') ||
+              error.message.includes('Cannot read properties of undefined')) {
+            console.log('📱 Connection lost detected via monitoring');
+            this.handleConnectionLost();
+          }
+        }
+      }
+    }, 30000); // Check every 30 seconds
+  }
+
+  private handlePhoneLogout(): void {
+    console.log('📱 Handling phone logout event');
+    this.isReady = false;
+    this.sessionInfo = null;
+    this.qrCode = null;
+    
+    // Clear stored session data
+    this.clearStoredSession();
+    
+    // Broadcast disconnection with logout reason
+    this.broadcastToClients('disconnected', { 
+      connected: false, 
+      reason: 'PHONE_LOGOUT',
+      requiresNewAuth: true
+    });
+    
+    // Restart client for new QR
+    setTimeout(() => {
+      this.initializeClient();
+    }, 2000);
+  }
+
+  private handleConnectionLost(): void {
+    console.log('🔌 Handling connection lost event');
+    this.isReady = false;
+    
+    // Don't clear session info immediately - might be temporary
+    // this.sessionInfo = null;
+    
+    // Broadcast disconnection
+    this.broadcastToClients('disconnected', { 
+      connected: false, 
+      reason: 'CONNECTION_LOST',
+      requiresNewAuth: false // Might reconnect with same session
+    });
+  }
+
   async getQRCode(): Promise<string | null> {
     return this.qrCode;
   }
@@ -586,7 +682,7 @@ export class WhatsAppService {
 
   async sendMessage(phoneNumber: string, message: string): Promise<any> {
     if (!this.client || !this.isReady) {
-      throw new Error('WhatsApp client is not ready');
+      throw new Error('WhatsApp is not connected. Please scan the QR code to connect your WhatsApp account.');
     }
 
     try {
@@ -617,13 +713,32 @@ export class WhatsAppService {
       
     } catch (error: any) {
       console.error('❌ Failed to send message:', error.message);
-      throw error;
+      
+      // Check if error is due to disconnection and update status
+      if (error.message.includes('Cannot read properties of undefined') || 
+          error.message.includes('getChat') ||
+          error.message.includes('Session closed') ||
+          error.message.includes('Protocol error')) {
+        console.log('🔌 Connection lost during message send - updating status');
+        this.isReady = false;
+        
+        // Broadcast disconnection status
+        this.broadcastToClients('disconnected', { 
+          connected: false, 
+          reason: 'CONNECTION_LOST',
+          requiresNewAuth: true
+        });
+        
+        throw new Error('WhatsApp connection lost. Please refresh the page and reconnect by scanning the QR code.');
+      }
+      
+      throw new Error(`Failed to send message: ${error.message}`);
     }
   }
 
   async sendMediaMessage(phoneNumber: string, message: string, mediaPath: string, fileName: string): Promise<any> {
     if (!this.client || !this.isReady) {
-      throw new Error('WhatsApp client is not ready');
+      throw new Error('WhatsApp is not connected. Please scan the QR code to connect your WhatsApp account.');
     }
 
     try {
@@ -656,7 +771,26 @@ export class WhatsAppService {
       
     } catch (error: any) {
       console.error('❌ Failed to send media message:', error.message);
-      throw error;
+      
+      // Check if error is due to disconnection and update status
+      if (error.message.includes('Cannot read properties of undefined') || 
+          error.message.includes('getChat') ||
+          error.message.includes('Session closed') ||
+          error.message.includes('Protocol error')) {
+        console.log('🔌 Connection lost during media message send - updating status');
+        this.isReady = false;
+        
+        // Broadcast disconnection status
+        this.broadcastToClients('disconnected', { 
+          connected: false, 
+          reason: 'CONNECTION_LOST',
+          requiresNewAuth: true
+        });
+        
+        throw new Error('WhatsApp connection lost. Please refresh the page and reconnect by scanning the QR code.');
+      }
+      
+      throw new Error(`Failed to send media message: ${error.message}`);
     }
   }
 
