@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2, Plus, UserPlus } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface ContactGroupMember {
@@ -35,6 +37,9 @@ export default function GroupContacts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newContact, setNewContact] = useState({ name: '', phoneNumber: '' });
+  const [validationErrors, setValidationErrors] = useState({ name: '', phoneNumber: '' });
   const queryClient = useQueryClient();
 
   const groupId = params?.groupId;
@@ -121,6 +126,73 @@ export default function GroupContacts() {
       }
     }
   });
+
+  // Add single contact mutation
+  const addContactMutation = useMutation({
+    mutationFn: (contactData: { name: string; phoneNumber: string }) =>
+      apiRequest(`/api/contact-groups/${groupId}/members`, "POST", contactData),
+    onSuccess: () => {
+      toast({
+        title: "Contact Added",
+        description: "Contact saved successfully",
+      });
+      setShowAddDialog(false);
+      setNewContact({ name: '', phoneNumber: '' });
+      setValidationErrors({ name: '', phoneNumber: '' });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Add Contact",
+        description: error?.message || "Failed to add contact",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Validation functions
+  const validateName = (name: string): string => {
+    if (!name.trim()) return 'Name is required';
+    if (name.trim().length < 3) return 'Name must be at least 3 characters';
+    if (name.trim().length > 15) return 'Name must be less than 15 characters';
+    return '';
+  };
+
+  const validatePhoneNumber = (phone: string): string => {
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (!cleanPhone) return 'Phone number is required';
+    if (cleanPhone.length !== 10) return 'Phone number must be exactly 10 digits';
+    if (!/^\d+$/.test(cleanPhone)) return 'Phone number must contain only numbers';
+    return '';
+  };
+
+  const handleAddContact = () => {
+    const nameError = validateName(newContact.name);
+    const phoneError = validatePhoneNumber(newContact.phoneNumber);
+    
+    setValidationErrors({ name: nameError, phoneNumber: phoneError });
+    
+    if (!nameError && !phoneError) {
+      // Format phone number with country code
+      let formattedPhone = newContact.phoneNumber.replace(/[^0-9]/g, '');
+      if (formattedPhone.length === 10) {
+        formattedPhone = '+91' + formattedPhone;
+      }
+      
+      addContactMutation.mutate({
+        name: newContact.name.trim(),
+        phoneNumber: formattedPhone
+      });
+    }
+  };
+
+  const handleDialogClose = () => {
+    setShowAddDialog(false);
+    setNewContact({ name: '', phoneNumber: '' });
+    setValidationErrors({ name: '', phoneNumber: '' });
+  };
 
   const filteredMembers = members.filter(member =>
     member.phoneNumber.includes(searchTerm) ||
@@ -234,6 +306,15 @@ export default function GroupContacts() {
               <Download className="h-4 w-4" />
               <span>Export CSV</span>
             </Button>
+
+            <Button
+              variant="default"
+              onClick={() => setShowAddDialog(true)}
+              className="flex items-center space-x-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Add Contact</span>
+            </Button>
             
             <Button
               variant="destructive"
@@ -342,6 +423,75 @@ export default function GroupContacts() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Add Contact Dialog */}
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Contact</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter contact name"
+                  value={newContact.name}
+                  onChange={(e) => {
+                    setNewContact(prev => ({ ...prev, name: e.target.value }));
+                    if (validationErrors.name) {
+                      setValidationErrors(prev => ({ ...prev, name: validateName(e.target.value) }));
+                    }
+                  }}
+                  className={validationErrors.name ? 'border-red-500' : ''}
+                />
+                {validationErrors.name && (
+                  <p className="text-sm text-red-500">{validationErrors.name}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  placeholder="Enter 10-digit phone number"
+                  value={newContact.phoneNumber}
+                  onChange={(e) => {
+                    // Only allow numbers
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setNewContact(prev => ({ ...prev, phoneNumber: value }));
+                    if (validationErrors.phoneNumber) {
+                      setValidationErrors(prev => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
+                    }
+                  }}
+                  maxLength={10}
+                  className={validationErrors.phoneNumber ? 'border-red-500' : ''}
+                />
+                {validationErrors.phoneNumber && (
+                  <p className="text-sm text-red-500">{validationErrors.phoneNumber}</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={handleDialogClose}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddContact}
+                disabled={addContactMutation.isPending}
+                className="flex items-center space-x-2"
+              >
+                {addContactMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Adding...</span>
+                  </>
+                ) : (
+                  <span>Add</span>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

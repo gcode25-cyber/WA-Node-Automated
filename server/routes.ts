@@ -946,6 +946,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add single contact to group
+  app.post("/api/contact-groups/:groupId/members", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const { name, phoneNumber } = req.body;
+
+      if (!name || !phoneNumber) {
+        return res.status(400).json({ error: "Name and phone number are required" });
+      }
+
+      const group = await storage.getContactGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ error: "Contact group not found" });
+      }
+
+      // Check if phone number already exists in the group
+      const existingMembers = await storage.getContactGroupMembers(groupId);
+      const existingNumbers = new Set(existingMembers.map(m => m.phoneNumber));
+      
+      if (existingNumbers.has(phoneNumber)) {
+        return res.status(400).json({ error: "Phone number already exists in this group" });
+      }
+
+      // Add the contact
+      const newMember = await storage.createContactGroupMember({
+        groupId,
+        phoneNumber,
+        name,
+        status: "valid"
+      });
+
+      // Update group statistics
+      await storage.updateContactGroup(groupId, {
+        totalContacts: group.totalContacts + 1,
+        validContacts: group.validContacts + 1
+      });
+
+      res.json({ success: true, member: newMember });
+
+    } catch (error: any) {
+      console.error("Add contact error:", error);
+      res.status(500).json({ error: error.message || "Failed to add contact" });
+    }
+  });
+
   // Batch delete contact group members
   app.delete("/api/contact-groups/:groupId/members/batch-delete", async (req, res) => {
     try {
