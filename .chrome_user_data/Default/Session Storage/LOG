@@ -1,3 +1,2 @@
-2025/08/05-11:45:00.586 90b Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Session Storage/MANIFEST-000001
-2025/08/05-11:45:00.587 90b Recovering log #3
-2025/08/05-11:45:00.588 90b Reusing old log /home/runner/workspace/.chrome_user_data/Default/Session Storage/000003.log 
+2025/08/05-11:50:41.079 c16 Creating DB /home/runner/workspace/.chrome_user_data/Default/Session Storage since it was missing.
+2025/08/05-11:50:41.086 c16 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Session Storage/MANIFEST-000001

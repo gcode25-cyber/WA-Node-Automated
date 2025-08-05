@@ -44,6 +44,17 @@ export class WhatsAppService {
       console.log('Client already initializing, skipping...');
       return;
     }
+    
+    // Additional safety check for existing client
+    if (this.client) {
+      try {
+        await this.client.destroy();
+        console.log('🧹 Destroyed existing client before reinitializing');
+      } catch (e: any) {
+        console.log('Previous client cleanup:', e.message);
+      }
+      this.client = null;
+    }
 
     try {
       this.isInitializing = true;
@@ -273,9 +284,7 @@ export class WhatsAppService {
         // If user logged out from phone, restart with QR immediately
         if (reason === 'UNPAIRED' || reason === 'LOGOUT') {
           console.log('🔄 Phone logout detected - restarting for new QR');
-          setTimeout(() => {
-            this.initializeClient();
-          }, 2000);
+          this.handlePhoneLogoutRestart();
         } else {
           console.log('📋 Use /api/reconnect-whatsapp to attempt reconnection with preserved session');
           console.log('📋 Use /api/force-restart-whatsapp to start fresh with QR code');
@@ -512,11 +521,72 @@ export class WhatsAppService {
       reason: 'PHONE_LOGOUT',
       requiresNewAuth: true
     });
-    
-    // Restart client for new QR
-    setTimeout(() => {
-      this.initializeClient();
-    }, 2000);
+  }
+
+  private async handlePhoneLogoutRestart(): Promise<void> {
+    try {
+      console.log('🔄 Starting safe restart after phone logout...');
+      
+      // Stop connection monitoring to prevent conflicts
+      if (this.connectionCheckInterval) {
+        clearInterval(this.connectionCheckInterval);
+        this.connectionCheckInterval = null;
+      }
+      
+      // Set initialization flag to prevent multiple restarts
+      this.isInitializing = true;
+      
+      // Clean destroy current client if it exists
+      if (this.client) {
+        try {
+          console.log('🧹 Safely destroying existing client...');
+          await this.client.destroy();
+          console.log('✅ Client destroyed successfully');
+        } catch (destroyError: any) {
+          console.log('Client destroy (expected):', destroyError.message);
+        }
+        this.client = null;
+      }
+      
+      // Clear session files to force fresh start
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const sessionPath = path.resolve('./.wwebjs_auth');
+        const chromeDataPath = path.resolve('./.chrome_user_data');
+        
+        if (fs.existsSync(sessionPath)) {
+          fs.rmSync(sessionPath, { recursive: true, force: true });
+          console.log('🗑️ Session files cleared for fresh start');
+        }
+        
+        if (fs.existsSync(chromeDataPath)) {
+          fs.rmSync(chromeDataPath, { recursive: true, force: true });
+          console.log('🗑️ Chrome data cleared for fresh start');
+        }
+      } catch (fsError: any) {
+        console.log('File cleanup:', fsError.message);
+      }
+      
+      // Wait for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Reset flags
+      this.isInitializing = false;
+      
+      // Restart client
+      console.log('🚀 Restarting client for new QR...');
+      await this.initializeClient();
+      
+    } catch (error: any) {
+      console.error('❌ Restart after logout failed:', error.message);
+      this.isInitializing = false;
+      
+      // Fallback: try again after longer delay
+      setTimeout(() => {
+        this.initializeClient();
+      }, 10000);
+    }
   }
 
   private handleConnectionLost(): void {

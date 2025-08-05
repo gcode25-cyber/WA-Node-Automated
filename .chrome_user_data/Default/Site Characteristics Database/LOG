@@ -1,3 +1,2 @@
-2025/08/05-11:44:59.388 90c Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Site Characteristics Database/MANIFEST-000001
-2025/08/05-11:44:59.389 90c Recovering log #3
-2025/08/05-11:44:59.389 90c Reusing old log /home/runner/workspace/.chrome_user_data/Default/Site Characteristics Database/000003.log 
+2025/08/05-11:50:38.572 c2c Creating DB /home/runner/workspace/.chrome_user_data/Default/Site Characteristics Database since it was missing.
+2025/08/05-11:50:38.671 c2c Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Site Characteristics Database/MANIFEST-000001
