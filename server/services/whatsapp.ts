@@ -1196,23 +1196,54 @@ export class WhatsAppService {
       const hasNameCount = contactData.filter((c: any) => c.isWAContact && c.isMyContact && c.name).length;
       const hasNumberCount = contactData.filter((c: any) => c.isWAContact && c.isMyContact && c.name && c.number).length;
 
+      // Helper function to validate phone numbers
+      const isValidPhoneNumber = (phoneNumber: string): boolean => {
+        if (!phoneNumber) return false;
+        
+        // Remove all non-digit characters for length checking
+        const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+        
+        // Reject numbers with 15+ digits (likely invalid/spam numbers)
+        if (cleanNumber.length >= 15) {
+          return false;
+        }
+        
+        // Reject numbers that are too short (less than 7 digits)
+        if (cleanNumber.length < 7) {
+          return false;
+        }
+        
+        return true;
+      };
+
+      const filteredContacts = contactData.filter((contact: any) => {
+        // More inclusive filtering to show all saved WhatsApp contacts with valid phone numbers
+        return contact.isWAContact && 
+               contact.isMyContact && 
+               contact.name && 
+               contact.number &&
+               !contact.id.includes('@g.us') && // Exclude group IDs
+               !contact.id.includes('status@broadcast') && // Exclude status broadcasts
+               isValidPhoneNumber(contact.number); // Exclude invalid phone numbers
+      });
+
+      // Calculate validation statistics
+      const beforeValidation = contactData.filter((c: any) => 
+        c.isWAContact && c.isMyContact && c.name && c.number &&
+        !c.id.includes('@g.us') && !c.id.includes('status@broadcast')
+      ).length;
+      const invalidPhoneNumbers = beforeValidation - filteredContacts.length;
+
       console.log(`🔍 Filtering stats:
         Total mapped: ${contactData.length}
         isWAContact: ${isWAContactCount}
         isMyContact: ${isMyContactCount}
         Both WA & My: ${bothCount}
         Has name: ${hasNameCount}
-        Has number: ${hasNumberCount}`);
-
-      const filteredContacts = contactData.filter((contact: any) => {
-        // More inclusive filtering to show all saved WhatsApp contacts
-        return contact.isWAContact && 
-               contact.isMyContact && 
-               contact.name && 
-               contact.number &&
-               !contact.id.includes('@g.us') && // Exclude group IDs
-               !contact.id.includes('status@broadcast'); // Exclude status broadcasts
-      });
+        Has number: ${hasNumberCount}
+        Before phone validation: ${beforeValidation}
+        Invalid phone numbers filtered: ${invalidPhoneNumbers}
+        Final valid contacts: ${filteredContacts.length}`);
 
       // Sort contacts alphabetically (A-Z) by name
       const sortedContacts = filteredContacts.sort((a: any, b: any) => {
@@ -1221,7 +1252,7 @@ export class WhatsAppService {
         return nameA.localeCompare(nameB);
       });
 
-      console.log(`✅ Retrieved ${sortedContacts.length} saved contacts from ${contacts.length} total WhatsApp contacts (sorted A-Z)`);
+      console.log(`✅ Retrieved ${sortedContacts.length} saved contacts (filtered out ${invalidPhoneNumbers} invalid phone numbers)`);
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('contacts_updated', sortedContacts);
