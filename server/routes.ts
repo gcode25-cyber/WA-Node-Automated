@@ -562,6 +562,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get WhatsApp status updates
+  app.get("/api/status", async (req, res) => {
+    try {
+      // Check if WhatsApp service is ready first
+      const sessionInfo = await whatsappService.getSessionInfo();
+      if (!sessionInfo) {
+        return res.status(503).json({ error: "WhatsApp not connected" });
+      }
+
+      const statusUpdates = await whatsappService.getStatusUpdates();
+      res.json(statusUpdates);
+    } catch (error: any) {
+      console.error("Get status updates error:", error);
+      res.status(500).json({ error: error.message || "Failed to get status updates" });
+    }
+  });
+
   // Download chats as CSV
   app.get("/api/chats/download", async (req, res) => {
     try {

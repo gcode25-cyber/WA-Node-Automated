@@ -963,6 +963,20 @@ export default function Dashboard() {
                 <div className="font-medium text-sm">Groups</div>
               </div>
 
+              <div 
+                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedModule === 'status' 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedModule('status')}
+              >
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                  <span className="text-purple-600 dark:text-purple-400 text-sm">📱</span>
+                </div>
+                <div className="font-medium text-sm">Status</div>
+              </div>
+
               {/* Reports Section */}
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-6 mb-2">REPORTS</h4>
               
@@ -1750,6 +1764,51 @@ export default function Dashboard() {
                 </Card>
               )}
 
+              {/* Status Module */}
+              {selectedModule === 'status' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-purple-600 text-lg">📱</span>
+                        <span>WhatsApp Status Updates</span>
+                      </div>
+                      <Button 
+                        onClick={() => setLocation('/status')}
+                        disabled={!sessionInfo}
+                      >
+                        View All Status
+                      </Button>
+                    </CardTitle>
+                    <CardDescription>
+                      View status updates from your contacts
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!sessionInfo ? (
+                      <div className="text-center p-8">
+                        <span className="text-purple-600 text-4xl mb-4 block">📱</span>
+                        <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
+                        <p className="text-muted-foreground">
+                          Please connect to WhatsApp first to view status updates.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center p-8">
+                        <span className="text-purple-600 text-4xl mb-4 block">📱</span>
+                        <h3 className="text-lg font-semibold mb-2">Status Updates</h3>
+                        <p className="text-muted-foreground mb-4">
+                          View and manage WhatsApp status updates from your contacts with full media support.
+                        </p>
+                        <Button onClick={() => setLocation('/status')}>
+                          View Status Updates
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Reports Module */}
               {selectedModule === 'reports' && (
                 <Card>
@@ -1770,7 +1829,7 @@ export default function Dashboard() {
               )}
 
               {/* Placeholder for other modules */}
-              {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups'].includes(selectedModule) && (
+              {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups', 'status'].includes(selectedModule) && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Feature Coming Soon</CardTitle>
