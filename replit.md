@@ -126,3 +126,5 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Chats and groups are sorted by latest activity (newest first) for better UX
   - Sorting is maintained during real-time data synchronization and WebSocket updates
   - Enhanced server-side sorting ensures consistent ordering across all client displays
+  - Fixed date format to DD/MM/YYYY format for better localization
+  - Corrected timestamp conversion and link overflow issues in message display

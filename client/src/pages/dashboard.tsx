@@ -1841,7 +1841,7 @@ export default function Dashboard() {
                                   </Badge>
                                 )}
                                 <p className="text-xs text-muted-foreground">
-                                  {new Date(chat.timestamp * 1000).toLocaleDateString()} {new Date(chat.timestamp * 1000).toLocaleTimeString()}
+                                  {new Date(chat.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(chat.timestamp * 1000).toLocaleTimeString()}
                                 </p>
                                 <Button
                                   size="sm"
@@ -1932,7 +1932,7 @@ export default function Dashboard() {
                                   </Badge>
                                 )}
                                 <p className="text-xs text-muted-foreground">
-                                  {new Date(group.timestamp * 1000).toLocaleDateString()} {new Date(group.timestamp * 1000).toLocaleTimeString()}
+                                  {new Date(group.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(group.timestamp * 1000).toLocaleTimeString()}
                                 </p>
                                 <div className="flex items-center space-x-2 mt-2">
                                   <Button

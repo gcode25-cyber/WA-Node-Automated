@@ -455,7 +455,7 @@ export default function ChatPage() {
                   <p className={`text-xs mt-1 ${
                     msg.fromMe ? 'text-green-100' : 'text-muted-foreground'
                   }`}>
-                    {new Date(msg.timestamp * 1000).toLocaleDateString()} {new Date(msg.timestamp * 1000).toLocaleTimeString()}
+                    {new Date(msg.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(msg.timestamp * 1000).toLocaleTimeString()}
                   </p>
                 </div>
               </div>

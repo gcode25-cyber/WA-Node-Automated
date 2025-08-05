@@ -1135,7 +1135,7 @@ export class WhatsAppService {
         // Use lastMessage timestamp if available, otherwise fallback to chat timestamp
         const timestampA = (a.lastMessage?.timestamp || a.timestamp || 0);
         const timestampB = (b.lastMessage?.timestamp || b.timestamp || 0);
-        return timestampA - timestampB; // Fixed: reversed to show latest at top
+        return timestampB - timestampA; // Latest at top
       });
 
       console.log(`✅ Retrieved ${sortedChats.length} chats (sorted by latest activity)`);
@@ -1276,7 +1276,7 @@ export class WhatsAppService {
         // Use lastMessage timestamp if available, otherwise fallback to group timestamp
         const timestampA = (a.lastMessage?.timestamp || a.timestamp || 0);
         const timestampB = (b.lastMessage?.timestamp || b.timestamp || 0);
-        return timestampA - timestampB; // Fixed: reversed to show latest at top
+        return timestampB - timestampA; // Latest at top
       });
 
       console.log(`✅ Retrieved ${sortedGroups.length} groups (sorted by latest activity)`);
