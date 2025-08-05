@@ -43,12 +43,16 @@ export default function GroupContacts() {
   const { data: group, isLoading: groupLoading } = useQuery<ContactGroup>({
     queryKey: [`/api/contact-groups/${groupId}`],
     enabled: !!groupId,
+    staleTime: 0, // Always refetch to get fresh data
+    refetchOnWindowFocus: true,
   });
 
   // Fetch group members
   const { data: members = [], isLoading: membersLoading } = useQuery<ContactGroupMember[]>({
     queryKey: [`/api/contact-groups/${groupId}/members`],
     enabled: !!groupId,
+    staleTime: 0, // Always refetch to get fresh data
+    refetchOnWindowFocus: true,
   });
 
   // Delete selected members mutation
@@ -64,7 +68,6 @@ export default function GroupContacts() {
       setSelectAll(false);
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
     },
     onError: (error: any) => {

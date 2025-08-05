@@ -503,12 +503,15 @@ export default function Dashboard() {
       
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast({
         title: "CSV Imported Successfully",
         description: `Imported ${data.validContacts} valid contacts, ${data.invalidContacts} invalid, ${data.duplicateContacts} duplicates`,
       });
+      // Invalidate all related queries including the specific group
       queryClient.invalidateQueries({ queryKey: ['/api/contact-groups'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${variables.groupId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${variables.groupId}/members`] });
     },
     onError: (error: any) => {
       toast({
