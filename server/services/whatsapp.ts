@@ -1130,10 +1130,15 @@ export class WhatsAppService {
         profilePicUrl: null // Will be loaded separately for performance
       }));
 
-      // Sort chats by timestamp (most recent first for better UX)
-      const sortedChats = chatData.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+      // Sort chats by latest activity (most recent first)
+      const sortedChats = chatData.sort((a: any, b: any) => {
+        // Use lastMessage timestamp if available, otherwise fallback to chat timestamp
+        const timestampA = (a.lastMessage?.timestamp || a.timestamp || 0);
+        const timestampB = (b.lastMessage?.timestamp || b.timestamp || 0);
+        return timestampB - timestampA;
+      });
 
-      console.log(`✅ Retrieved ${chatData.length} chats (including archived: ${chatData.filter((c: any) => c.isArchived).length})`);
+      console.log(`✅ Retrieved ${sortedChats.length} chats (sorted by latest activity)`);
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('chats_updated', sortedChats);
@@ -1187,12 +1192,19 @@ export class WhatsAppService {
         contact.name !== contact.id
       ); // Only saved WhatsApp contacts with proper names
 
-      console.log(`✅ Retrieved ${contactData.length} contacts`);
+      // Sort contacts alphabetically (A-Z) by name
+      const sortedContacts = contactData.sort((a: any, b: any) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+
+      console.log(`✅ Retrieved ${sortedContacts.length} contacts (sorted A-Z)`);
       
       // Broadcast to WebSocket clients for real-time updates
-      this.broadcastToClients('contacts_updated', contactData);
+      this.broadcastToClients('contacts_updated', sortedContacts);
       
-      return contactData;
+      return sortedContacts;
     } catch (error: any) {
       console.error('❌ Failed to fetch contacts:', error.message);
       throw error;
@@ -1259,12 +1271,20 @@ export class WhatsAppService {
         })
       );
 
-      console.log(`✅ Retrieved ${groupData.length} groups`);
+      // Sort groups by latest activity (most recent first)
+      const sortedGroups = groupData.sort((a: any, b: any) => {
+        // Use lastMessage timestamp if available, otherwise fallback to group timestamp
+        const timestampA = (a.lastMessage?.timestamp || a.timestamp || 0);
+        const timestampB = (b.lastMessage?.timestamp || b.timestamp || 0);
+        return timestampB - timestampA;
+      });
+
+      console.log(`✅ Retrieved ${sortedGroups.length} groups (sorted by latest activity)`);
       
       // Broadcast to WebSocket clients for real-time updates
-      this.broadcastToClients('groups_updated', { groups: groupData });
+      this.broadcastToClients('groups_updated', { groups: sortedGroups });
       
-      return groupData;
+      return sortedGroups;
     } catch (error: any) {
       console.error('❌ Failed to fetch groups:', error.message);
       throw error;

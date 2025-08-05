@@ -120,3 +120,9 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Added automatic phone logout detection that updates UI status immediately
   - Implemented user-friendly error messages for connection issues during message sending
   - Application now provides real-time feedback when users log out from their phone
+  
+- **2025-08-05**: Implemented proper data sorting throughout the application:
+  - Contacts are now sorted alphabetically (A-Z) by name for consistent navigation
+  - Chats and groups are sorted by latest activity (newest first) for better UX
+  - Sorting is maintained during real-time data synchronization and WebSocket updates
+  - Enhanced server-side sorting ensures consistent ordering across all client displays
