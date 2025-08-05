@@ -12,7 +12,7 @@ declare module "express-session" {
 }
 import { whatsappService } from "./services/whatsapp";
 import { sessionInfoSchema, qrResponseSchema, sendMessageSchema, sendMediaMessageSchema, loginSchema, signupSchema } from "@shared/schema";
-import type { WhatsappAccount } from "@shared/schema";
+import type { WhatsappAccount, ContactGroup } from "@shared/schema";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
@@ -1153,6 +1153,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Add contacts to groups error:", error);
       res.status(500).json({ error: error.message || "Failed to add contacts to groups" });
+    }
+  });
+
+  // Get contact groups for a specific contact
+  app.get("/api/contacts/:contactNumber/groups", async (req, res) => {
+    try {
+      const { contactNumber } = req.params;
+      
+      // Clean the contact number for matching
+      let cleanNumber = contactNumber.replace(/[^0-9+]/g, '');
+      if (cleanNumber && !cleanNumber.startsWith('+') && cleanNumber.length === 10) {
+        cleanNumber = '+91' + cleanNumber;
+      }
+      
+      // Get all contact groups
+      const groups = await storage.getContactGroups();
+      const contactGroups: ContactGroup[] = [];
+      
+      // Check each group for the contact
+      for (const group of groups) {
+        const members = await storage.getContactGroupMembers(group.id);
+        const isMember = members.some(member => member.phoneNumber === cleanNumber);
+        if (isMember) {
+          contactGroups.push(group);
+        }
+      }
+      
+      res.json(contactGroups);
+      
+    } catch (error: any) {
+      console.error("Get contact groups error:", error);
+      res.status(500).json({ error: error.message || "Failed to get contact groups" });
+    }
+  });
+
+  // Remove contact from specific group
+  app.delete("/api/contacts/:contactNumber/remove-from-group/:groupId", async (req, res) => {
+    try {
+      const { contactNumber, groupId } = req.params;
+      
+      // Clean the contact number for matching
+      let cleanNumber = contactNumber.replace(/[^0-9+]/g, '');
+      if (cleanNumber && !cleanNumber.startsWith('+') && cleanNumber.length === 10) {
+        cleanNumber = '+91' + cleanNumber;
+      }
+      
+      // Get the group
+      const group = await storage.getContactGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ error: "Contact group not found" });
+      }
+      
+      // Get group members to find the specific member
+      const members = await storage.getContactGroupMembers(groupId);
+      const memberToRemove = members.find(member => member.phoneNumber === cleanNumber);
+      
+      if (!memberToRemove) {
+        return res.status(404).json({ error: "Contact not found in group" });
+      }
+      
+      // Remove the member
+      await storage.deleteContactGroupMember(memberToRemove.id);
+      
+      // Update group statistics
+      await storage.updateContactGroup(groupId, {
+        totalContacts: Math.max(0, group.totalContacts - 1),
+        validContacts: Math.max(0, group.validContacts - 1)
+      });
+      
+      res.json({
+        success: true,
+        message: "Contact removed from group successfully"
+      });
+      
+    } catch (error: any) {
+      console.error("Remove contact from group error:", error);
+      res.status(500).json({ error: error.message || "Failed to remove contact from group" });
     }
   });
 

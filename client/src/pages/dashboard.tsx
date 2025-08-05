@@ -137,6 +137,7 @@ export default function Dashboard() {
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [showAddToGroupsDialog, setShowAddToGroupsDialog] = useState(false);
   const [selectedGroupsForAdd, setSelectedGroupsForAdd] = useState<Set<string>>(new Set());
+  const [contactGroupMemberships, setContactGroupMemberships] = useState<Map<string, ContactGroup[]>>(new Map());
   
   // Close contacts dropdown when clicking outside
   useEffect(() => {
@@ -669,6 +670,78 @@ export default function Dashboard() {
     const groupIds = Array.from(selectedGroupsForAdd);
     addToGroupsMutation.mutate({ contactIds, groupIds });
   };
+
+  // Mutation for removing contact from a group
+  const removeFromGroupMutation = useMutation({
+    mutationFn: async ({ contactId, groupId }: { contactId: string; groupId: string }) => {
+      return apiRequest(`/api/contacts/${contactId}/remove-from-group/${groupId}`, "DELETE");
+    },
+    onSuccess: (data: any, variables) => {
+      toast({
+        title: "Contact Removed",
+        description: `Contact removed from group successfully.`,
+      });
+      // Update local state to remove the group from contact's membership
+      setContactGroupMemberships(prev => {
+        const newMap = new Map(prev);
+        const currentGroups = newMap.get(variables.contactId) || [];
+        const updatedGroups = currentGroups.filter(group => group.id !== variables.groupId);
+        if (updatedGroups.length > 0) {
+          newMap.set(variables.contactId, updatedGroups);
+        } else {
+          newMap.delete(variables.contactId);
+        }
+        return newMap;
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/contact-groups"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Removing Contact",
+        description: error.message || "Failed to remove contact from group.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Function to fetch contact group memberships for a contact
+  const fetchContactGroupMemberships = async (contactNumber: string): Promise<ContactGroup[]> => {
+    try {
+      const response = await fetch(`/api/contacts/${contactNumber}/groups`);
+      if (response.ok) {
+        return await response.json();
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch contact group memberships:', error);
+      return [];
+    }
+  };
+
+  // Load contact group memberships when contacts are loaded
+  useEffect(() => {
+    const loadContactGroupMemberships = async () => {
+      if (contacts && contacts.length > 0) {
+        const membershipsMap = new Map<string, ContactGroup[]>();
+        
+        // Only load for contacts that are "My Contacts"
+        const myContacts = deduplicateContacts(contacts).filter(contact => contact.isMyContact);
+        
+        for (const contact of myContacts) {
+          const groups = await fetchContactGroupMemberships(contact.number);
+          if (groups.length > 0) {
+            membershipsMap.set(contact.id, groups);
+          }
+        }
+        
+        setContactGroupMemberships(membershipsMap);
+      }
+    };
+
+    if (contacts && !contactsLoading) {
+      loadContactGroupMemberships();
+    }
+  }, [contacts, contactsLoading]);
 
   // Export all groups CSV
   const exportAllGroupsCSV = async () => {
@@ -1431,11 +1504,39 @@ export default function Dashboard() {
                                   <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-blue-700 flex items-center justify-center">
                                     <Phone className="h-5 w-5" />
                                   </div>
-                                  <div>
+                                  <div className="flex-1">
                                     <h4 className="font-semibold">{contact.name}</h4>
                                     <p className="text-sm text-muted-foreground">
                                       {contact.number}
                                     </p>
+                                    {/* Contact Group Tags */}
+                                    {contactGroupMemberships.get(contact.id) && contactGroupMemberships.get(contact.id)!.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mt-2">
+                                        {contactGroupMemberships.get(contact.id)!.map((group) => (
+                                          <Badge 
+                                            key={group.id} 
+                                            variant="secondary" 
+                                            className="text-xs flex items-center gap-1 pr-1"
+                                          >
+                                            <span>{group.name}</span>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeFromGroupMutation.mutate({ 
+                                                  contactId: contact.number, 
+                                                  groupId: group.id 
+                                                });
+                                              }}
+                                              className="ml-1 hover:bg-red-200 dark:hover:bg-red-800 rounded-full p-0.5 transition-colors"
+                                              data-testid={`button-remove-${contact.id}-from-${group.id}`}
+                                              disabled={removeFromGroupMutation.isPending}
+                                            >
+                                              <X className="h-3 w-3" />
+                                            </button>
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="flex items-center space-x-2">
