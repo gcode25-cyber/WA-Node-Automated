@@ -904,7 +904,13 @@ export class WhatsAppService {
       const chatsPromise = this.client.getChats();
       const chats = await Promise.race([chatsPromise, timeoutPromise]);
       
-      const chatData = chats.map((chat: any) => ({
+      // Filter out status@broadcast and other broadcast chats
+      const filteredChats = chats.filter((chat: any) => 
+        !chat.id._serialized.includes('status@broadcast') && 
+        !chat.id._serialized.includes('@broadcast')
+      );
+      
+      const chatData = filteredChats.map((chat: any) => ({
         id: chat.id._serialized,
         name: chat.name || chat.pushname || chat.id.user,
         isGroup: chat.isGroup,
@@ -923,7 +929,7 @@ export class WhatsAppService {
       // Sort chats by timestamp (most recent first for better UX)
       const sortedChats = chatData.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
 
-      console.log(`✅ Retrieved ${chatData.length} chats (including archived: ${chatData.filter(c => c.isArchived).length})`);
+      console.log(`✅ Retrieved ${chatData.length} chats (including archived: ${chatData.filter((c: any) => c.isArchived).length})`);
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('chats_updated', sortedChats);
