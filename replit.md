@@ -128,3 +128,11 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Enhanced server-side sorting ensures consistent ordering across all client displays
   - Fixed date format to DD/MM/YYYY format for better localization
   - Corrected timestamp conversion and link overflow issues in message display
+
+- **2025-08-05**: Fixed contact deduplication and filtering to show all saved WhatsApp contacts:
+  - Resolved issue where only one phone number per contact name was displayed
+  - Updated backend filtering to be more inclusive of all saved WhatsApp contacts  
+  - Removed restrictive phone number validation that was excluding valid international numbers
+  - Enhanced contact deduplication to preserve multiple phone numbers for same person
+  - System now displays 6,845 contacts from WhatsApp Web vs previous ~3,000 contacts
+  - Added detailed logging to track contact filtering statistics for debugging

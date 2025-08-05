@@ -1175,6 +1175,8 @@ export class WhatsAppService {
       const contactsPromise = this.client.getContacts();
       const contacts = await Promise.race([contactsPromise, timeoutPromise]);
       
+      console.log(`📊 Raw WhatsApp contacts: ${contacts.length}`);
+      
       const contactData = contacts.map((contact: any) => ({
         id: contact.id._serialized,
         name: contact.name || contact.pushname || contact.id.user,
@@ -1185,22 +1187,41 @@ export class WhatsAppService {
         profilePicUrl: null, // Will be loaded separately for performance
         status: null, // Will be loaded separately for performance
         isGroup: false // Contacts are not groups
-      })).filter((contact: any) => 
-        contact.isWAContact && 
-        contact.isMyContact && 
-        contact.name && 
-        contact.name !== contact.number && 
-        contact.name !== contact.id
-      ); // Only saved WhatsApp contacts with proper names
+      }));
+
+      // Log filtering statistics
+      const isWAContactCount = contactData.filter((c: any) => c.isWAContact).length;
+      const isMyContactCount = contactData.filter((c: any) => c.isMyContact).length;
+      const bothCount = contactData.filter((c: any) => c.isWAContact && c.isMyContact).length;
+      const hasNameCount = contactData.filter((c: any) => c.isWAContact && c.isMyContact && c.name).length;
+      const hasNumberCount = contactData.filter((c: any) => c.isWAContact && c.isMyContact && c.name && c.number).length;
+
+      console.log(`🔍 Filtering stats:
+        Total mapped: ${contactData.length}
+        isWAContact: ${isWAContactCount}
+        isMyContact: ${isMyContactCount}
+        Both WA & My: ${bothCount}
+        Has name: ${hasNameCount}
+        Has number: ${hasNumberCount}`);
+
+      const filteredContacts = contactData.filter((contact: any) => {
+        // More inclusive filtering to show all saved WhatsApp contacts
+        return contact.isWAContact && 
+               contact.isMyContact && 
+               contact.name && 
+               contact.number &&
+               !contact.id.includes('@g.us') && // Exclude group IDs
+               !contact.id.includes('status@broadcast'); // Exclude status broadcasts
+      });
 
       // Sort contacts alphabetically (A-Z) by name
-      const sortedContacts = contactData.sort((a: any, b: any) => {
+      const sortedContacts = filteredContacts.sort((a: any, b: any) => {
         const nameA = (a.name || '').toLowerCase();
         const nameB = (b.name || '').toLowerCase();
         return nameA.localeCompare(nameB);
       });
 
-      console.log(`✅ Retrieved ${sortedContacts.length} contacts (sorted A-Z)`);
+      console.log(`✅ Retrieved ${sortedContacts.length} contacts from ${contacts.length} total WhatsApp contacts (sorted A-Z)`);
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('contacts_updated', sortedContacts);

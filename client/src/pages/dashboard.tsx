@@ -211,74 +211,45 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  // Helper function to determine if a phone number is valid
+  // Helper function to determine if a phone number is valid (more inclusive)
   const isValidPhoneNumber = (phoneNumber: string): boolean => {
     // Remove all non-digit characters
     const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
     
-    // Valid phone numbers should:
-    // 1. Have at least 10 digits
-    // 2. Not be extremely long (likely group IDs if > 15 digits)
-    // 3. Start with a reasonable country code pattern
-    if (cleanNumber.length < 10 || cleanNumber.length > 15) {
+    // More inclusive validation - just check basic phone number patterns
+    // Valid phone numbers should have at least 7 digits and not be extremely long
+    if (cleanNumber.length < 7 || cleanNumber.length > 15) {
       return false;
     }
     
-    // Check for common invalid patterns (group-like IDs)
-    // Group IDs often have patterns like long sequences of repeated digits or unusual patterns
-    if (cleanNumber.length > 13) {
-      return false; // Likely a group ID
+    // Exclude obvious group IDs or invalid patterns
+    // Group IDs typically have specific patterns or are very long
+    if (cleanNumber.length > 15) {
+      return false;
     }
     
-    // Valid phone numbers typically start with country codes
-    // Common patterns: +91, +1, +44, etc.
-    const startsWithValidCountryCode = 
-      cleanNumber.startsWith('91') ||   // India
-      cleanNumber.startsWith('1') ||    // US/Canada  
-      cleanNumber.startsWith('44') ||   // UK
-      cleanNumber.startsWith('49') ||   // Germany
-      cleanNumber.startsWith('33') ||   // France
-      cleanNumber.startsWith('61') ||   // Australia
-      cleanNumber.startsWith('81') ||   // Japan
-      cleanNumber.startsWith('86') ||   // China
-      cleanNumber.startsWith('7') ||    // Russia
-      cleanNumber.startsWith('55');     // Brazil
-    
-    return startsWithValidCountryCode;
+    // Allow most numbers that look like phone numbers
+    // This is more inclusive to capture international variations
+    return true;
   };
 
-  // Helper function to deduplicate contacts by name, prioritizing valid phone numbers
+  // Helper function to keep all contacts with valid phone numbers (no deduplication by name)
   const deduplicateContacts = (contactsList: Contact[]): Contact[] => {
-    const contactMap = new Map<string, Contact>();
+    // Instead of deduplicating by name, only remove exact duplicates (same ID)
+    const uniqueContacts = new Map<string, Contact>();
     
     contactsList.forEach(contact => {
-      const existingContact = contactMap.get(contact.name);
-      
-      if (!existingContact) {
-        // First contact with this name
-        contactMap.set(contact.name, contact);
-      } else {
-        // Contact with same name exists, prioritize the one with valid phone number
-        const currentIsValid = isValidPhoneNumber(contact.number);
-        const existingIsValid = isValidPhoneNumber(existingContact.number);
-        
-        if (currentIsValid && !existingIsValid) {
-          // Replace with valid phone number
-          contactMap.set(contact.name, contact);
-        } else if (currentIsValid && existingIsValid) {
-          // Both are valid, keep the shorter/more standard one
-          const currentClean = contact.number.replace(/[^0-9]/g, '');
-          const existingClean = existingContact.number.replace(/[^0-9]/g, '');
-          
-          if (currentClean.length <= existingClean.length) {
-            contactMap.set(contact.name, contact);
-          }
-        }
-        // If current is invalid and existing is valid, keep existing (do nothing)
+      // Only add if not already present (based on unique ID)
+      if (!uniqueContacts.has(contact.id)) {
+        uniqueContacts.set(contact.id, contact);
       }
     });
     
-    return Array.from(contactMap.values());
+    // Return all unique contacts, preserving multiple numbers for same person
+    return Array.from(uniqueContacts.values()).filter(contact => 
+      contact.isMyContact && // Only show saved contacts
+      isValidPhoneNumber(contact.number) // Only filter out obviously invalid phone numbers
+    );
   };
 
   // Helper function to filter and format contacts for dropdown
