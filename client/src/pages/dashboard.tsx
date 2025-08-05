@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
-import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown } from "lucide-react";
+import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface Chat {
@@ -486,32 +486,42 @@ export default function Dashboard() {
     },
   });
 
-  // Handle CSV file upload
-  const handleCSVUpload = async (groupId: string, file: File) => {
-    const formData = new FormData();
-    formData.append('csv', file);
-    
-    try {
+  // Import CSV mutation
+  const importCsvMutation = useMutation({
+    mutationFn: async ({ groupId, file }: { groupId: string; file: File }) => {
+      const formData = new FormData();
+      formData.append('csv', file);
       const response = await fetch(`/api/contact-groups/${groupId}/import-csv`, {
         method: 'POST',
         body: formData,
       });
       
-      if (!response.ok) throw new Error('Failed to upload CSV');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to import CSV');
+      }
       
-      const result = await response.json();
+      return response.json();
+    },
+    onSuccess: (data) => {
       toast({
         title: "CSV Imported Successfully",
-        description: `Imported ${result.validContacts} valid contacts, ${result.invalidContacts} invalid, ${result.duplicateContacts} duplicates`,
+        description: `Imported ${data.validContacts} valid contacts, ${data.invalidContacts} invalid, ${data.duplicateContacts} duplicates`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/contact-groups'] });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Failed to Import CSV",
         description: error.message || "Failed to import CSV file",
         variant: "destructive",
       });
-    }
+    },
+  });
+
+  // Handle CSV file upload
+  const handleCSVUpload = (groupId: string, file: File) => {
+    importCsvMutation.mutate({ groupId, file });
   };
 
   // Export all groups CSV
@@ -1329,38 +1339,57 @@ export default function Dashboard() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => setLocation(`/group-contacts/${group.id}`)}
-                                  title="View Contacts"
-                                  className="h-8 w-8 p-0 flex items-center justify-center"
+                                  className="flex items-center space-x-2"
                                 >
                                   <Users className="h-4 w-4" />
+                                  <span>Show</span>
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => document.getElementById(`csv-upload-${group.id}`)?.click()}
-                                  title="Import CSV"
-                                  className="h-8 w-8 p-0 flex items-center justify-center"
+                                  disabled={importCsvMutation.isPending}
+                                  className="flex items-center space-x-2"
                                 >
-                                  <Upload className="h-4 w-4" />
+                                  {importCsvMutation.isPending ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      <span>Importing...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Upload className="h-4 w-4" />
+                                      <span>Import</span>
+                                    </>
+                                  )}
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => window.open(`/api/contact-groups/${group.id}/export`)}
-                                  title="Export"
-                                  className="h-8 w-8 p-0 flex items-center justify-center"
+                                  className="flex items-center space-x-2"
                                 >
                                   <Download className="h-4 w-4" />
+                                  <span>Export</span>
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => deleteContactGroupMutation.mutate(group.id)}
                                   disabled={deleteContactGroupMutation.isPending}
-                                  title="Delete"
-                                  className="h-8 w-8 p-0 flex items-center justify-center"
+                                  className="flex items-center space-x-2"
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  {deleteContactGroupMutation.isPending ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      <span>Deleting...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Trash2 className="h-4 w-4" />
+                                      <span>Delete</span>
+                                    </>
+                                  )}
                                 </Button>
                               </div>
                             </div>
