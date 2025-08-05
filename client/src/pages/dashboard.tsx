@@ -246,10 +246,8 @@ export default function Dashboard() {
     });
     
     // Return all unique contacts, preserving multiple numbers for same person
-    return Array.from(uniqueContacts.values()).filter(contact => 
-      contact.isMyContact && // Only show saved contacts
-      isValidPhoneNumber(contact.number) // Only filter out obviously invalid phone numbers
-    );
+    // Remove frontend filtering - backend already filters appropriately
+    return Array.from(uniqueContacts.values());
   };
 
   // Helper function to filter and format contacts for dropdown

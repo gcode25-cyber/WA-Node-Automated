@@ -1221,7 +1221,7 @@ export class WhatsAppService {
         return nameA.localeCompare(nameB);
       });
 
-      console.log(`✅ Retrieved ${sortedContacts.length} contacts from ${contacts.length} total WhatsApp contacts (sorted A-Z)`);
+      console.log(`✅ Retrieved ${sortedContacts.length} saved contacts from ${contacts.length} total WhatsApp contacts (sorted A-Z)`);
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('contacts_updated', sortedContacts);

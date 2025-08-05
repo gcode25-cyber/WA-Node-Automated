@@ -547,9 +547,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const contacts = await whatsappService.getContacts();
-      // Apply deduplication to remove duplicate contacts with same name but different numbers
-      const deduplicatedContacts = deduplicateContacts(contacts);
-      res.json(deduplicatedContacts);
+      // Return all contacts without deduplication to preserve multiple numbers per person
+      res.json(contacts);
     } catch (error: any) {
       console.error("Get contacts error:", error);
       res.status(500).json({ error: error.message || "Failed to get contacts" });
