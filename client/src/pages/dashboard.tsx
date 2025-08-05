@@ -204,8 +204,78 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
+  // Helper function to determine if a phone number is valid
+  const isValidPhoneNumber = (phoneNumber: string): boolean => {
+    // Remove all non-digit characters
+    const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+    
+    // Valid phone numbers should:
+    // 1. Have at least 10 digits
+    // 2. Not be extremely long (likely group IDs if > 15 digits)
+    // 3. Start with a reasonable country code pattern
+    if (cleanNumber.length < 10 || cleanNumber.length > 15) {
+      return false;
+    }
+    
+    // Check for common invalid patterns (group-like IDs)
+    // Group IDs often have patterns like long sequences of repeated digits or unusual patterns
+    if (cleanNumber.length > 13) {
+      return false; // Likely a group ID
+    }
+    
+    // Valid phone numbers typically start with country codes
+    // Common patterns: +91, +1, +44, etc.
+    const startsWithValidCountryCode = 
+      cleanNumber.startsWith('91') ||   // India
+      cleanNumber.startsWith('1') ||    // US/Canada  
+      cleanNumber.startsWith('44') ||   // UK
+      cleanNumber.startsWith('49') ||   // Germany
+      cleanNumber.startsWith('33') ||   // France
+      cleanNumber.startsWith('61') ||   // Australia
+      cleanNumber.startsWith('81') ||   // Japan
+      cleanNumber.startsWith('86') ||   // China
+      cleanNumber.startsWith('7') ||    // Russia
+      cleanNumber.startsWith('55');     // Brazil
+    
+    return startsWithValidCountryCode;
+  };
+
+  // Helper function to deduplicate contacts by name, prioritizing valid phone numbers
+  const deduplicateContacts = (contactsList: Contact[]): Contact[] => {
+    const contactMap = new Map<string, Contact>();
+    
+    contactsList.forEach(contact => {
+      const existingContact = contactMap.get(contact.name);
+      
+      if (!existingContact) {
+        // First contact with this name
+        contactMap.set(contact.name, contact);
+      } else {
+        // Contact with same name exists, prioritize the one with valid phone number
+        const currentIsValid = isValidPhoneNumber(contact.number);
+        const existingIsValid = isValidPhoneNumber(existingContact.number);
+        
+        if (currentIsValid && !existingIsValid) {
+          // Replace with valid phone number
+          contactMap.set(contact.name, contact);
+        } else if (currentIsValid && existingIsValid) {
+          // Both are valid, keep the shorter/more standard one
+          const currentClean = contact.number.replace(/[^0-9]/g, '');
+          const existingClean = existingContact.number.replace(/[^0-9]/g, '');
+          
+          if (currentClean.length <= existingClean.length) {
+            contactMap.set(contact.name, contact);
+          }
+        }
+        // If current is invalid and existing is valid, keep existing (do nothing)
+      }
+    });
+    
+    return Array.from(contactMap.values());
+  };
+
   // Helper function to filter and format contacts for dropdown
-  const filteredContacts = contacts.filter((contact: Contact) => 
+  const filteredContacts = deduplicateContacts(contacts).filter((contact: Contact) => 
     contact.isMyContact && // Only show saved contacts
     (contact.name.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
      contact.number.includes(contactSearchTerm))
@@ -1246,7 +1316,7 @@ export default function Dashboard() {
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {contacts.map((contact: Contact) => (
+                        {deduplicateContacts(contacts).filter(contact => contact.isMyContact).map((contact: Contact) => (
                           <div key={contact.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3">

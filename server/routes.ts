@@ -456,6 +456,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to determine if a phone number is valid
+  const isValidPhoneNumber = (phoneNumber: string): boolean => {
+    // Remove all non-digit characters
+    const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+    
+    // Valid phone numbers should:
+    // 1. Have at least 10 digits
+    // 2. Not be extremely long (likely group IDs if > 15 digits)
+    // 3. Start with a reasonable country code pattern
+    if (cleanNumber.length < 10 || cleanNumber.length > 15) {
+      return false;
+    }
+    
+    // Check for common invalid patterns (group-like IDs)
+    // Group IDs often have patterns like long sequences of repeated digits or unusual patterns
+    if (cleanNumber.length > 13) {
+      return false; // Likely a group ID
+    }
+    
+    // Valid phone numbers typically start with country codes
+    // Common patterns: +91, +1, +44, etc.
+    const startsWithValidCountryCode = 
+      cleanNumber.startsWith('91') ||   // India
+      cleanNumber.startsWith('1') ||    // US/Canada  
+      cleanNumber.startsWith('44') ||   // UK
+      cleanNumber.startsWith('49') ||   // Germany
+      cleanNumber.startsWith('33') ||   // France
+      cleanNumber.startsWith('61') ||   // Australia
+      cleanNumber.startsWith('81') ||   // Japan
+      cleanNumber.startsWith('86') ||   // China
+      cleanNumber.startsWith('7') ||    // Russia
+      cleanNumber.startsWith('55');     // Brazil
+    
+    return startsWithValidCountryCode;
+  };
+
+  // Helper function to deduplicate contacts by name, prioritizing valid phone numbers
+  const deduplicateContacts = (contactsList: any[]): any[] => {
+    const contactMap = new Map<string, any>();
+    
+    contactsList.forEach(contact => {
+      const existingContact = contactMap.get(contact.name);
+      
+      if (!existingContact) {
+        // First contact with this name
+        contactMap.set(contact.name, contact);
+      } else {
+        // Contact with same name exists, prioritize the one with valid phone number
+        const currentIsValid = isValidPhoneNumber(contact.number || contact.id);
+        const existingIsValid = isValidPhoneNumber(existingContact.number || existingContact.id);
+        
+        if (currentIsValid && !existingIsValid) {
+          // Replace with valid phone number
+          contactMap.set(contact.name, contact);
+        } else if (currentIsValid && existingIsValid) {
+          // Both are valid, keep the shorter/more standard one
+          const currentClean = (contact.number || contact.id).replace(/[^0-9]/g, '');
+          const existingClean = (existingContact.number || existingContact.id).replace(/[^0-9]/g, '');
+          
+          if (currentClean.length <= existingClean.length) {
+            contactMap.set(contact.name, contact);
+          }
+        }
+        // If current is invalid and existing is valid, keep existing (do nothing)
+      }
+    });
+    
+    return Array.from(contactMap.values());
+  };
+
   // Get all contacts from connected WhatsApp device
   app.get("/api/contacts", async (req, res) => {
     try {
@@ -466,7 +536,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const contacts = await whatsappService.getContacts();
-      res.json(contacts);
+      // Apply deduplication to remove duplicate contacts with same name but different numbers
+      const deduplicatedContacts = deduplicateContacts(contacts);
+      res.json(deduplicatedContacts);
     } catch (error: any) {
       console.error("Get contacts error:", error);
       res.status(500).json({ error: error.message || "Failed to get contacts" });
@@ -520,10 +592,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/contacts/download", async (req, res) => {
     try {
       const contacts = await whatsappService.getContacts();
+      // Apply deduplication to remove duplicate contacts with same name but different numbers
+      const deduplicatedContacts = deduplicateContacts(contacts);
       
       // Convert to CSV format
       const csvHeader = 'Name,Phone Number,Is My Contact,Is WhatsApp Contact,Is Group\n';
-      const csvRows = contacts.map((contact: any) => {
+      const csvRows = deduplicatedContacts.map((contact: any) => {
         return `"${contact.name}","${contact.number || contact.id}","${contact.isMyContact}","${contact.isWAContact}","${contact.isGroup}"`;
       }).join('\n');
       
