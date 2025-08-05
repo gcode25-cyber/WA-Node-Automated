@@ -445,17 +445,17 @@ export default function ChatPage() {
                       
                       {/* Show caption if present */}
                       {msg.body && msg.body !== '[Media]' && (
-                        <p className="text-sm mt-2">{msg.body}</p>
+                        <p className="text-sm mt-2 break-words overflow-wrap-anywhere">{msg.body}</p>
                       )}
                     </div>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap">{msg.body}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{msg.body}</p>
                   )}
                   
                   <p className={`text-xs mt-1 ${
                     msg.fromMe ? 'text-green-100' : 'text-muted-foreground'
                   }`}>
-                    {new Date(msg.timestamp * 1000).toLocaleTimeString()}
+                    {new Date(msg.timestamp * 1000).toLocaleDateString()} {new Date(msg.timestamp * 1000).toLocaleTimeString()}
                   </p>
                 </div>
               </div>

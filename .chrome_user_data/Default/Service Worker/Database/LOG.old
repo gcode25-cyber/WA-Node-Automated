@@ -1,2 +1,3 @@
-2025/08/05-11:56:12.114 ec5 Creating DB /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database since it was missing.
-2025/08/05-11:56:12.125 ec5 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/MANIFEST-000001
+2025/08/05-12:07:22.034 137a Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/MANIFEST-000001
+2025/08/05-12:07:22.037 137a Recovering log #3
+2025/08/05-12:07:22.039 137a Reusing old log /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/000003.log 
