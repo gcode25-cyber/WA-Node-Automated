@@ -76,21 +76,32 @@ export default function GroupContacts() {
 
   // Import CSV mutation
   const importCsvMutation = useMutation({
-    mutationFn: (file: File) => {
+    mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append('file', file);
-      return fetch(`/api/contact-groups/${groupId}/import`, {
+      formData.append('csv', file);
+      const response = await fetch(`/api/contact-groups/${groupId}/import-csv`, {
         method: 'POST',
         body: formData,
-      }).then(res => res.json());
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to import CSV');
+      }
+      
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
         title: "Import Successful",
-        description: `Imported ${data.imported} contacts, ${data.duplicates} duplicates found`,
+        description: `Imported ${data.validContacts} valid contacts, ${data.duplicateContacts} duplicates found`,
       });
+      // Force immediate refresh of both queries
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
       queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
+      
+      // Also refresh the contact groups list
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
     },
     onError: (error: any) => {
       toast({
@@ -99,6 +110,13 @@ export default function GroupContacts() {
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      // Reset the file input
+      const fileInput = document.getElementById('csv-import') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    }
   });
 
   const filteredMembers = members.filter(member =>
