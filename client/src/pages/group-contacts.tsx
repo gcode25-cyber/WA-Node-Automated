@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface ContactGroupMember {
@@ -190,8 +190,19 @@ export default function GroupContacts() {
               variant="outline"
               onClick={() => document.getElementById('csv-import')?.click()}
               disabled={importCsvMutation.isPending}
+              className="flex items-center space-x-2"
             >
-              <Upload className="h-4 w-4" />
+              {importCsvMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Importing...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  <span>Import CSV</span>
+                </>
+              )}
             </Button>
             
             <Button
