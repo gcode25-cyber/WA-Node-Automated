@@ -90,3 +90,9 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Fixed missing bulk operation methods in MemStorage interface implementation
   - Verified contact groups now properly persist to PostgreSQL database across application restarts
   - Contact group creation, retrieval, and member management fully functional with database persistence
+
+- **2025-08-05**: Enhanced contact group interface layout:
+  - Moved "Select All" checkbox above the contact list for better usability
+  - Restructured table columns to proper order: checkbox, ID, name, phone number, status
+  - Implemented center-aligned table layout with proper spacing distribution
+  - Enhanced visual hierarchy and user experience in contact group management interface

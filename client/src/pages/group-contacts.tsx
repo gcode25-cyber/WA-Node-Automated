@@ -341,7 +341,7 @@ export default function GroupContacts() {
           </div>
         </div>
 
-        {/* Search and Actions */}
+        {/* Search */}
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -355,17 +355,6 @@ export default function GroupContacts() {
                     className="pl-10"
                   />
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="select-all"
-                    checked={selectAll}
-                    onCheckedChange={handleSelectAll}
-                  />
-                  <label htmlFor="select-all" className="text-sm font-medium">
-                    Select All ({filteredMembers.length})
-                  </label>
-                </div>
               </div>
             </div>
           </CardContent>
@@ -377,13 +366,25 @@ export default function GroupContacts() {
             <CardTitle>Group Contacts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
+            <div className="space-y-4">
+              {/* Select All Section */}
+              <div className="flex items-center space-x-2 px-4 py-2 bg-muted/30 rounded-lg">
+                <Checkbox
+                  id="select-all"
+                  checked={selectAll}
+                  onCheckedChange={handleSelectAll}
+                />
+                <label htmlFor="select-all" className="text-sm font-medium">
+                  Select All ({filteredMembers.length})
+                </label>
+              </div>
+
               {/* Table Header */}
-              <div className="grid grid-cols-10 gap-4 py-2 px-4 border-b font-medium text-sm text-muted-foreground">
+              <div className="grid grid-cols-12 gap-2 py-2 px-4 border-b font-medium text-sm text-muted-foreground text-center">
                 <div className="col-span-1">SELECT</div>
-                <div className="col-span-1">NO.</div>
-                <div className="col-span-4">PHONE NUMBER</div>
-                <div className="col-span-3">NAME</div>
+                <div className="col-span-1">ID</div>
+                <div className="col-span-4">NAME</div>
+                <div className="col-span-5">PHONE NUMBER</div>
                 <div className="col-span-1">STATUS</div>
               </div>
 
@@ -396,24 +397,24 @@ export default function GroupContacts() {
                 filteredMembers.map((member, index) => (
                   <div
                     key={member.id}
-                    className="grid grid-cols-10 gap-4 py-3 px-4 border-b hover:bg-muted/50 transition-colors"
+                    className="grid grid-cols-12 gap-2 py-3 px-4 border-b hover:bg-muted/50 transition-colors"
                   >
-                    <div className="col-span-1 flex items-center">
+                    <div className="col-span-1 flex items-center justify-center">
                       <Checkbox
                         checked={selectedContacts.includes(member.id)}
                         onCheckedChange={(checked) => handleSelectContact(member.id, checked as boolean)}
                       />
                     </div>
-                    <div className="col-span-1 flex items-center text-sm text-muted-foreground">
+                    <div className="col-span-1 flex items-center justify-center text-sm text-muted-foreground">
                       {index + 1}
                     </div>
-                    <div className="col-span-4 flex items-center font-mono text-sm">
-                      {member.phoneNumber}
-                    </div>
-                    <div className="col-span-3 flex items-center text-sm">
+                    <div className="col-span-4 flex items-center justify-center text-sm">
                       {member.name || '-'}
                     </div>
-                    <div className="col-span-1 flex items-center">
+                    <div className="col-span-5 flex items-center justify-center font-mono text-sm">
+                      {member.phoneNumber}
+                    </div>
+                    <div className="col-span-1 flex items-center justify-center">
                       <Badge 
                         variant={member.status === 'valid' ? 'default' : 'secondary'}
                         className="text-xs"
