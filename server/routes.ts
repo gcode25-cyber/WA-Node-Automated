@@ -1067,6 +1067,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add multiple contacts to multiple groups
+  app.post("/api/contacts/add-to-groups", async (req, res) => {
+    try {
+      const { contactIds, groupIds } = req.body;
+      
+      if (!contactIds || !Array.isArray(contactIds) || contactIds.length === 0) {
+        return res.status(400).json({ error: "Contact IDs are required" });
+      }
+      
+      if (!groupIds || !Array.isArray(groupIds) || groupIds.length === 0) {
+        return res.status(400).json({ error: "Group IDs are required" });
+      }
+
+      // Get contact information from WhatsApp
+      const contacts = await whatsappService.getContacts();
+      const contactMap = new Map(contacts.map(contact => [contact.id, contact]));
+      
+      let totalAdded = 0;
+      let totalSkipped = 0;
+      
+      // Add each contact to each selected group
+      for (const groupId of groupIds) {
+        const group = await storage.getContactGroup(groupId);
+        if (!group) {
+          console.warn(`Group ${groupId} not found, skipping`);
+          continue;
+        }
+        
+        const existingMembers = await storage.getContactGroupMembers(groupId);
+        const existingNumbers = new Set(existingMembers.map(m => m.phoneNumber));
+        
+        let groupValidContacts = group.validContacts;
+        let groupTotalContacts = group.totalContacts;
+        
+        for (const contactId of contactIds) {
+          const contact = contactMap.get(contactId);
+          if (!contact) {
+            console.warn(`Contact ${contactId} not found, skipping`);
+            totalSkipped++;
+            continue;
+          }
+          
+          // Clean and format phone number
+          let phoneNumber = contact.number.replace(/[^0-9+]/g, '');
+          if (phoneNumber && !phoneNumber.startsWith('+') && phoneNumber.length === 10) {
+            phoneNumber = '+91' + phoneNumber;
+          }
+          
+          if (existingNumbers.has(phoneNumber)) {
+            totalSkipped++;
+            continue;
+          }
+          
+          // Add contact to group
+          await storage.createContactGroupMember({
+            groupId,
+            phoneNumber,
+            name: contact.name,
+            status: "valid"
+          });
+          
+          existingNumbers.add(phoneNumber);
+          groupValidContacts++;
+          groupTotalContacts++;
+          totalAdded++;
+        }
+        
+        // Update group statistics
+        await storage.updateContactGroup(groupId, {
+          totalContacts: groupTotalContacts,
+          validContacts: groupValidContacts
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: `Added ${totalAdded} contacts to ${groupIds.length} group(s)`,
+        totalAdded,
+        totalSkipped,
+        contactsProcessed: contactIds.length,
+        groupsProcessed: groupIds.length
+      });
+      
+    } catch (error: any) {
+      console.error("Add contacts to groups error:", error);
+      res.status(500).json({ error: error.message || "Failed to add contacts to groups" });
+    }
+  });
+
   // Batch delete contact group members
   app.delete("/api/contact-groups/:groupId/members/batch-delete", async (req, res) => {
     try {

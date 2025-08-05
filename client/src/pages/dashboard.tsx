@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
@@ -131,6 +132,11 @@ export default function Dashboard() {
   const [showContactsDropdown, setShowContactsDropdown] = useState(false);
   const [contactSearchTerm, setContactSearchTerm] = useState("");
   const contactsDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Contact selection states for adding to groups
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [showAddToGroupsDialog, setShowAddToGroupsDialog] = useState(false);
+  const [selectedGroupsForAdd, setSelectedGroupsForAdd] = useState<Set<string>>(new Set());
   
   // Close contacts dropdown when clicking outside
   useEffect(() => {
@@ -281,7 +287,39 @@ export default function Dashboard() {
      contact.number.includes(contactSearchTerm))
   );
   
-  // Helper function to handle contact selection
+  // Helper functions for contact selection in contacts module
+  const handleContactCheckboxToggle = (contactId: string) => {
+    setSelectedContacts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(contactId)) {
+        newSet.delete(contactId);
+      } else {
+        newSet.add(contactId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAllContacts = () => {
+    const filteredContactIds = deduplicateContacts(contacts)
+      .filter(contact => contact.isMyContact)
+      .map(contact => contact.id);
+    
+    if (selectedContacts.size === filteredContactIds.length) {
+      // All are selected, unselect all
+      setSelectedContacts(new Set());
+    } else {
+      // Not all are selected, select all
+      setSelectedContacts(new Set(filteredContactIds));
+    }
+  };
+
+  const handleAddToContactGroups = () => {
+    setShowAddToGroupsDialog(true);
+    setSelectedGroupsForAdd(new Set());
+  };
+
+  // Helper function to handle contact selection for messaging
   const handleContactSelect = (contact: Contact) => {
     // Extract the phone number without country code formatting
     const phoneNumber = contact.number.replace(/\D/g, ''); // Remove all non-digits
@@ -599,6 +637,37 @@ export default function Dashboard() {
   // Handle CSV file upload
   const handleCSVUpload = (groupId: string, file: File) => {
     importCsvMutation.mutate({ groupId, file });
+  };
+
+  // Mutation for adding contacts to groups
+  const addToGroupsMutation = useMutation({
+    mutationFn: async ({ contactIds, groupIds }: { contactIds: string[]; groupIds: string[] }) => {
+      return apiRequest('/api/contacts/add-to-groups', "POST", { contactIds, groupIds });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Contacts Added",
+        description: `Successfully added ${selectedContacts.size} contact${selectedContacts.size !== 1 ? 's' : ''} to ${selectedGroupsForAdd.size} group${selectedGroupsForAdd.size !== 1 ? 's' : ''}.`,
+      });
+      setSelectedContacts(new Set());
+      setSelectedGroupsForAdd(new Set());
+      setShowAddToGroupsDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/contact-groups"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Adding Contacts",
+        description: error.message || "Failed to add contacts to groups.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handler for adding contacts to groups
+  const handleAddContactsToGroups = () => {
+    const contactIds = Array.from(selectedContacts);
+    const groupIds = Array.from(selectedGroupsForAdd);
+    addToGroupsMutation.mutate({ contactIds, groupIds });
   };
 
   // Export all groups CSV
@@ -1282,13 +1351,23 @@ export default function Dashboard() {
                         <Phone className="h-5 w-5" />
                         <span>WhatsApp Contacts</span>
                       </div>
-                      <Button 
-                        onClick={exportContactsCSV}
-                        disabled={!sessionInfo || contacts.length === 0}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Export CSV
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          onClick={handleAddToContactGroups}
+                          disabled={!sessionInfo || selectedContacts.size === 0}
+                          variant="outline"
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Add to Contact Groups
+                        </Button>
+                        <Button 
+                          onClick={exportContactsCSV}
+                          disabled={!sessionInfo || contacts.length === 0}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Export CSV
+                        </Button>
+                      </div>
                     </CardTitle>
                     <CardDescription>
                       Your WhatsApp contacts from connected device
@@ -1317,34 +1396,63 @@ export default function Dashboard() {
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        {deduplicateContacts(contacts).filter(contact => contact.isMyContact).map((contact: Contact) => (
-                          <div key={contact.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-blue-700 flex items-center justify-center">
-                                  <Phone className="h-5 w-5" />
+                      <div className="space-y-4">
+                        {/* Select All Checkbox */}
+                        <div className="flex items-center space-x-2 p-2 border-b">
+                          <Checkbox
+                            id="select-all-contacts"
+                            checked={
+                              deduplicateContacts(contacts).filter(contact => contact.isMyContact).length > 0 &&
+                              selectedContacts.size === deduplicateContacts(contacts).filter(contact => contact.isMyContact).length
+                            }
+                            onCheckedChange={handleSelectAllContacts}
+                            data-testid="checkbox-select-all-contacts"
+                          />
+                          <label 
+                            htmlFor="select-all-contacts" 
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            Select All ({deduplicateContacts(contacts).filter(contact => contact.isMyContact).length} contacts)
+                          </label>
+                        </div>
+
+                        {/* Contacts List */}
+                        <div className="space-y-2">
+                          {deduplicateContacts(contacts).filter(contact => contact.isMyContact).map((contact: Contact) => (
+                            <div key={contact.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <Checkbox
+                                    id={`contact-${contact.id}`}
+                                    checked={selectedContacts.has(contact.id)}
+                                    onCheckedChange={() => handleContactCheckboxToggle(contact.id)}
+                                    data-testid={`checkbox-contact-${contact.id}`}
+                                  />
+                                  <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-blue-700 flex items-center justify-center">
+                                    <Phone className="h-5 w-5" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold">{contact.name}</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      {contact.number}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <h4 className="font-semibold">{contact.name}</h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    {contact.number}
-                                  </p>
+                                <div className="flex items-center space-x-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setLocation(`/chat/${contact.id}`)}
+                                    data-testid={`button-chat-${contact.id}`}
+                                  >
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Chat
+                                  </Button>
                                 </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setLocation(`/chat/${contact.id}`)}
-                                >
-                                  <MessageSquare className="h-4 w-4 mr-1" />
-                                  Chat
-                                </Button>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -1965,6 +2073,87 @@ export default function Dashboard() {
                   <>
                     <Send className="mr-2 h-4 w-4" />
                     Send Message
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add to Contact Groups Dialog */}
+      <Dialog open={showAddToGroupsDialog} onOpenChange={setShowAddToGroupsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add to Contact Groups</DialogTitle>
+            <DialogDescription>
+              Select contact groups to add the selected {selectedContacts.size} contact{selectedContacts.size !== 1 ? 's' : ''} to.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {contactGroups.length === 0 ? (
+                <div className="text-center p-4">
+                  <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    No contact groups available. Create a contact group first.
+                  </p>
+                </div>
+              ) : (
+                contactGroups.map((group: ContactGroup) => (
+                  <div key={group.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`group-${group.id}`}
+                      checked={selectedGroupsForAdd.has(group.id)}
+                      onCheckedChange={(checked) => {
+                        setSelectedGroupsForAdd(prev => {
+                          const newSet = new Set(prev);
+                          if (checked) {
+                            newSet.add(group.id);
+                          } else {
+                            newSet.delete(group.id);
+                          }
+                          return newSet;
+                        });
+                      }}
+                      data-testid={`checkbox-group-${group.id}`}
+                    />
+                    <label 
+                      htmlFor={`group-${group.id}`} 
+                      className="text-sm font-medium cursor-pointer flex-1"
+                    >
+                      {group.name}
+                      <span className="text-muted-foreground"> ({group.validContacts} contacts)</span>
+                    </label>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddToGroupsDialog(false);
+                  setSelectedGroupsForAdd(new Set());
+                }}
+                data-testid="button-cancel-add-to-groups"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddContactsToGroups}
+                disabled={addToGroupsMutation.isPending || selectedGroupsForAdd.size === 0}
+                data-testid="button-add-to-groups"
+              >
+                {addToGroupsMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Users className="mr-2 h-4 w-4" />
+                    Add
                   </>
                 )}
               </Button>

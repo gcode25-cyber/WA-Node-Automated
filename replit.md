@@ -103,3 +103,11 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Removed Status API endpoint and WhatsApp status fetching method
   - Cleaned up all Status-related code from codebase
   - Status module will be re-implemented later with different requirements
+
+- **2025-08-05**: Implemented contact selection and group assignment feature:
+  - Added checkbox functionality to personal contacts module with "Select All" option above the contact list
+  - Created "Add to Contact Groups" button that enables when contacts are selected
+  - Implemented popup modal for selecting target contact groups with checkboxes
+  - Added API endpoint `/api/contacts/add-to-groups` for bulk contact-to-group assignment
+  - Feature allows copying selected contacts to multiple contact groups simultaneously
+  - Enhanced UI follows same design pattern as contact groups module for consistency
