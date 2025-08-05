@@ -294,12 +294,11 @@ export default function GroupContacts() {
           <CardContent>
             <div className="space-y-1">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 py-2 px-4 border-b font-medium text-sm text-muted-foreground">
+              <div className="grid grid-cols-10 gap-4 py-2 px-4 border-b font-medium text-sm text-muted-foreground">
                 <div className="col-span-1">SELECT</div>
                 <div className="col-span-1">NO.</div>
                 <div className="col-span-4">PHONE NUMBER</div>
                 <div className="col-span-3">NAME</div>
-                <div className="col-span-2">VALID?</div>
                 <div className="col-span-1">STATUS</div>
               </div>
 
@@ -312,7 +311,7 @@ export default function GroupContacts() {
                 filteredMembers.map((member, index) => (
                   <div
                     key={member.id}
-                    className="grid grid-cols-12 gap-4 py-3 px-4 border-b hover:bg-muted/50 transition-colors"
+                    className="grid grid-cols-10 gap-4 py-3 px-4 border-b hover:bg-muted/50 transition-colors"
                   >
                     <div className="col-span-1 flex items-center">
                       <Checkbox
@@ -328,18 +327,6 @@ export default function GroupContacts() {
                     </div>
                     <div className="col-span-3 flex items-center text-sm">
                       {member.name || '-'}
-                    </div>
-                    <div className="col-span-2 flex items-center">
-                      {member.status === 'valid' ? (
-                        <div className="flex items-center space-x-1 text-green-600">
-                          <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm">Valid</span>
-                        </div>
-                      ) : (
-                        <Badge variant="destructive" className="text-xs">
-                          {member.status}
-                        </Badge>
-                      )}
                     </div>
                     <div className="col-span-1 flex items-center">
                       <Badge 
