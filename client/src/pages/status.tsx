@@ -25,7 +25,7 @@ export default function StatusPage() {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
 
   // Fetch status updates
-  const { data: statusUpdates = [], isLoading: statusLoading } = useQuery<StatusUpdate[]>({
+  const { data: statusUpdates = [], isLoading: statusLoading, error: statusError } = useQuery<StatusUpdate[]>({
     queryKey: ['/api/status'],
     refetchInterval: 30000,
   });
@@ -83,10 +83,28 @@ export default function StatusPage() {
     return author || 'Unknown';
   };
 
+  console.log('Status page rendering:', { statusLoading, statusUpdates, statusError, statusList });
+
   if (statusLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading status updates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (statusError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Error loading status updates</p>
+          <Button onClick={() => setLocation('/dashboard?module=status')}>
+            Back to Dashboard
+          </Button>
+        </div>
       </div>
     );
   }
