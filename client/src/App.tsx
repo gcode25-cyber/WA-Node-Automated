@@ -15,7 +15,7 @@ import AccountManagement from "@/pages/account-management";
 import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import GroupContacts from "@/pages/group-contacts";
-import StatusPage from "@/pages/status";
+
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,7 +33,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/chat/:contactId" component={ChatPage} />
       <Route path="/group-contacts/:groupId" component={GroupContacts} />
-      <Route path="/status" component={StatusPage} />
+
       <Route component={NotFound} />
     </Switch>
   );

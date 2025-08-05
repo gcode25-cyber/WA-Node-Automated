@@ -1092,47 +1092,7 @@ export class WhatsAppService {
     }
   }
 
-  // Method to get WhatsApp status updates
-  async getStatusUpdates(): Promise<any[]> {
-    if (!this.client || !this.isReady) {
-      throw new Error('WhatsApp client is not ready');
-    }
 
-    try {
-      console.log('📱 Fetching status updates...');
-      const chats = await this.client.getChats();
-      
-      // Find status broadcast chat
-      const statusChat = chats.find((chat: any) => 
-        chat.id._serialized.includes('status@broadcast') ||
-        chat.id._serialized.includes('@broadcast')
-      );
-
-      if (!statusChat) {
-        console.log('No status chat found');
-        return [];
-      }
-
-      const messages = await statusChat.fetchMessages({ limit: 50 });
-      const statusUpdates = messages.map((msg: any) => ({
-        id: msg.id.id,
-        author: msg.author || msg.from,
-        authorName: msg.notifyName || msg.author?.split('@')[0] || 'Unknown',
-        body: msg.body || '',
-        timestamp: msg.timestamp,
-        type: msg.type,
-        hasMedia: msg.hasMedia,
-        mediaType: msg.type,
-        links: msg.links || []
-      })).filter((status: any) => status.author && status.author !== 'status@broadcast');
-
-      console.log(`✅ Retrieved ${statusUpdates.length} status updates`);
-      return statusUpdates;
-    } catch (error: any) {
-      console.error('❌ Failed to fetch status updates:', error.message);
-      throw error;
-    }
-  }
 
   // Helper method to format phone numbers nicely
   private formatPhoneNumber(author: string): string {

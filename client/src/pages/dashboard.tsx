@@ -963,19 +963,7 @@ export default function Dashboard() {
                 <div className="font-medium text-sm">Groups</div>
               </div>
 
-              <div 
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedModule === 'status' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedModule('status')}
-              >
-                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-                  <span className="text-purple-600 dark:text-purple-400 text-sm">📱</span>
-                </div>
-                <div className="font-medium text-sm">Status</div>
-              </div>
+
 
               {/* Reports Section */}
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-6 mb-2">REPORTS</h4>
@@ -1764,74 +1752,7 @@ export default function Dashboard() {
                 </Card>
               )}
 
-              {/* Status Module */}
-              {selectedModule === 'status' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-purple-600 text-lg">📱</span>
-                        <span>WhatsApp Status Updates</span>
-                      </div>
-                      <Button 
-                        onClick={() => setLocation('/status')}
-                        disabled={!sessionInfo}
-                      >
-                        View All Status
-                      </Button>
-                    </CardTitle>
-                    <CardDescription>
-                      View status updates from your contacts
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {!sessionInfo ? (
-                      <div className="text-center p-8">
-                        <span className="text-purple-600 text-4xl mb-4 block">📱</span>
-                        <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
-                        <p className="text-muted-foreground">
-                          Please connect to WhatsApp first to view status updates.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {/* Preview of status list design */}
-                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 p-0.5">
-                                <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                                  <User className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-                                </div>
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-medium text-sm">Contact Status Updates</h4>
-                                <p className="text-xs text-muted-foreground">View recent status updates</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 p-0.5">
-                                <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                                  <User className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-                                </div>
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-medium text-sm">Recent Updates</h4>
-                                <p className="text-xs text-muted-foreground">50 status updates available</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <Button onClick={() => setLocation('/status')}>
-                            View All Status Updates
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+
 
               {/* Reports Module */}
               {selectedModule === 'reports' && (
@@ -1853,7 +1774,7 @@ export default function Dashboard() {
               )}
 
               {/* Placeholder for other modules */}
-              {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups', 'status'].includes(selectedModule) && (
+              {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups'].includes(selectedModule) && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Feature Coming Soon</CardTitle>

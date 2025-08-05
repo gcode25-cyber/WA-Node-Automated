@@ -96,3 +96,10 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
   - Restructured table columns to proper order: checkbox, ID, name, phone number, status
   - Implemented center-aligned table layout with proper spacing distribution
   - Enhanced visual hierarchy and user experience in contact group management interface
+
+- **2025-08-05**: Removed Status module per user request:
+  - Removed Status navigation item from dashboard sidebar
+  - Deleted Status page component and route
+  - Removed Status API endpoint and WhatsApp status fetching method
+  - Cleaned up all Status-related code from codebase
+  - Status module will be re-implemented later with different requirements
