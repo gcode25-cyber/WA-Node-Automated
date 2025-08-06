@@ -125,3 +125,69 @@
 2025/08/06-11:58:31.332 5c7 compacted to: files[ 0 0 1 0 0 0 0 ]
 2025/08/06-11:58:31.333 5c7 Delete type=2 #34
 2025/08/06-11:58:31.333 5c7 Manual compaction at level-1 from '\x00\x10\x00\x00\x05' @ 1887 : 0 .. '\x00\x11\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/06-11:59:33.468 5c8 Level-0 table #37: started
+2025/08/06-11:59:33.511 5c8 Level-0 table #37: 1021093 bytes OK
+2025/08/06-11:59:33.519 5c8 Delete type=2 #32
+2025/08/06-11:59:33.519 5c8 Delete type=0 #33
+2025/08/06-11:59:34.535 5d0 Compacting 1@1 + 1@2 files
+2025/08/06-11:59:34.604 5d0 Generated table #38@1: 15862 keys, 500501 bytes
+2025/08/06-11:59:34.604 5d0 Compacted 1@1 + 1@2 files => 500501 bytes
+2025/08/06-11:59:34.610 5d0 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/06-11:59:34.611 5d0 Delete type=2 #35
+2025/08/06-11:59:34.611 5d0 Delete type=2 #37
+2025/08/06-11:59:36.450 5c8 Level-0 table #40: started
+2025/08/06-11:59:36.502 5c8 Level-0 table #40: 1130290 bytes OK
+2025/08/06-11:59:36.507 5c8 Delete type=0 #36
+2025/08/06-11:59:36.524 5c7 Compacting 1@1 + 1@2 files
+2025/08/06-11:59:36.609 5c7 Generated table #41@1: 22522 keys, 1079356 bytes
+2025/08/06-11:59:36.609 5c7 Compacted 1@1 + 1@2 files => 1079356 bytes
+2025/08/06-11:59:36.636 5c7 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/06-11:59:39.000 5c8 Level-0 table #43: started
+2025/08/06-11:59:39.136 5c8 Level-0 table #43: 1062451 bytes OK
+2025/08/06-11:59:39.146 5c8 Delete type=2 #38
+2025/08/06-11:59:39.146 5c8 Delete type=0 #39
+2025/08/06-11:59:39.147 5c8 Delete type=2 #40
+2025/08/06-11:59:39.174 5c8 Compacting 1@1 + 1@2 files
+2025/08/06-11:59:39.255 5c8 Generated table #44@1: 30989 keys, 1525788 bytes
+2025/08/06-11:59:39.256 5c8 Compacted 1@1 + 1@2 files => 1525788 bytes
+2025/08/06-11:59:39.263 5c8 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/06-11:59:40.431 5c8 Level-0 table #46: started
+2025/08/06-11:59:40.629 5c8 Level-0 table #46: 1040234 bytes OK
+2025/08/06-11:59:40.641 5c8 Delete type=2 #41
+2025/08/06-11:59:40.641 5c8 Delete type=0 #42
+2025/08/06-11:59:40.641 5c8 Delete type=2 #43
+2025/08/06-11:59:40.650 5c8 Compacting 1@1 + 1@2 files
+2025/08/06-11:59:40.818 5c8 Generated table #47@1: 50116 keys, 2192478 bytes
+2025/08/06-11:59:40.818 5c8 Compacted 1@1 + 1@2 files => 2192478 bytes
+2025/08/06-11:59:40.824 5c8 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/06-11:59:41.209 5c9 Level-0 table #49: started
+2025/08/06-11:59:41.289 5c9 Level-0 table #49: 1105444 bytes OK
+2025/08/06-11:59:41.298 5c9 Delete type=2 #44
+2025/08/06-11:59:41.299 5c9 Delete type=0 #45
+2025/08/06-11:59:41.300 5c9 Delete type=2 #46
+2025/08/06-11:59:41.315 5c9 Compacting 1@1 + 1@2 files
+2025/08/06-11:59:41.403 5c9 Generated table #50@1: 41856 keys, 1999288 bytes
+2025/08/06-11:59:41.403 5c9 Compacted 1@1 + 1@2 files => 1999288 bytes
+2025/08/06-11:59:41.411 5c9 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/06-12:00:20.874 5c7 Level-0 table #52: started
+2025/08/06-12:00:20.988 5c7 Level-0 table #52: 1037558 bytes OK
+2025/08/06-12:00:21.001 5c7 Delete type=2 #47
+2025/08/06-12:00:21.001 5c7 Delete type=0 #48
+2025/08/06-12:00:21.002 5c7 Delete type=2 #49
+2025/08/06-12:00:21.011 5c7 Compacting 1@1 + 1@2 files
+2025/08/06-12:00:21.293 5c7 Generated table #53@1: 47338 keys, 2210502 bytes
+2025/08/06-12:00:21.307 5c7 Generated table #54@1: 3031 keys, 141204 bytes
+2025/08/06-12:00:21.307 5c7 Compacted 1@1 + 1@2 files => 2351706 bytes
+2025/08/06-12:00:21.315 5c7 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/06-12:00:21.315 5c7 Delete type=2 #50
+2025/08/06-12:00:21.315 5c7 Delete type=2 #52
+2025/08/06-12:00:39.044 5c8 Level-0 table #56: started
+2025/08/06-12:00:39.247 5c8 Level-0 table #56: 1085309 bytes OK
+2025/08/06-12:00:39.262 5c8 Delete type=0 #51
+2025/08/06-12:00:46.650 5c8 Compacting 1@1 + 1@2 files
+2025/08/06-12:00:47.318 5c8 Generated table #57@1: 48296 keys, 2212573 bytes
+2025/08/06-12:00:47.336 5c8 Generated table #58@1: 1021 keys, 66242 bytes
+2025/08/06-12:00:47.336 5c8 Compacted 1@1 + 1@2 files => 2278815 bytes
+2025/08/06-12:00:47.343 5c8 compacted to: files[ 0 0 3 0 0 0 0 ]
+2025/08/06-12:00:47.343 5c8 Delete type=2 #53
+2025/08/06-12:00:47.343 5c8 Delete type=2 #56

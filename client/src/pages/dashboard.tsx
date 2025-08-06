@@ -2472,6 +2472,11 @@ export default function Dashboard() {
                   id="group-name"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !createContactGroupMutation.isPending && newGroupName.trim()) {
+                      handleCreateGroup();
+                    }
+                  }}
                 />
                 <Label 
                   htmlFor="group-name" 
@@ -2493,6 +2498,12 @@ export default function Dashboard() {
                   value={newGroupDescription}
                   onChange={(e) => setNewGroupDescription(e.target.value)}
                   rows={3}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && !createContactGroupMutation.isPending && newGroupName.trim()) {
+                      e.preventDefault(); // Prevent new line
+                      handleCreateGroup();
+                    }
+                  }}
                 />
                 <Label 
                   htmlFor="group-description" 
