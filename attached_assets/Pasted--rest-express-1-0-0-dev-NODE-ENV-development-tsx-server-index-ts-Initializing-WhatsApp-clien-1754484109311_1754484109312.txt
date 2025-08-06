@@ -1,0 +1,105 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+🚀 Initializing WhatsApp client...
+12:40:40 PM [express] serving on port 5000
+🔍 Found existing session files, attempting automatic restoration...
+📋 Session files exist, will restore on WhatsApp ready event
+✅ Starting client initialization...
+📡 WebSocket client connected
+📡 WebSocket client connected
+12:40:48 PM [express] GET /api/bulk-campaigns 200 in 19ms
+12:40:48 PM [express] GET /api/contact-groups 304 in 50ms :: [{"id":"0050ed52-a0bd-43cb-b0d0-f3af8ad4…
+📡 WebSocket client disconnected
+12:40:49 PM [express] GET /api/session-info 404 in 342ms :: {"error":"No active session","connected":…
+12:40:52 PM [express] GET /api/system-status 200 in 2ms :: {"client":"Initializing","puppeteer":"Stab…
+12:40:52 PM [express] GET /api/get-qr 200 in 1ms :: {"qr":null}
+12:40:52 PM [express] GET /api/session-info 404 in 43ms :: {"error":"No active session","connected":f…
+🔌 Phone connection changed: DISCONNECTED → null | Phone: Disconnected → Disconnected
+📡 Broadcasted connection_status to 1 clients
+📱 New QR Code received from WhatsApp Web
+⚠️ Note: QR code means session was not restored or has expired
+🔍 QR String type: string
+🔍 QR String length: 239
+🔍 QR String preview: 2@nKFMy/lk0XSb8x1ZeQsor8S7A2QxfYeA8A9NV/xqQDUoryqe08AnN59N4/h/BkJZu4S0ZgyE48xaUQbmVtl6RtROix1K5CLuaoo=,AiHkGXeXCk6eSE3XG...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+✅ QR already in base64 format, returning directly
+12:40:57 PM [express] GET /api/get-qr 200 in 1ms :: {"qr":"data:image/png;base64,iVBORw0KGgoAAAANSUhE…
+✅ QR already in base64 format, returning directly
+12:41:02 PM [express] GET /api/get-qr 304 in 2ms :: {"qr":"data:image/png;base64,iVBORw0KGgoAAAANSUhE…
+12:41:02 PM [express] GET /api/session-info 404 in 311ms :: {"error":"No active session","connected":…
+✅ QR already in base64 format, returning directly
+12:41:07 PM [express] GET /api/get-qr 304 in 0ms :: {"qr":"data:image/png;base64,iVBORw0KGgoAAAANSUhE…
+🔐 WhatsApp client authenticated successfully
+✅ Session restoration successful - no QR code needed
+✅ WhatsApp client is ready - session restored successfully!
+🎉 Session restored automatically! User: Parth Number: 919428463575
+💾 Session backup saved to file
+💾 Session info saved to storage for future persistence
+📄 Session backup marker created
+📡 Broadcasted connected to 1 clients
+12:41:12 PM [express] GET /api/session-info 200 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+12:41:13 PM [express] GET /api/get-qr 200 in 2ms :: {"qr":null}
+📡 Broadcasted contacts_updated to 1 clients
+📡 Broadcasted chats_updated to 1 clients
+📡 Broadcasted groups_updated to 1 clients
+12:41:15 PM [express] GET /api/bulk-campaigns 200 in 12ms
+📡 Broadcasted chats_updated to 1 clients
+12:41:15 PM [express] GET /api/chats 200 in 37ms :: [{"id":"120363295717631250@g.us","name":"frnds","…
+📡 Broadcasted contacts_updated to 1 clients
+12:41:15 PM [express] GET /api/contacts 200 in 89ms :: [{"id":"919638483500@c.us","name":"Annant2","n…
+📡 Broadcasted groups_updated to 1 clients
+12:41:15 PM [express] GET /api/groups 200 in 103ms :: [{"id":"120363295717631250@g.us","name":"frnds"…
+12:41:15 PM [express] GET /api/contacts/bulk-group-memberships 304 in 168ms :: {}
+🔌 Phone connection changed: null → CONNECTED | Phone: Disconnected → Connected
+📡 Broadcasted connection_status to 1 clients
+12:41:25 PM [express] GET /api/session-info 304 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+📱 New QR Code received from WhatsApp Web
+⚠️ Note: QR code means session was not restored or has expired
+🔍 QR String type: string
+🔍 QR String length: 146
+🔍 QR String preview: undefined,AiHkGXeXCk6eSE3XGsfd+aEMHoxfYA4ei5yPc19/gQE=,ZHTOGx/ujQcqymDPEt4Tz0lIZyQUiYeqtannaU3jrF0=,lMtEKf3kr3aYC7OaPkQ8...
+✅ QR Code generated successfully with qr-image
+📡 Broadcasted qr to 1 clients
+🔐 WhatsApp client authenticated successfully
+✅ Session restoration successful - no QR code needed
+🔐 WhatsApp client authenticated successfully
+✅ Session restoration successful - no QR code needed
+✅ WhatsApp client is ready - session restored successfully!
+🎉 Session restored automatically! User: Parth Number: 919428463575
+✅ WhatsApp client is ready - session restored successfully!
+🎉 Session restored automatically! User: Parth Number: 919428463575
+12:41:35 PM [express] GET /api/session-info 304 in 2ms :: {"number":"919428463575","name":"Parth","lo…
+💾 Session backup saved to file
+💾 Session backup saved to file
+💾 Session info saved to storage for future persistence
+📄 Session backup marker created
+📡 Broadcasted connected to 1 clients
+💾 Session info saved to storage for future persistence
+📄 Session backup marker created
+📡 Broadcasted connected to 1 clients
+🔌 WhatsApp client disconnected: LOGOUT
+📱 User logged out from phone - clearing session data
+📡 Broadcasted disconnected to 1 clients
+🔄 Phone logout detected - restarting for new QR
+🔄 Starting safe restart after phone logout...
+🧹 Safely destroying existing client...
+🗑️ Cleared stored session data from database
+/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/lib/cjs/puppeteer/common/Connection.js:329
+                error: new Errors_js_1.ProtocolError(),
+                       ^
+
+ProtocolError: Protocol error (Network.getResponseBody): Target closed.
+    at <anonymous> (/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/src/common/Connection.ts:400:16)
+    at new Promise (<anonymous>)
+    at CDPSessionImpl.send (/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/src/common/Connection.ts:396:12)
+    at <anonymous> (/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/src/common/HTTPResponse.ts:203:47)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async HTTPResponse.text (/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/src/common/HTTPResponse.ts:231:21)
+    at async /home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:771:39 {
+  originalMessage: ''
+}
+
+Node.js v20.19.3
