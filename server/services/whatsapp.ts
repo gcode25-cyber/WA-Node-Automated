@@ -537,27 +537,36 @@ export class WhatsAppService {
         
         // Handle different disconnection states
         if (currentState === 'UNPAIRED' || currentState === 'UNPAIRED_IDLE') {
-              console.log('📱 Phone disconnection detected via state monitoring');
-              this.handlePhoneLogout();
-            }
-          }
-        } catch (error: any) {
-          // If we can't get state, connection might be lost
-          console.log('🔌 Connection check failed:', error.message);
-          
-          if (error.message.includes('Session closed') || 
-              error.message.includes('Protocol error') ||
-              error.message.includes('Cannot read properties of undefined')) {
-            console.log('📱 Connection lost detected via monitoring');
-            this.handleConnectionLost();
-          }
+          console.log('📱 Phone was unpaired - triggering restart for new QR');
+          this.handleUnpairedRestart();
         }
       }
-    }, 30000); // Check every 30 seconds
+      
+      this.lastStateCheck = new Date();
+    } catch (error: any) {
+      // Connection check failed - likely means client is broken
+      console.log('⚠️ Connection health check failed:', error.message);
+      this.updateConnectionState('TIMEOUT', false);
+      this.isReady = false;
+    }
   }
 
-  private handlePhoneLogout(): void {
-    console.log('📱 Handling phone logout event');
+  private updateConnectionState(state: string, phoneConnected: boolean) {
+    this.currentState = state;
+    this.isPhoneConnected = phoneConnected;
+    
+    // Broadcast real-time status update
+    this.broadcastToClients('connection_status', {
+      connected: phoneConnected,
+      state: state,
+      sessionInfo: phoneConnected ? this.sessionInfo : null,
+      timestamp: new Date().toISOString(),
+      isRealTime: true
+    });
+  }
+
+  private handleUnpairedRestart(): void {
+    console.log('📱 Handling unpaired restart event');
     this.isReady = false;
     this.sessionInfo = null;
     this.qrCode = null;
@@ -565,12 +574,17 @@ export class WhatsAppService {
     // Clear stored session data
     this.clearStoredSession();
     
-    // Broadcast disconnection with logout reason
+    // Broadcast disconnection with unpaired reason
     this.broadcastToClients('disconnected', { 
       connected: false, 
-      reason: 'PHONE_LOGOUT',
+      reason: 'UNPAIRED',
       requiresNewAuth: true
     });
+    
+    // Restart to get new QR
+    setTimeout(() => {
+      this.handlePhoneLogoutRestart();
+    }, 2000);
   }
 
   private async handlePhoneLogoutRestart(): Promise<void> {

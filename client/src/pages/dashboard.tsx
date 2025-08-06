@@ -341,6 +341,33 @@ export default function Dashboard() {
           queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
           queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
           break;
+        case 'connection_status':
+          // Handle robust real-time connection status updates (like WhatsApp Web)
+          if (message.data?.isRealTime) {
+            const isConnected = message.data.connected;
+            const state = message.data.state;
+            
+            // Update session info query with real-time status
+            if (isConnected && message.data.sessionInfo) {
+              queryClient.setQueryData(['/api/session-info'], message.data.sessionInfo);
+              
+              // Refresh data when phone reconnects
+              queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+            } else if (!isConnected) {
+              // Clear session data when phone disconnects
+              queryClient.setQueryData(['/api/session-info'], null);
+              
+              // Show QR code if session needs re-authentication
+              if (state === 'UNPAIRED' || state === 'TIMEOUT') {
+                queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+              }
+            }
+            
+            console.log(`📱 Real-time status: ${isConnected ? 'Phone Connected' : 'Phone Disconnected'} (${state})`);
+          }
+          break;
         case 'disconnected':
         case 'logout':
           // Invalidate all session-related queries
