@@ -7,13 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
 import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User } from "lucide-react";
-import BulkCampaigns from "./bulk-campaigns";
+
 import { useLocation } from "wouter";
 
 interface Chat {
@@ -128,6 +128,16 @@ export default function Dashboard() {
   const [bulkMessage, setBulkMessage] = useState("");
   const [importingGroupId, setImportingGroupId] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  
+  // Enhanced campaign states
+  const [newCampaignName, setNewCampaignName] = useState('');
+  const [targetType, setTargetType] = useState('contact_group');
+  const [selectedWhatsAppGroup, setSelectedWhatsAppGroup] = useState('');
+  const [scheduleType, setScheduleType] = useState('immediate');
+  const [scheduledTime, setScheduledTime] = useState('');
+  const [minInterval, setMinInterval] = useState(1);
+  const [maxInterval, setMaxInterval] = useState(10);
+  const [selectedMedia, setSelectedMedia] = useState<File | null>(null);
   
   // Contact selection dropdown state
   const [showContactsDropdown, setShowContactsDropdown] = useState(false);
@@ -563,6 +573,168 @@ export default function Dashboard() {
       });
     },
   });
+
+  // Enhanced campaign creation mutation
+  const createBulkCampaignMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await fetch('/api/campaigns/create', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create campaign');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Campaign Created",
+        description: "Campaign has been created successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Create Campaign",
+        description: error.message || "Failed to create campaign.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Media file handler
+  const handleMediaSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedMedia(file);
+    }
+  };
+
+  // Enhanced campaign creation handler
+  const handleCreateEnhancedCampaign = async () => {
+    if (!newCampaignName.trim() || !bulkMessage.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide campaign name and message.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (targetType === 'contact_group' && !selectedContactGroup) {
+      toast({
+        title: "Missing Target",
+        description: "Please select a contact group.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (targetType === 'whatsapp_group' && !selectedWhatsAppGroup) {
+      toast({
+        title: "Missing Target",
+        description: "Please select a WhatsApp group.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', newCampaignName);
+    formData.append('message', bulkMessage);
+    formData.append('targetType', targetType);
+    formData.append('scheduleType', scheduleType);
+    formData.append('minInterval', minInterval.toString());
+    formData.append('maxInterval', maxInterval.toString());
+
+    if (targetType === 'contact_group') {
+      formData.append('targetId', selectedContactGroup);
+    } else if (targetType === 'whatsapp_group') {
+      formData.append('targetId', selectedWhatsAppGroup);
+    }
+
+    if (scheduleType === 'scheduled' && scheduledTime) {
+      formData.append('scheduledTime', scheduledTime);
+    }
+
+    if (selectedMedia) {
+      formData.append('media', selectedMedia);
+    }
+
+    try {
+      await createBulkCampaignMutation.mutateAsync(formData);
+      
+      // Reset form
+      setNewCampaignName('');
+      setBulkMessage('');
+      setSelectedContactGroup('');
+      setSelectedWhatsAppGroup('');
+      setTargetType('contact_group');
+      setScheduleType('immediate');
+      setScheduledTime('');
+      setMinInterval(1);
+      setMaxInterval(10);
+      setSelectedMedia(null);
+      setShowBulkMessageDialog(false);
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
+
+  // Campaign control functions
+  const executeCampaign = async (campaignId: string) => {
+    try {
+      await apiRequest(`/api/campaigns/${campaignId}/execute`, "POST");
+      toast({
+        title: "Campaign Started",
+        description: "Campaign execution has begun.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Start Campaign",
+        description: error.message || "Failed to start campaign.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const pauseCampaign = async (campaignId: string) => {
+    try {
+      await apiRequest(`/api/campaigns/${campaignId}/pause`, "POST");
+      toast({
+        title: "Campaign Paused",
+        description: "Campaign has been paused.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Pause Campaign",
+        description: error.message || "Failed to pause campaign.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resumeCampaign = async (campaignId: string) => {
+    try {
+      await apiRequest(`/api/campaigns/${campaignId}/resume`, "POST");
+      toast({
+        title: "Campaign Resumed",
+        description: "Campaign has been resumed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Resume Campaign",
+        description: error.message || "Failed to resume campaign.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Import CSV mutation
   const importCsvMutation = useMutation({
@@ -1055,22 +1227,7 @@ export default function Dashboard() {
                 <div className="font-medium text-sm">Bulk Messaging</div>
               </div>
 
-              <div 
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedModule === 'bulk-campaigns' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedModule('bulk-campaigns')}
-              >
-                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                  <BarChart3 className="h-4 w-4 text-red-600 dark:text-red-400" />
-                </div>
-                <div>
-                  <div className="font-medium text-sm">Campaign Manager</div>
-                  <div className="text-xs text-gray-500">Advanced bulk messaging campaigns</div>
-                </div>
-              </div>
+
 
               <div 
                 className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
@@ -1715,101 +1872,339 @@ export default function Dashboard() {
                 </div>
               )}
 
-            {/* Bulk Messaging Module */}
+            {/* Enhanced Bulk Messaging Module */}
             {selectedModule === 'bulk-messaging' && (
-              <div className="p-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Send className="h-5 w-5" />
-                        <span>Bulk Messaging</span>
-                      </div>
-                      <Button 
-                        onClick={() => setShowBulkMessageDialog(true)}
-                        disabled={!sessionInfo || contactGroups.length === 0}
-                      >
+              <div className="p-6 space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Bulk Messaging</h1>
+                    <p className="text-muted-foreground">Create and manage bulk messaging campaigns</p>
+                  </div>
+                  <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
+                    <DialogTrigger asChild>
+                      <Button disabled={!sessionInfo}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Send Bulk Message
+                        Create Campaign
                       </Button>
-                    </CardTitle>
-                    <CardDescription>
-                      Send messages to multiple contacts at once using contact groups
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {contactGroups.length === 0 ? (
-                      <div className="text-center p-8">
-                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Contact Groups</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Create contact groups first to start bulk messaging campaigns.
-                        </p>
-                        <Button onClick={() => setSelectedModule('contact-groups')}>
-                          Go to Contact Groups
-                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Create New Campaign</DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="campaignName">Campaign Name</Label>
+                            <Input
+                              id="campaignName"
+                              placeholder="Enter campaign name"
+                              value={newCampaignName}
+                              onChange={(e) => setNewCampaignName(e.target.value)}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Target Type</Label>
+                            <Select value={targetType} onValueChange={setTargetType}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="contact_group">Contact Group</SelectItem>
+                                <SelectItem value="local_contacts">All Local Contacts</SelectItem>
+                                <SelectItem value="whatsapp_group">WhatsApp Group</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {targetType === "contact_group" && (
+                            <div className="space-y-2">
+                              <Label>Contact Group</Label>
+                              <Select value={selectedContactGroup} onValueChange={setSelectedContactGroup}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select contact group" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {contactGroups.map((group: ContactGroup) => (
+                                    <SelectItem key={group.id} value={group.id}>
+                                      {group.name} ({group.validContacts} contacts)
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+
+                          {targetType === "whatsapp_group" && (
+                            <div className="space-y-2">
+                              <Label>WhatsApp Group</Label>
+                              <Select value={selectedWhatsAppGroup} onValueChange={setSelectedWhatsAppGroup}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select WhatsApp group" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {groups.map((group: Group) => (
+                                    <SelectItem key={group.id} value={group.id}>
+                                      {group.name} ({group.participants?.length || 0} members)
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="message">Message</Label>
+                            <Textarea
+                              id="message"
+                              placeholder="Type your message here..."
+                              rows={4}
+                              value={bulkMessage}
+                              onChange={(e) => setBulkMessage(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Schedule Type</Label>
+                            <Select value={scheduleType} onValueChange={setScheduleType}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="immediate">Send Immediately</SelectItem>
+                                <SelectItem value="scheduled">Schedule for Specific Time</SelectItem>
+                                <SelectItem value="daytime">Daytime Hours (6AM-6PM)</SelectItem>
+                                <SelectItem value="nighttime">Nighttime Hours (7PM-5AM)</SelectItem>
+                                <SelectItem value="odd_hours">Odd Hours Only</SelectItem>
+                                <SelectItem value="even_hours">Even Hours Only</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {scheduleType === "scheduled" && (
+                            <div className="space-y-2">
+                              <Label>Schedule Time</Label>
+                              <Input
+                                type="datetime-local"
+                                value={scheduledTime}
+                                onChange={(e) => setScheduledTime(e.target.value)}
+                              />
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Min Interval (seconds)</Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="300"
+                                value={minInterval}
+                                onChange={(e) => setMinInterval(parseInt(e.target.value) || 1)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Max Interval (seconds)</Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="300"
+                                value={maxInterval}
+                                onChange={(e) => setMaxInterval(parseInt(e.target.value) || 10)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Media Attachment (Optional)</Label>
+                            <Input
+                              type="file"
+                              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                              onChange={handleMediaSelect}
+                            />
+                            {selectedMedia && (
+                              <div className="text-sm text-muted-foreground">
+                                Selected: {selectedMedia.name} ({(selectedMedia.size / 1024 / 1024).toFixed(2)} MB)
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setShowBulkMessageDialog(false)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleCreateEnhancedCampaign}
+                            disabled={createBulkCampaignMutation.isPending}
+                          >
+                            {createBulkCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
+                          </Button>
+                        </div>
                       </div>
-                    ) : campaignsLoading ? (
-                      <div className="text-center p-8">
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* Campaign List */}
+                <div className="space-y-4">
+                  {!sessionInfo ? (
+                    <Card>
+                      <CardContent className="text-center py-8">
+                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
+                        <p className="text-muted-foreground">
+                          Please connect to WhatsApp first to create campaigns.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : campaignsLoading ? (
+                    <Card>
+                      <CardContent className="text-center py-8">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-muted-foreground">Loading campaigns...</p>
-                      </div>
-                    ) : bulkCampaigns.length === 0 ? (
-                      <div className="text-center p-8">
-                        <Send className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Bulk Messages Sent</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Send a bulk message to reach multiple contacts.
-                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : bulkCampaigns.length === 0 ? (
+                    <Card>
+                      <CardContent className="text-center py-8">
+                        <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
+                        <p className="text-muted-foreground mb-4">Create your first bulk messaging campaign</p>
                         <Button onClick={() => setShowBulkMessageDialog(true)}>
-                          <Send className="h-4 w-4 mr-2" />
-                          Send Bulk Message
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Campaign
                         </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {bulkCampaigns.map((campaign: BulkCampaign) => (
-                          <div key={campaign.id} className="border rounded-lg p-4 space-y-3">
-                            <div className="flex items-center justify-between">
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-4">
+                      {bulkCampaigns.map((campaign: BulkCampaign) => (
+                        <Card key={campaign.id}>
+                          <CardHeader>
+                            <div className="flex justify-between items-start">
                               <div>
-                                <h4 className="font-semibold">{campaign.name}</h4>
-                                <p className="text-sm text-muted-foreground truncate">{campaign.message}</p>
+                                <CardTitle className="flex items-center gap-2">
+                                  {campaign.name}
+                                  <Badge 
+                                    className={
+                                      campaign.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                                      campaign.status === 'running' ? 'bg-blue-100 text-blue-800' :
+                                      campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                                      campaign.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                      campaign.status === 'failed' ? 'bg-red-100 text-red-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }
+                                  >
+                                    {campaign.status}
+                                  </Badge>
+                                </CardTitle>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Created: {new Date(campaign.createdAt).toLocaleString()}
+                                </p>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <Badge variant={campaign.status === 'sent' ? 'default' : 'secondary'}>
-                                  {campaign.status}
-                                </Badge>
-                                {campaign.status === 'draft' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => sendBulkCampaignMutation.mutate(campaign.id)}
+                              <div className="flex gap-2">
+                                {campaign.status === "draft" && (
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => executeCampaign(campaign.id)}
                                     disabled={sendBulkCampaignMutation.isPending}
                                   >
-                                    Send Now
+                                    <Send className="h-4 w-4 mr-1" />
+                                    Start
+                                  </Button>
+                                )}
+                                {campaign.status === "running" && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => pauseCampaign(campaign.id)}
+                                  >
+                                    <Clock className="h-4 w-4 mr-1" />
+                                    Pause
+                                  </Button>
+                                )}
+                                {campaign.status === "paused" && (
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => resumeCampaign(campaign.id)}
+                                  >
+                                    <Send className="h-4 w-4 mr-1" />
+                                    Resume
                                   </Button>
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                              <span>Sent: {campaign.sentCount}</span>
-                              <span>Failed: {campaign.failedCount}</span>
-                              <span>Created: {new Date(campaign.createdAt).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-                </div>
-              )}
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              <div>
+                                <h4 className="font-medium text-sm mb-1">Message Preview</h4>
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {campaign.message}
+                                </p>
+                              </div>
 
-            {/* Bulk Campaigns Module */}
-            {selectedModule === 'bulk-campaigns' && (
-              <div className="p-6">
-                <BulkCampaigns />
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium">Sent:</span>
+                                  <p className="text-muted-foreground">{campaign.sentCount}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Failed:</span>
+                                  <p className="text-muted-foreground">{campaign.failedCount}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Target Type:</span>
+                                  <p className="text-muted-foreground capitalize">Contact Group</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Status:</span>
+                                  <p className="text-muted-foreground capitalize">{campaign.status}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Analytics Section */}
+                  {bulkCampaigns.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Campaign Analytics</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-blue-600">
+                              {bulkCampaigns.length}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total Campaigns</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-green-600">
+                              {bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0)}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Messages Sent</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-red-600">
+                              {bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0)}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Failed Messages</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             )}
+
+
 
             {/* Chats Module */}
             {selectedModule === 'chats' && (
