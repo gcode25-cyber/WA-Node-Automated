@@ -1107,10 +1107,11 @@ export default function Dashboard() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col">
-          {selectedFeature === 'whatsapp' ? (
-            <div className="p-6 flex-1 flex flex-col">
-              {/* Send Message Module */}
-              {selectedModule === 'send-message' && (
+        {selectedFeature === 'whatsapp' ? (
+          <div className="flex-1 flex flex-col">
+            {/* Send Message Module */}
+            {selectedModule === 'send-message' && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -1322,137 +1323,141 @@ export default function Dashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-              )}
+              </div>
+            )}
 
-              {/* Template Modules */}
-              {selectedModule === 'button-template' && (
+            {/* Template Modules */}
+            {selectedModule === 'button-template' && (
+              <div className="p-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Button Template</CardTitle>
-                    <CardDescription>Create interactive button messages (Coming Soon)</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center p-8">
-                      <span className="text-4xl mb-4 block">📱</span>
-                      <h3 className="text-lg font-semibold mb-2">Button Template</h3>
-                      <p className="text-muted-foreground">
-                        This feature will allow you to create interactive button messages for enhanced user engagement.
-                      </p>
-                    </div>
-                  </CardContent>
+                    <CardHeader>
+                      <CardTitle>Button Template</CardTitle>
+                      <CardDescription>Create interactive button messages (Coming Soon)</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center p-8">
+                        <span className="text-4xl mb-4 block">📱</span>
+                        <h3 className="text-lg font-semibold mb-2">Button Template</h3>
+                        <p className="text-muted-foreground">
+                          This feature will allow you to create interactive button messages for enhanced user engagement.
+                        </p>
+                      </div>
+                    </CardContent>
                 </Card>
-              )}
+              </div>
+            )}
 
-              {selectedModule === 'poll-template' && (
+            {selectedModule === 'poll-template' && (
+              <div className="p-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Poll Template</CardTitle>
-                    <CardDescription>Create Poll messages (Coming Soon)</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center p-8">
-                      <span className="text-4xl mb-4 block">📊</span>
-                      <h3 className="text-lg font-semibold mb-2">Poll Template</h3>
-                      <p className="text-muted-foreground">
-                        This feature will allow you to create poll messages to gather feedback from your contacts.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <CardHeader>
+                      <CardTitle>Poll Template</CardTitle>
+                      <CardDescription>Create Poll messages (Coming Soon)</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center p-8">
+                        <span className="text-4xl mb-4 block">📊</span>
+                        <h3 className="text-lg font-semibold mb-2">Poll Template</h3>
+                        <p className="text-muted-foreground">
+                          This feature will allow you to create poll messages to gather feedback from your contacts.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               )}
 
-              {selectedModule === 'list-template' && (
+            {selectedModule === 'list-template' && (
+              <div className="p-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>List Message Template</CardTitle>
-                    <CardDescription>Create list of items/options (Coming Soon)</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center p-8">
-                      <span className="text-4xl mb-4 block">📝</span>
-                      <h3 className="text-lg font-semibold mb-2">List Message Template</h3>
-                      <p className="text-muted-foreground">
-                        This feature will allow you to create structured list messages with multiple options.
-                      </p>
-                    </div>
-                  </CardContent>
+                    <CardHeader>
+                      <CardTitle>List Message Template</CardTitle>
+                      <CardDescription>Create list of items/options (Coming Soon)</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center p-8">
+                        <span className="text-4xl mb-4 block">📝</span>
+                        <h3 className="text-lg font-semibold mb-2">List Message Template</h3>
+                        <p className="text-muted-foreground">
+                          This feature will allow you to create structured list messages with multiple options.
+                        </p>
+                      </div>
+                    </CardContent>
                 </Card>
-              )}
+              </div>
+            )}
 
-              {selectedModule === 'contacts' && (
-                <div className="h-full flex flex-col">
+            {selectedModule === 'contacts' && (
+                <div className="h-full flex flex-col overflow-hidden">
                   {/* Sticky Header */}
-                  <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 rounded-t-lg">
-                    <div className="p-6 pb-4">
-                      <div className="flex items-center justify-between mb-2">
+                  <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 pb-4 shrink-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Phone className="h-5 w-5" />
+                        <span className="text-lg font-semibold">WhatsApp Contacts</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          onClick={handleAddToContactGroups}
+                          disabled={!sessionInfo || selectedContacts.size === 0}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Add to Contact Groups
+                        </Button>
+                        <Button 
+                          onClick={exportContactsCSV}
+                          disabled={!sessionInfo || contacts.length === 0}
+                          size="sm"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Export CSV
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Your WhatsApp contacts from connected device
+                    </p>
+                    
+                    {/* Controls */}
+                    {sessionInfo && contacts.length > 0 && (
+                      <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center space-x-2">
-                          <Phone className="h-5 w-5" />
-                          <span className="text-lg font-semibold">WhatsApp Contacts</span>
+                          <Checkbox
+                            id="select-all-contacts"
+                            checked={
+                              filteredContacts.length > 0 &&
+                              selectedContacts.size === filteredContacts.length
+                            }
+                            onCheckedChange={handleSelectAllContacts}
+                            data-testid="checkbox-select-all-contacts"
+                          />
+                          <label 
+                            htmlFor="select-all-contacts" 
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            Select All ({filteredContacts.length} contacts)
+                          </label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            onClick={handleAddToContactGroups}
-                            disabled={!sessionInfo || selectedContacts.size === 0}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            Add to Contact Groups
-                          </Button>
-                          <Button 
-                            onClick={exportContactsCSV}
-                            disabled={!sessionInfo || contacts.length === 0}
-                            size="sm"
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Export CSV
-                          </Button>
+                        
+                        {/* Search Bar */}
+                        <div className="relative max-w-md flex-1">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Search contacts..."
+                            value={contactSearchTerm}
+                            onChange={(e) => setContactSearchTerm(e.target.value)}
+                            className="pl-10"
+                            data-testid="input-search-contacts"
+                          />
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Your WhatsApp contacts from connected device
-                      </p>
-                      
-                      {/* Controls */}
-                      {sessionInfo && contacts.length > 0 && (
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="select-all-contacts"
-                              checked={
-                                filteredContacts.length > 0 &&
-                                selectedContacts.size === filteredContacts.length
-                              }
-                              onCheckedChange={handleSelectAllContacts}
-                              data-testid="checkbox-select-all-contacts"
-                            />
-                            <label 
-                              htmlFor="select-all-contacts" 
-                              className="text-sm font-medium cursor-pointer"
-                            >
-                              Select All ({filteredContacts.length} contacts)
-                            </label>
-                          </div>
-                          
-                          {/* Search Bar */}
-                          <div className="relative max-w-md flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              placeholder="Search contacts..."
-                              value={contactSearchTerm}
-                              onChange={(e) => setContactSearchTerm(e.target.value)}
-                              className="pl-10"
-                              data-testid="input-search-contacts"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                   
                   {/* Scrollable Content */}
-                  <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700">
-                    <div className="p-6">
+                  <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 p-6">
                     {!sessionInfo ? (
                       <div className="text-center p-8">
                         <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -1475,7 +1480,7 @@ export default function Dashboard() {
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-2 p-4">
+                      <div className="space-y-2">
                         {/* Contacts List */}
                         {filteredContacts.length === 0 ? (
                           <div className="text-center p-8">
@@ -1551,15 +1556,15 @@ export default function Dashboard() {
                         )}
                       </div>
                     )}
-                    </div>
                   </div>
                 </div>
               )}
 
 
 
-              {/* Contact Groups Module */}
-              {selectedModule === 'contact-groups' && (
+            {/* Contact Groups Module */}
+            {selectedModule === 'contact-groups' && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -1689,10 +1694,12 @@ export default function Dashboard() {
                     )}
                   </CardContent>
                 </Card>
+                </div>
               )}
 
-              {/* Bulk Messaging Module */}
-              {selectedModule === 'bulk-messaging' && (
+            {/* Bulk Messaging Module */}
+            {selectedModule === 'bulk-messaging' && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -1776,10 +1783,12 @@ export default function Dashboard() {
                     )}
                   </CardContent>
                 </Card>
+                </div>
               )}
 
-              {/* Chats Module */}
-              {selectedModule === 'chats' && (
+            {/* Chats Module */}
+            {selectedModule === 'chats' && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -1855,10 +1864,12 @@ export default function Dashboard() {
                     )}
                   </CardContent>
                 </Card>
+                </div>
               )}
 
-              {/* Groups Module */}
-              {selectedModule === 'groups' && (
+            {/* Groups Module */}
+            {selectedModule === 'groups' && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -1955,12 +1966,12 @@ export default function Dashboard() {
                     )}
                   </CardContent>
                 </Card>
+                </div>
               )}
 
-
-
-              {/* Reports Module */}
-              {selectedModule === 'reports' && (
+            {/* Reports Module */}
+            {selectedModule === 'reports' && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Reports</CardTitle>
@@ -1976,10 +1987,12 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
+                </div>
               )}
 
-              {/* Placeholder for other modules */}
-              {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups'].includes(selectedModule) && (
+            {/* Placeholder for other modules */}
+            {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups'].includes(selectedModule) && (
+              <div className="p-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Feature Coming Soon</CardTitle>
@@ -1997,12 +2010,12 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              )}
-            </div>
-          ) : selectedFeature === 'rcs' ? (
-            /* RCS Content */
-            <div className="p-6">
-              <Card>
+              </div>
+            )}
+          </div>
+        ) : selectedFeature === 'rcs' ? (
+          <div className="p-6">
+            <Card>
                 <CardHeader>
                   <CardTitle>RCS Messaging</CardTitle>
                   <CardDescription>Rich Communication Services (Coming Soon)</CardDescription>
@@ -2016,9 +2029,9 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </CardContent>
-              </Card>
-            </div>
-          ) : null}
+            </Card>
+          </div>
+        ) : null}
         </div>
       </div>
 
