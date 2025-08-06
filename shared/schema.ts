@@ -68,13 +68,40 @@ export const contactGroupMembers = pgTable("contact_group_members", {
 export const bulkMessageCampaigns = pgTable("bulk_message_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  contactGroupId: varchar("contact_group_id").notNull().references(() => contactGroups.id),
+  // Target configuration - one of these will be set
+  targetType: varchar("target_type", { enum: ["contact_group", "local_contacts", "whatsapp_group"] }).notNull(),
+  contactGroupId: varchar("contact_group_id").references(() => contactGroups.id),
+  whatsappGroupId: text("whatsapp_group_id"), // For WhatsApp groups
+  // Message content
   message: text("message").notNull(),
   mediaUrl: text("media_url"),
-  scheduledAt: timestamp("scheduled_at"),
-  status: varchar("status", { enum: ["draft", "scheduled", "running", "completed", "failed"] }).default("draft").notNull(),
+  mediaType: varchar("media_type", { enum: ["image", "video", "document", "audio"] }),
+  // Scheduling configuration
+  timePost: timestamp("time_post"),
+  minInterval: integer("min_interval").default(1).notNull(), // seconds
+  maxInterval: integer("max_interval").default(10).notNull(), // seconds
+  scheduleType: varchar("schedule_type", { enum: ["immediate", "scheduled", "daytime", "nighttime", "odd_hours", "even_hours"] }).default("immediate").notNull(),
+  scheduleHours: text("schedule_hours"), // JSON array of hours for custom scheduling
+  // Status and tracking
+  status: varchar("status", { enum: ["draft", "scheduled", "running", "paused", "completed", "failed"] }).default("draft").notNull(),
   sentCount: integer("sent_count").default(0).notNull(),
   failedCount: integer("failed_count").default(0).notNull(),
+  totalTargets: integer("total_targets").default(0).notNull(),
+  lastExecuted: timestamp("last_executed"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Campaign execution logs for tracking message sending progress
+export const campaignExecutions = pgTable("campaign_executions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => bulkMessageCampaigns.id, { onDelete: "cascade" }),
+  targetId: text("target_id").notNull(), // Phone number or group ID
+  targetName: text("target_name"),
+  status: varchar("status", { enum: ["pending", "sent", "failed", "skipped"] }).default("pending").notNull(),
+  errorMessage: text("error_message"),
+  sentAt: timestamp("sent_at"),
+  scheduledFor: timestamp("scheduled_for"),
+  retryCount: integer("retry_count").default(0).notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
@@ -131,6 +158,13 @@ export const insertBulkMessageCampaignSchema = createInsertSchema(bulkMessageCam
   createdAt: true,
   sentCount: true,
   failedCount: true,
+  totalTargets: true,
+  lastExecuted: true,
+});
+
+export const insertCampaignExecutionSchema = createInsertSchema(campaignExecutions).omit({
+  id: true,
+  createdAt: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -147,6 +181,8 @@ export type ContactGroupMember = typeof contactGroupMembers.$inferSelect;
 export type InsertContactGroupMember = z.infer<typeof insertContactGroupMemberSchema>;
 export type BulkMessageCampaign = typeof bulkMessageCampaigns.$inferSelect;
 export type InsertBulkMessageCampaign = z.infer<typeof insertBulkMessageCampaignSchema>;
+export type CampaignExecution = typeof campaignExecutions.$inferSelect;
+export type InsertCampaignExecution = z.infer<typeof insertCampaignExecutionSchema>;
 
 // API Response types
 export const sessionInfoSchema = z.object({
@@ -182,8 +218,41 @@ export const bulkMessageSchema = z.object({
   scheduledAt: z.string().optional(),
 });
 
+// Enhanced bulk message campaign schema
+export const createCampaignSchema = z.object({
+  name: z.string().min(1, "Campaign name is required"),
+  targetType: z.enum(["contact_group", "local_contacts", "whatsapp_group"]),
+  contactGroupId: z.string().optional(),
+  whatsappGroupId: z.string().optional(),
+  message: z.string().min(1, "Message is required").max(1000, "Message too long"),
+  mediaUrl: z.string().optional(),
+  mediaType: z.enum(["image", "video", "document", "audio"]).optional(),
+  timePost: z.string().optional(), // ISO string
+  minInterval: z.number().min(1).max(3600).default(1),
+  maxInterval: z.number().min(1).max(3600).default(10),
+  scheduleType: z.enum(["immediate", "scheduled", "daytime", "nighttime", "odd_hours", "even_hours"]).default("immediate"),
+  scheduleHours: z.array(z.number()).optional(), // Array of hours (0-23)
+}).refine(data => {
+  if (data.targetType === "contact_group" && !data.contactGroupId) {
+    return false;
+  }
+  if (data.targetType === "whatsapp_group" && !data.whatsappGroupId) {
+    return false;
+  }
+  if (data.scheduleType === "scheduled" && !data.timePost) {
+    return false;
+  }
+  if (data.minInterval > data.maxInterval) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Invalid campaign configuration"
+});
+
 export type SessionInfo = z.infer<typeof sessionInfoSchema>;
 export type QRResponse = z.infer<typeof qrResponseSchema>;
 export type SendMessageRequest = z.infer<typeof sendMessageSchema>;
 export type SendMediaMessageRequest = z.infer<typeof sendMediaMessageSchema>;
 export type BulkMessageRequest = z.infer<typeof bulkMessageSchema>;
+export type CreateCampaignRequest = z.infer<typeof createCampaignSchema>;

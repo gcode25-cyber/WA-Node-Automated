@@ -11,7 +11,7 @@ declare module "express-session" {
   }
 }
 import { whatsappService } from "./services/whatsapp";
-import { sessionInfoSchema, qrResponseSchema, sendMessageSchema, sendMediaMessageSchema, loginSchema, signupSchema } from "@shared/schema";
+import { sessionInfoSchema, qrResponseSchema, sendMessageSchema, sendMediaMessageSchema, loginSchema, signupSchema, createCampaignSchema } from "@shared/schema";
 import type { WhatsappAccount, ContactGroup } from "@shared/schema";
 import { storage } from "./storage";
 import multer from "multer";
@@ -1516,11 +1516,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const campaign = await storage.createBulkMessageCampaign({
         name: campaignName,
+        targetType: "contact_group",
         contactGroupId,
         message,
-        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+        timePost: scheduledAt ? new Date(scheduledAt) : null,
         status: "draft",
-        mediaUrl: null
+        mediaUrl: null,
+        minInterval: 1,
+        maxInterval: 10,
+        scheduleType: "immediate"
       });
 
       res.json(campaign);
@@ -1543,7 +1547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get contact group members
-      const members = await storage.getContactGroupMembers(campaign.contactGroupId);
+      const members = await storage.getContactGroupMembers(campaign.contactGroupId!);
       let sentCount = 0;
       let failedCount = 0;
 
@@ -1593,6 +1597,293 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: error.message || "Failed to send bulk campaign" });
     }
   });
+
+  // Enhanced Bulk Campaign Creation API
+  app.post("/api/campaigns/create", upload.single('media'), async (req, res) => {
+    try {
+      const validatedData = createCampaignSchema.parse(req.body);
+      
+      let mediaUrl = null;
+      let mediaType = null;
+      
+      // Handle media upload if provided
+      if (req.file) {
+        mediaUrl = `/uploads/${req.file.filename}`;
+        if (req.file.mimetype.startsWith('image/')) mediaType = 'image';
+        else if (req.file.mimetype.startsWith('video/')) mediaType = 'video';
+        else if (req.file.mimetype.startsWith('audio/')) mediaType = 'audio';
+        else mediaType = 'document';
+      }
+
+      // Determine total targets based on target type
+      let totalTargets = 0;
+      if (validatedData.targetType === "contact_group" && validatedData.contactGroupId) {
+        const group = await storage.getContactGroup(validatedData.contactGroupId);
+        if (!group) {
+          return res.status(404).json({ error: "Contact group not found" });
+        }
+        totalTargets = group.validContacts;
+      } else if (validatedData.targetType === "local_contacts") {
+        // Get count of all local WhatsApp contacts
+        const contacts = await whatsappService.getContacts();
+        totalTargets = contacts.length;
+      } else if (validatedData.targetType === "whatsapp_group" && validatedData.whatsappGroupId) {
+        // Get WhatsApp group member count
+        const groupInfo = await whatsappService.getGroupInfo(validatedData.whatsappGroupId);
+        totalTargets = groupInfo ? groupInfo.participants.length : 0;
+      }
+
+      // Create campaign with enhanced scheduling data
+      const campaign = await storage.createBulkMessageCampaign({
+        ...validatedData,
+        mediaUrl,
+        mediaType: mediaType as any,
+        timePost: validatedData.timePost ? new Date(validatedData.timePost) : null,
+        scheduleHours: validatedData.scheduleHours ? JSON.stringify(validatedData.scheduleHours) : null,
+        totalTargets,
+        status: "draft"
+      });
+
+      res.json({ 
+        success: true, 
+        campaign,
+        message: "Campaign created successfully" 
+      });
+      
+    } catch (error: any) {
+      console.error("Create enhanced campaign error:", error);
+      res.status(500).json({ error: error.message || "Failed to create campaign" });
+    }
+  });
+
+  // Enhanced Campaign Execution API
+  app.post("/api/campaigns/:campaignId/execute", async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      
+      const campaign = await storage.updateBulkMessageCampaign(campaignId, {
+        status: "running",
+        lastExecuted: new Date()
+      });
+
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+
+      // Determine target list based on campaign type
+      let targets: Array<{id: string, name?: string}> = [];
+      
+      if (campaign.targetType === "contact_group" && campaign.contactGroupId) {
+        const members = await storage.getContactGroupMembers(campaign.contactGroupId);
+        targets = members
+          .filter(m => m.status === "valid")
+          .map(m => ({ id: m.phoneNumber, name: m.name || undefined }));
+      } else if (campaign.targetType === "local_contacts") {
+        const contacts = await whatsappService.getContacts();
+        targets = contacts.map(c => ({ id: c.id, name: c.name }));
+      } else if (campaign.targetType === "whatsapp_group" && campaign.whatsappGroupId) {
+        targets = [{ id: campaign.whatsappGroupId, name: "WhatsApp Group" }];
+      }
+
+      // Execute campaign with intelligent scheduling
+      executeCampaignWithScheduling(campaign, targets);
+      
+      res.json({
+        success: true,
+        message: "Campaign execution started",
+        totalTargets: targets.length,
+        estimatedDuration: calculateEstimatedDuration(targets.length, campaign.minInterval, campaign.maxInterval)
+      });
+      
+    } catch (error: any) {
+      console.error("Execute campaign error:", error);
+      res.status(500).json({ error: error.message || "Failed to execute campaign" });
+    }
+  });
+
+  // Campaign Control APIs
+  app.post("/api/campaigns/:campaignId/pause", async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const campaign = await storage.updateBulkMessageCampaign(campaignId, {
+        status: "paused"
+      });
+      
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      res.json({ success: true, message: "Campaign paused successfully" });
+    } catch (error: any) {
+      console.error("Pause campaign error:", error);
+      res.status(500).json({ error: error.message || "Failed to pause campaign" });
+    }
+  });
+
+  app.post("/api/campaigns/:campaignId/resume", async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const campaign = await storage.updateBulkMessageCampaign(campaignId, {
+        status: "running"
+      });
+      
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      res.json({ success: true, message: "Campaign resumed successfully" });
+    } catch (error: any) {
+      console.error("Resume campaign error:", error);
+      res.status(500).json({ error: error.message || "Failed to resume campaign" });
+    }
+  });
+
+  // Get campaign targets for preview
+  app.get("/api/campaigns/targets", async (req, res) => {
+    try {
+      const { targetType, contactGroupId, whatsappGroupId } = req.query;
+      
+      let targets: Array<{id: string, name?: string, count?: number}> = [];
+      
+      if (targetType === "contact_group" && contactGroupId) {
+        const group = await storage.getContactGroup(contactGroupId as string);
+        if (group) {
+          targets.push({
+            id: group.id,
+            name: group.name,
+            count: group.validContacts
+          });
+        }
+      } else if (targetType === "local_contacts") {
+        const contacts = await whatsappService.getContacts();
+        targets.push({
+          id: "local_contacts",
+          name: "All Local Contacts",
+          count: contacts.length
+        });
+      } else if (targetType === "whatsapp_group") {
+        const groups = await whatsappService.getGroups();
+        targets = groups.map(g => ({
+          id: g.id,
+          name: g.name,
+          count: g.participants?.length || 0
+        }));
+      }
+      
+      res.json(targets);
+    } catch (error: any) {
+      console.error("Get campaign targets error:", error);
+      res.status(500).json({ error: error.message || "Failed to get targets" });
+    }
+  });
+
+  // Helper functions for campaign execution
+  async function executeCampaignWithScheduling(campaign: any, targets: Array<{id: string, name?: string}>) {
+    const { scheduleType, timePost, minInterval, maxInterval, scheduleHours } = campaign;
+    
+    // Determine when to start sending
+    let startTime = new Date();
+    
+    if (scheduleType === "scheduled" && timePost) {
+      startTime = new Date(timePost);
+    } else if (scheduleType === "daytime") {
+      startTime = getNextScheduledTime([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+    } else if (scheduleType === "nighttime") {
+      startTime = getNextScheduledTime([19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5]);
+    } else if (scheduleType === "odd_hours") {
+      startTime = getNextScheduledTime([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]);
+    } else if (scheduleType === "even_hours") {
+      startTime = getNextScheduledTime([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]);
+    }
+    
+    // Execute campaign in background
+    setTimeout(async () => {
+      await executeCampaignMessages(campaign, targets);
+    }, Math.max(0, startTime.getTime() - Date.now()));
+  }
+
+  function getNextScheduledTime(allowedHours: number[]): Date {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    // Find next allowed hour today
+    const nextHourToday = allowedHours.find(hour => hour > currentHour);
+    
+    if (nextHourToday !== undefined) {
+      const nextTime = new Date(now);
+      nextTime.setHours(nextHourToday, 0, 0, 0);
+      return nextTime;
+    }
+    
+    // No valid hour today, use first hour tomorrow
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(allowedHours[0], 0, 0, 0);
+    return tomorrow;
+  }
+
+  async function executeCampaignMessages(campaign: any, targets: Array<{id: string, name?: string}>) {
+    let sentCount = 0;
+    let failedCount = 0;
+    
+    for (const target of targets) {
+      try {
+        // Check if campaign is still running (could be paused)
+        const currentCampaign = await storage.getBulkMessageCampaigns();
+        const activeCampaign = currentCampaign.find(c => c.id === campaign.id);
+        
+        if (!activeCampaign || activeCampaign.status !== "running") {
+          console.log(`Campaign ${campaign.id} stopped or paused`);
+          break;
+        }
+        
+        // Send message
+        if (campaign.targetType === "whatsapp_group") {
+          await whatsappService.sendMessageToGroup(target.id, campaign.message);
+        } else {
+          if (campaign.mediaUrl) {
+            await whatsappService.sendMediaMessage(target.id, campaign.message, campaign.mediaUrl);
+          } else {
+            await whatsappService.sendMessage(target.id, campaign.message);
+          }
+        }
+        
+        sentCount++;
+        
+        // Random interval between messages
+        const interval = getRandomInterval(campaign.minInterval * 1000, campaign.maxInterval * 1000);
+        await new Promise(resolve => setTimeout(resolve, interval));
+        
+      } catch (error) {
+        console.error(`Failed to send message to ${target.id}:`, error);
+        failedCount++;
+      }
+    }
+    
+    // Update final campaign status
+    await storage.updateBulkMessageCampaign(campaign.id, {
+      status: "completed",
+      sentCount,
+      failedCount
+    });
+  }
+
+  function getRandomInterval(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function calculateEstimatedDuration(targetCount: number, minInterval: number, maxInterval: number): string {
+    const avgInterval = (minInterval + maxInterval) / 2;
+    const totalSeconds = targetCount * avgInterval;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
+  }
 
   const httpServer = createServer(app);
   return httpServer;

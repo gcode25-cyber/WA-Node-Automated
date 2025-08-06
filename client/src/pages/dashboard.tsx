@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
 import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User } from "lucide-react";
+import BulkCampaigns from "./bulk-campaigns";
 import { useLocation } from "wouter";
 
 interface Chat {
@@ -1056,6 +1057,23 @@ export default function Dashboard() {
 
               <div 
                 className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedModule === 'bulk-campaigns' 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedModule('bulk-campaigns')}
+              >
+                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                </div>
+                <div>
+                  <div className="font-medium text-sm">Campaign Manager</div>
+                  <div className="text-xs text-gray-500">Advanced bulk messaging campaigns</div>
+                </div>
+              </div>
+
+              <div 
+                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
                   selectedModule === 'groups' 
                     ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
                     : 'hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -1785,6 +1803,13 @@ export default function Dashboard() {
                 </Card>
                 </div>
               )}
+
+            {/* Bulk Campaigns Module */}
+            {selectedModule === 'bulk-campaigns' && (
+              <div className="p-6">
+                <BulkCampaigns />
+              </div>
+            )}
 
             {/* Chats Module */}
             {selectedModule === 'chats' && (

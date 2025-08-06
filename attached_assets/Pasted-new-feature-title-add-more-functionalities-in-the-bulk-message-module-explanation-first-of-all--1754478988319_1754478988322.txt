@@ -1,0 +1,11 @@
+new feature:
+title: add more functionalities in the bulk message module
+explanation: first of all, before sending bulk messages, we will create campaign with "campaign name" field, a drop down to let user to select from contacts (our local whatsapp contacts <no need to display all contacts, just make the option as whole) or contact groups (our all created groups will display separately) or groups (our whatsapp groups display separately) to send messages.
+
+for example I have five contact group, all displayed here and then included option for our "local contacts" and if my whatsapp have three groups, all three will display here, user can select only one object, a contact group, or the local contacts or one from the groups, if user select a contact group, bulk messages will send to all the numbers presented in that contact group, if local contacts are selected, messages will send to all the local contacts and if user select a whatsapp group, messages will send to all the participates of that particular group.
+
+after that drop down a text area and media uploading same as our single message module, copy from there, then (see the attached image) time and date as the start point of sending bulk messages (when user clicked on this field a date and time selector pop-up will display), minimum and maximum interval, in both drop down add seconds from 1 second to 3600 seconds, then schedule time, add four button there, as displayed: daytime, nighttime, odd, even, if day time selected: it displays hours from 7 to 18, 0 to 23 if nighttime selected, then odd hours and even hours, and then two buttons "cancel" and "schedule".
+
+if user selects "schedule", the bulk message will scheduled for that specific "time of post" to send, properly implement random intervals and schedule time functionalities. if user select minimum 9 second and max 23 second, messages will send with intervals with random seconds between 9 second to 23 seconds, sometimes after 10 seconds, sometimes after 21 seconds, thats way. after that the "schedule time" functionality.
+
+these campaign will be saved to the database, so that user can start that campaign multiple times in the future.
