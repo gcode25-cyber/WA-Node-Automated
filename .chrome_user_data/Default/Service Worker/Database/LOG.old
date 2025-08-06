@@ -1,3 +1,3 @@
-2025/08/06-11:45:30.728 341 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/MANIFEST-000001
-2025/08/06-11:45:30.735 341 Recovering log #3
-2025/08/06-11:45:30.735 341 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/000003.log 
+2025/08/06-11:45:34.598 400 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/MANIFEST-000001
+2025/08/06-11:45:34.598 400 Recovering log #3
+2025/08/06-11:45:34.599 400 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/000003.log 
