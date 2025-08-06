@@ -1601,7 +1601,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced Bulk Campaign Creation API
   app.post("/api/campaigns/create", upload.single('media'), async (req, res) => {
     try {
-      const validatedData = createCampaignSchema.parse(req.body);
+      // Transform FormData strings to appropriate types
+      const requestData = {
+        ...req.body,
+        minInterval: req.body.minInterval ? parseInt(req.body.minInterval) : 1,
+        maxInterval: req.body.maxInterval ? parseInt(req.body.maxInterval) : 10,
+      };
+      
+      const validatedData = createCampaignSchema.parse(requestData);
       
       let mediaUrl = null;
       let mediaType = null;

@@ -651,13 +651,13 @@ export default function Dashboard() {
     formData.append('maxInterval', maxInterval.toString());
 
     if (targetType === 'contact_group') {
-      formData.append('targetId', selectedContactGroup);
+      formData.append('contactGroupId', selectedContactGroup);
     } else if (targetType === 'whatsapp_group') {
-      formData.append('targetId', selectedWhatsAppGroup);
+      formData.append('whatsappGroupId', selectedWhatsAppGroup);
     }
 
     if (scheduleType === 'scheduled' && scheduledTime) {
-      formData.append('scheduledTime', scheduledTime);
+      formData.append('timePost', scheduledTime);
     }
 
     if (selectedMedia) {
@@ -1966,6 +1966,20 @@ export default function Dashboard() {
                           </div>
 
                           <div className="space-y-2">
+                            <Label>Media Attachment (Optional)</Label>
+                            <Input
+                              type="file"
+                              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                              onChange={handleMediaSelect}
+                            />
+                            {selectedMedia && (
+                              <div className="text-sm text-muted-foreground">
+                                Selected: {selectedMedia.name} ({(selectedMedia.size / 1024 / 1024).toFixed(2)} MB)
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
                             <Label>Schedule Type</Label>
                             <Select value={scheduleType} onValueChange={setScheduleType}>
                               <SelectTrigger>
@@ -2014,20 +2028,6 @@ export default function Dashboard() {
                                 onChange={(e) => setMaxInterval(parseInt(e.target.value) || 10)}
                               />
                             </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>Media Attachment (Optional)</Label>
-                            <Input
-                              type="file"
-                              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-                              onChange={handleMediaSelect}
-                            />
-                            {selectedMedia && (
-                              <div className="text-sm text-muted-foreground">
-                                Selected: {selectedMedia.name} ({(selectedMedia.size / 1024 / 1024).toFixed(2)} MB)
-                              </div>
-                            )}
                           </div>
                         </div>
 
