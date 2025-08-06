@@ -341,14 +341,25 @@ export class WhatsAppService {
       this.sessionInfo = null;
       this.qrCode = null;
       
-      // Attempt retry after a delay for transient network issues
-      console.log('🔄 Scheduling retry in 10 seconds...');
-      setTimeout(() => {
-        if (!this.isReady && !this.isInitializing) {
-          console.log('🔄 Retrying WhatsApp client initialization...');
+      // Handle specific error types
+      if (error.message.includes('Protocol error') || 
+          error.message.includes('Target closed') ||
+          error.message.includes('Navigation timeout')) {
+        console.log('🔧 Protocol/Connection error handled - attempting clean restart');
+        // Clean restart for protocol errors
+        setTimeout(() => {
           this.initializeClient();
-        }
-      }, 10000);
+        }, 5000);
+      } else {
+        // Attempt retry after a delay for other transient network issues
+        console.log('🔄 Scheduling retry in 10 seconds...');
+        setTimeout(() => {
+          if (!this.isReady && !this.isInitializing) {
+            console.log('🔄 Retrying WhatsApp client initialization...');
+            this.initializeClient();
+          }
+        }, 10000);
+      }
       
       console.log('Browser failed to initialize - QR will be available when browser starts');
     } finally {
@@ -381,8 +392,8 @@ export class WhatsAppService {
             if (page) {
               console.log('📱 Executing UI-based logout to disconnect phone...');
               
-              // Try to click the menu and logout
-              await page.evaluate(() => {
+              // Try to click the menu and logout with timeout
+              const uiLogoutPromise = page.evaluate(() => {
                 try {
                   // Look for menu button and click it
                   const menuBtn = document.querySelector("span[data-icon='menu']");
@@ -414,11 +425,20 @@ export class WhatsAppService {
                 }
               });
               
+              // Add timeout to prevent hanging
+              const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+              await Promise.race([uiLogoutPromise, timeoutPromise]);
+              
               console.log('✅ UI logout attempt completed');
               await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for logout to process
             }
           } catch (pageError: any) {
-            console.log('Page access failed:', pageError.message);
+            if (pageError.message.includes('Protocol error') || 
+                pageError.message.includes('Target closed')) {
+              console.log('🔧 Page access failed during logout (expected):', pageError.message);
+            } else {
+              console.log('Page access failed:', pageError.message);
+            }
           }
           
           // Method 2: Standard client logout
@@ -429,10 +449,25 @@ export class WhatsAppService {
             console.log('Client logout (expected):', logoutError.message);
           }
           
-          // Method 3: Destroy client
+          // Method 3: Destroy client with timeout protection
           console.log('🧹 Destroying WhatsApp client...');
-          await this.client.destroy();
-          console.log('✅ Client destroyed');
+          try {
+            const destroyPromise = this.client.destroy();
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Client destroy timeout')), 8000)
+            );
+            
+            await Promise.race([destroyPromise, timeoutPromise]);
+            console.log('✅ Client destroyed');
+          } catch (destroyError: any) {
+            if (destroyError.message.includes('Protocol error') || 
+                destroyError.message.includes('Target closed') ||
+                destroyError.message.includes('timeout')) {
+              console.log('🔧 Client destruction completed (expected during logout)');
+            } else {
+              console.log('Client destroy error:', destroyError.message);
+            }
+          }
           
         } catch (clientError: any) {
           console.log('Client operation failed:', clientError.message);
@@ -604,10 +639,24 @@ export class WhatsAppService {
       if (this.client) {
         try {
           console.log('🧹 Safely destroying existing client...');
-          await this.client.destroy();
+          
+          // Add timeout to prevent hanging on destroy
+          const destroyPromise = this.client.destroy();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Destroy timeout')), 5000)
+          );
+          
+          await Promise.race([destroyPromise, timeoutPromise]);
           console.log('✅ Client destroyed successfully');
         } catch (destroyError: any) {
-          console.log('Client destroy (expected):', destroyError.message);
+          // Handle ProtocolError and other cleanup errors gracefully
+          if (destroyError.message.includes('Protocol error') || 
+              destroyError.message.includes('Target closed') ||
+              destroyError.message.includes('Destroy timeout')) {
+            console.log('🔧 Client cleanup completed (expected during phone logout)');
+          } else {
+            console.log('Client destroy error:', destroyError.message);
+          }
         }
         this.client = null;
       }
@@ -646,10 +695,20 @@ export class WhatsAppService {
       console.error('❌ Restart after logout failed:', error.message);
       this.isInitializing = false;
       
-      // Fallback: try again after longer delay
-      setTimeout(() => {
-        this.initializeClient();
-      }, 10000);
+      // Handle ProtocolError gracefully - it's expected during logout
+      if (error.message.includes('Protocol error') || 
+          error.message.includes('Target closed')) {
+        console.log('🔧 ProtocolError handled - this is expected during phone logout');
+        // Continue with restart anyway
+        setTimeout(() => {
+          this.initializeClient();
+        }, 3000);
+      } else {
+        // Fallback: try again after longer delay for other errors
+        setTimeout(() => {
+          this.initializeClient();
+        }, 10000);
+      }
     }
   }
 

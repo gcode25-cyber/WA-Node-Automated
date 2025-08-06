@@ -5,6 +5,29 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { WebSocketServer } from 'ws';
 
+// Global error handlers to prevent WhatsApp ProtocolError crashes
+process.on('uncaughtException', (error) => {
+  if (error.message.includes('Protocol error') || 
+      error.message.includes('Target closed')) {
+    console.log('🔧 Handled ProtocolError (expected during WhatsApp logout):', error.message);
+    // Don't exit the process for protocol errors
+    return;
+  }
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: any, promise) => {
+  if (reason?.message?.includes('Protocol error') || 
+      reason?.message?.includes('Target closed')) {
+    console.log('🔧 Handled ProtocolError rejection (expected during WhatsApp logout):', reason.message);
+    // Don't exit the process for protocol errors
+    return;
+  }
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
