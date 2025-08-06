@@ -1412,45 +1412,45 @@ export default function Dashboard() {
                       <CardDescription>
                         Your WhatsApp contacts from connected device
                       </CardDescription>
-                    </CardHeader>
-                    
-                    {/* Sticky Controls */}
-                    {sessionInfo && contacts.length > 0 && (
-                      <div className="px-6 pb-4 space-y-4">
-                        {/* Select All and Search Bar */}
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="select-all-contacts"
-                              checked={
-                                filteredContacts.length > 0 &&
-                                selectedContacts.size === filteredContacts.length
-                              }
-                              onCheckedChange={handleSelectAllContacts}
-                              data-testid="checkbox-select-all-contacts"
-                            />
-                            <label 
-                              htmlFor="select-all-contacts" 
-                              className="text-sm font-medium cursor-pointer"
-                            >
-                              Select All ({filteredContacts.length} contacts)
-                            </label>
-                          </div>
-                          
-                          {/* Search Bar */}
-                          <div className="relative max-w-md flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              placeholder="Search contacts..."
-                              value={contactSearchTerm}
-                              onChange={(e) => setContactSearchTerm(e.target.value)}
-                              className="pl-10"
-                              data-testid="input-search-contacts"
-                            />
+                      
+                      {/* Sticky Controls - moved inside sticky header */}
+                      {sessionInfo && contacts.length > 0 && (
+                        <div className="px-6 pb-4 space-y-4">
+                          {/* Select All and Search Bar */}
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="select-all-contacts"
+                                checked={
+                                  filteredContacts.length > 0 &&
+                                  selectedContacts.size === filteredContacts.length
+                                }
+                                onCheckedChange={handleSelectAllContacts}
+                                data-testid="checkbox-select-all-contacts"
+                              />
+                              <label 
+                                htmlFor="select-all-contacts" 
+                                className="text-sm font-medium cursor-pointer"
+                              >
+                                Select All ({filteredContacts.length} contacts)
+                              </label>
+                            </div>
+                            
+                            {/* Search Bar */}
+                            <div className="relative max-w-md flex-1">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                placeholder="Search contacts..."
+                                value={contactSearchTerm}
+                                onChange={(e) => setContactSearchTerm(e.target.value)}
+                                className="pl-10"
+                                data-testid="input-search-contacts"
+                              />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </CardHeader>
                   </div>
                   
                   {/* Scrollable Content */}
