@@ -1082,6 +1082,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add multiple phone numbers to contact group
+  app.post("/api/contact-groups/:groupId/members/batch", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const { phoneNumbers } = req.body;
+
+      if (!phoneNumbers || !Array.isArray(phoneNumbers)) {
+        return res.status(400).json({ error: "Phone numbers array is required" });
+      }
+
+      const group = await storage.getContactGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ error: "Contact group not found" });
+      }
+
+      // Get existing numbers to avoid duplicates
+      const existingMembers = await storage.getContactGroupMembers(groupId);
+      const existingNumbers = new Set(existingMembers.map(m => m.phoneNumber));
+
+      let validContacts = 0;
+      let duplicateContacts = 0;
+      let invalidContacts = 0;
+      const membersToInsert: { groupId: string; phoneNumber: string; name: null; status: 'valid' | 'invalid' }[] = [];
+
+      for (const phoneNumber of phoneNumbers) {
+        if (!phoneNumber || typeof phoneNumber !== 'string') {
+          invalidContacts++;
+          continue;
+        }
+
+        // Check for duplicates
+        if (existingNumbers.has(phoneNumber)) {
+          duplicateContacts++;
+          continue;
+        }
+
+        // Add to existing numbers set to prevent duplicates within the batch
+        existingNumbers.add(phoneNumber);
+        validContacts++;
+
+        membersToInsert.push({
+          groupId,
+          phoneNumber,
+          name: null, // Multiple numbers don't have names
+          status: "valid"
+        });
+      }
+
+      // Bulk insert all valid members
+      if (membersToInsert.length > 0) {
+        await storage.createContactGroupMembersBulk(membersToInsert);
+      }
+
+      // Update group statistics
+      await storage.updateContactGroup(groupId, {
+        totalContacts: group.totalContacts + validContacts,
+        validContacts: group.validContacts + validContacts,
+        duplicateContacts: group.duplicateContacts + duplicateContacts,
+        invalidContacts: group.invalidContacts + invalidContacts
+      });
+
+      res.json({ 
+        success: true, 
+        validContacts,
+        duplicateContacts,
+        invalidContacts,
+        totalProcessed: phoneNumbers.length
+      });
+
+    } catch (error: any) {
+      console.error("Add multiple contacts error:", error);
+      res.status(500).json({ error: error.message || "Failed to add multiple contacts" });
+    }
+  });
+
   // Add multiple contacts to multiple groups
   app.post("/api/contacts/add-to-groups", async (req, res) => {
     try {

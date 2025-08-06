@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2, Plus, UserPlus } from 'lucide-react';
+import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2, Plus, UserPlus, Users, FileText } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface ContactGroupMember {
@@ -38,7 +39,11 @@ export default function GroupContacts() {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAddModeDialog, setShowAddModeDialog] = useState(false);
+  const [addMode, setAddMode] = useState<'single' | 'multiple'>('single');
   const [newContact, setNewContact] = useState({ name: '', phoneNumber: '' });
+  const [multipleNumbers, setMultipleNumbers] = useState('');
+  const [multipleNumbersErrors, setMultipleNumbersErrors] = useState<string[]>([]);
   const [validationErrors, setValidationErrors] = useState({ name: '', phoneNumber: '' });
   const [isImporting, setIsImporting] = useState(false);
   const queryClient = useQueryClient();
@@ -156,6 +161,31 @@ export default function GroupContacts() {
     },
   });
 
+  // Add multiple contacts mutation
+  const addMultipleContactsMutation = useMutation({
+    mutationFn: (phoneNumbers: string[]) =>
+      apiRequest(`/api/contact-groups/${groupId}/members/batch`, "POST", { phoneNumbers }),
+    onSuccess: (data: any) => {
+      toast({
+        title: "Contacts Added",
+        description: `Successfully added ${data.validContacts} valid contacts${data.invalidContacts > 0 ? `, ${data.invalidContacts} invalid numbers` : ''}`,
+      });
+      setShowAddDialog(false);
+      setMultipleNumbers('');
+      setMultipleNumbersErrors([]);
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Add Contacts",
+        description: error?.message || "Failed to add contacts",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Validation functions
   const validateName = (name: string): string => {
     if (!name.trim()) return 'Name is required';
@@ -172,30 +202,115 @@ export default function GroupContacts() {
     return '';
   };
 
-  const handleAddContact = () => {
-    const nameError = validateName(newContact.name);
-    const phoneError = validatePhoneNumber(newContact.phoneNumber);
+  const validateMultiplePhoneNumbers = (numbers: string): string[] => {
+    const errors: string[] = [];
+    const lines = numbers.split('\n').filter(line => line.trim());
     
-    setValidationErrors({ name: nameError, phoneNumber: phoneError });
-    
-    if (!nameError && !phoneError) {
-      // Format phone number with country code
-      let formattedPhone = newContact.phoneNumber.replace(/[^0-9]/g, '');
-      if (formattedPhone.length === 10) {
-        formattedPhone = '+91' + formattedPhone;
+    lines.forEach((line, index) => {
+      const cleanPhone = line.trim().replace(/[\s\-\(\)\+]/g, '');
+      let validPhone = '';
+      
+      // Handle different formats
+      if (cleanPhone.startsWith('91') && cleanPhone.length === 12) {
+        validPhone = cleanPhone.slice(2); // Remove country code
+      } else if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
+        validPhone = cleanPhone.slice(1); // Remove leading 0
+      } else if (cleanPhone.length === 10) {
+        validPhone = cleanPhone;
       }
       
-      addContactMutation.mutate({
-        name: newContact.name.trim(),
-        phoneNumber: formattedPhone
-      });
+      if (!validPhone || validPhone.length !== 10 || !/^\d{10}$/.test(validPhone)) {
+        errors.push(`Line ${index + 1}: "${line.trim()}" is not a valid 10-digit phone number`);
+      }
+    });
+    
+    return errors;
+  };
+
+  const formatMultiplePhoneNumbers = (numbers: string): string[] => {
+    const lines = numbers.split('\n').filter(line => line.trim());
+    const validNumbers: string[] = [];
+    
+    lines.forEach(line => {
+      const cleanPhone = line.trim().replace(/[\s\-\(\)\+]/g, '');
+      let validPhone = '';
+      
+      // Handle different formats
+      if (cleanPhone.startsWith('91') && cleanPhone.length === 12) {
+        validPhone = cleanPhone.slice(2);
+      } else if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
+        validPhone = cleanPhone.slice(1);
+      } else if (cleanPhone.length === 10) {
+        validPhone = cleanPhone;
+      }
+      
+      if (validPhone && validPhone.length === 10 && /^\d{10}$/.test(validPhone)) {
+        validNumbers.push('+91' + validPhone);
+      }
+    });
+    
+    return validNumbers;
+  };
+
+  const handleAddContact = () => {
+    if (addMode === 'single') {
+      const nameError = validateName(newContact.name);
+      const phoneError = validatePhoneNumber(newContact.phoneNumber);
+      
+      setValidationErrors({ name: nameError, phoneNumber: phoneError });
+      
+      if (!nameError && !phoneError) {
+        // Format phone number with country code
+        let formattedPhone = newContact.phoneNumber.replace(/[^0-9]/g, '');
+        if (formattedPhone.length === 10) {
+          formattedPhone = '+91' + formattedPhone;
+        }
+        
+        addContactMutation.mutate({
+          name: newContact.name.trim(),
+          phoneNumber: formattedPhone
+        });
+      }
+    } else {
+      // Multiple numbers mode
+      const errors = validateMultiplePhoneNumbers(multipleNumbers);
+      setMultipleNumbersErrors(errors);
+      
+      if (errors.length === 0 && multipleNumbers.trim()) {
+        const validNumbers = formatMultiplePhoneNumbers(multipleNumbers);
+        if (validNumbers.length > 0) {
+          addMultipleContactsMutation.mutate(validNumbers);
+        } else {
+          toast({
+            title: "No Valid Numbers",
+            description: "Please enter at least one valid phone number",
+            variant: "destructive",
+          });
+        }
+      } else if (!multipleNumbers.trim()) {
+        toast({
+          title: "No Numbers Entered",
+          description: "Please enter phone numbers",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const handleDialogClose = () => {
     setShowAddDialog(false);
+    setShowAddModeDialog(false);
+    setAddMode('single');
     setNewContact({ name: '', phoneNumber: '' });
+    setMultipleNumbers('');
+    setMultipleNumbersErrors([]);
     setValidationErrors({ name: '', phoneNumber: '' });
+  };
+
+  const handleAddModeSelect = (mode: 'single' | 'multiple') => {
+    setAddMode(mode);
+    setShowAddModeDialog(false);
+    setShowAddDialog(true);
   };
 
   const filteredMembers = members.filter(member =>
@@ -313,7 +428,7 @@ export default function GroupContacts() {
 
             <Button
               variant="default"
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => setShowAddModeDialog(true)}
               className="flex items-center space-x-2"
             >
               <UserPlus className="h-4 w-4" />
@@ -429,69 +544,159 @@ export default function GroupContacts() {
           </CardContent>
         </Card>
 
-        {/* Add Contact Dialog */}
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        {/* Add Mode Selection Dialog */}
+        <Dialog open={showAddModeDialog} onOpenChange={setShowAddModeDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Add New Contact</DialogTitle>
+              <DialogTitle>Choose Add Contact Method</DialogTitle>
+              <DialogDescription>
+                Select how you want to add contacts to this group
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter contact name"
-                  value={newContact.name}
-                  onChange={(e) => {
-                    setNewContact(prev => ({ ...prev, name: e.target.value }));
-                    if (validationErrors.name) {
-                      setValidationErrors(prev => ({ ...prev, name: validateName(e.target.value) }));
-                    }
-                  }}
-                  className={validationErrors.name ? 'border-red-500' : ''}
-                />
-                {validationErrors.name && (
-                  <p className="text-sm text-red-500">{validationErrors.name}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input
-                  id="phoneNumber"
-                  placeholder="Enter 10-digit phone number"
-                  value={newContact.phoneNumber}
-                  onChange={(e) => {
-                    // Only allow numbers
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    setNewContact(prev => ({ ...prev, phoneNumber: value }));
-                    if (validationErrors.phoneNumber) {
-                      setValidationErrors(prev => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
-                    }
-                  }}
-                  maxLength={10}
-                  className={validationErrors.phoneNumber ? 'border-red-500' : ''}
-                />
-                {validationErrors.phoneNumber && (
-                  <p className="text-sm text-red-500">{validationErrors.phoneNumber}</p>
-                )}
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-24 flex flex-col items-center space-y-2 hover:bg-primary/5"
+                  onClick={() => handleAddModeSelect('single')}
+                >
+                  <UserPlus className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Single Contact</div>
+                    <div className="text-xs text-muted-foreground">Add one contact with name</div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-24 flex flex-col items-center space-y-2 hover:bg-primary/5"
+                  onClick={() => handleAddModeSelect('multiple')}
+                >
+                  <Users className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Multiple Numbers</div>
+                    <div className="text-xs text-muted-foreground">Add multiple phone numbers</div>
+                  </div>
+                </Button>
               </div>
             </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddModeDialog(false)}>
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Contact Dialog */}
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent className={addMode === 'multiple' ? "sm:max-w-2xl" : "sm:max-w-md"}>
+            <DialogHeader>
+              <DialogTitle>
+                {addMode === 'single' ? 'Add Single Contact' : 'Add Multiple Numbers'}
+              </DialogTitle>
+              {addMode === 'multiple' && (
+                <DialogDescription>
+                  Enter phone numbers one per line. Supports formats: 9384938438, +913843294343, 913843843845
+                </DialogDescription>
+              )}
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {addMode === 'single' ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Enter contact name"
+                      value={newContact.name}
+                      onChange={(e) => {
+                        setNewContact(prev => ({ ...prev, name: e.target.value }));
+                        if (validationErrors.name) {
+                          setValidationErrors(prev => ({ ...prev, name: validateName(e.target.value) }));
+                        }
+                      }}
+                      className={validationErrors.name ? 'border-red-500' : ''}
+                    />
+                    {validationErrors.name && (
+                      <p className="text-sm text-red-500">{validationErrors.name}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Input
+                      id="phoneNumber"
+                      placeholder="Enter 10-digit phone number"
+                      value={newContact.phoneNumber}
+                      onChange={(e) => {
+                        // Only allow numbers
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        setNewContact(prev => ({ ...prev, phoneNumber: value }));
+                        if (validationErrors.phoneNumber) {
+                          setValidationErrors(prev => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
+                        }
+                      }}
+                      maxLength={10}
+                      className={validationErrors.phoneNumber ? 'border-red-500' : ''}
+                    />
+                    {validationErrors.phoneNumber && (
+                      <p className="text-sm text-red-500">{validationErrors.phoneNumber}</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="multipleNumbers">Phone Numbers</Label>
+                  <Textarea
+                    id="multipleNumbers"
+                    placeholder={`Enter phone numbers, one per line:\n9384938438\n+913843294343\n913843843845\n9123456789`}
+                    value={multipleNumbers}
+                    onChange={(e) => {
+                      setMultipleNumbers(e.target.value);
+                      // Clear errors when user starts typing
+                      if (multipleNumbersErrors.length > 0) {
+                        const newErrors = validateMultiplePhoneNumbers(e.target.value);
+                        setMultipleNumbersErrors(newErrors);
+                      }
+                    }}
+                    className={`min-h-[200px] font-mono text-sm ${multipleNumbersErrors.length > 0 ? 'border-red-500' : ''}`}
+                  />
+                  {multipleNumbersErrors.length > 0 && (
+                    <div className="space-y-1">
+                      {multipleNumbersErrors.map((error, index) => (
+                        <p key={index} className="text-sm text-red-500">{error}</p>
+                      ))}
+                    </div>
+                  )}
+                  {multipleNumbers.trim() && multipleNumbersErrors.length === 0 && (
+                    <p className="text-sm text-green-600">
+                      ✓ {formatMultiplePhoneNumbers(multipleNumbers).length} valid numbers detected
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            
             <DialogFooter>
               <Button variant="outline" onClick={handleDialogClose}>
                 Cancel
               </Button>
               <Button 
                 onClick={handleAddContact}
-                disabled={addContactMutation.isPending}
+                disabled={
+                  addMode === 'single' 
+                    ? addContactMutation.isPending 
+                    : addMultipleContactsMutation.isPending
+                }
                 className="flex items-center space-x-2"
               >
-                {addContactMutation.isPending ? (
+                {(addMode === 'single' ? addContactMutation.isPending : addMultipleContactsMutation.isPending) ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Adding...</span>
                   </>
                 ) : (
-                  <span>Add</span>
+                  <span>{addMode === 'single' ? 'Add Contact' : 'Add Numbers'}</span>
                 )}
               </Button>
             </DialogFooter>
