@@ -1380,14 +1380,14 @@ export default function Dashboard() {
               )}
 
               {selectedModule === 'contacts' && (
-                <Card className="h-full flex flex-col">
+                <div className="h-full flex flex-col">
                   {/* Sticky Header */}
-                  <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center justify-between">
+                  <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 rounded-t-lg">
+                    <div className="p-6 pb-4">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
                           <Phone className="h-5 w-5" />
-                          <span>WhatsApp Contacts</span>
+                          <span className="text-lg font-semibold">WhatsApp Contacts</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Button 
@@ -1408,53 +1408,51 @@ export default function Dashboard() {
                             Export CSV
                           </Button>
                         </div>
-                      </CardTitle>
-                      <CardDescription>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
                         Your WhatsApp contacts from connected device
-                      </CardDescription>
+                      </p>
                       
-                      {/* Sticky Controls - moved inside sticky header */}
+                      {/* Controls */}
                       {sessionInfo && contacts.length > 0 && (
-                        <div className="px-6 pb-4 space-y-4">
-                          {/* Select All and Search Bar */}
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="select-all-contacts"
-                                checked={
-                                  filteredContacts.length > 0 &&
-                                  selectedContacts.size === filteredContacts.length
-                                }
-                                onCheckedChange={handleSelectAllContacts}
-                                data-testid="checkbox-select-all-contacts"
-                              />
-                              <label 
-                                htmlFor="select-all-contacts" 
-                                className="text-sm font-medium cursor-pointer"
-                              >
-                                Select All ({filteredContacts.length} contacts)
-                              </label>
-                            </div>
-                            
-                            {/* Search Bar */}
-                            <div className="relative max-w-md flex-1">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                              <Input
-                                placeholder="Search contacts..."
-                                value={contactSearchTerm}
-                                onChange={(e) => setContactSearchTerm(e.target.value)}
-                                className="pl-10"
-                                data-testid="input-search-contacts"
-                              />
-                            </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="select-all-contacts"
+                              checked={
+                                filteredContacts.length > 0 &&
+                                selectedContacts.size === filteredContacts.length
+                              }
+                              onCheckedChange={handleSelectAllContacts}
+                              data-testid="checkbox-select-all-contacts"
+                            />
+                            <label 
+                              htmlFor="select-all-contacts" 
+                              className="text-sm font-medium cursor-pointer"
+                            >
+                              Select All ({filteredContacts.length} contacts)
+                            </label>
+                          </div>
+                          
+                          {/* Search Bar */}
+                          <div className="relative max-w-md flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              placeholder="Search contacts..."
+                              value={contactSearchTerm}
+                              onChange={(e) => setContactSearchTerm(e.target.value)}
+                              className="pl-10"
+                              data-testid="input-search-contacts"
+                            />
                           </div>
                         </div>
                       )}
-                    </CardHeader>
+                    </div>
                   </div>
                   
                   {/* Scrollable Content */}
-                  <CardContent className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700">
+                    <div className="p-6">
                     {!sessionInfo ? (
                       <div className="text-center p-8">
                         <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -1553,8 +1551,9 @@ export default function Dashboard() {
                         )}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                    </div>
+                  </div>
+                </div>
               )}
 
 
