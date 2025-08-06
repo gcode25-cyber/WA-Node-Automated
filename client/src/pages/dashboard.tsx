@@ -271,9 +271,7 @@ export default function Dashboard() {
   };
 
   const handleSelectAllContacts = () => {
-    const filteredContactIds = deduplicateContacts(contacts)
-      .filter(contact => contact.isMyContact)
-      .map(contact => contact.id);
+    const filteredContactIds = filteredContacts.map(contact => contact.id);
     
     if (selectedContacts.size === filteredContactIds.length) {
       // All are selected, unselect all
@@ -1108,9 +1106,9 @@ export default function Dashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col">
           {selectedFeature === 'whatsapp' ? (
-            <div className="p-6">
+            <div className="p-6 flex-1 flex flex-col">
               {/* Send Message Module */}
               {selectedModule === 'send-message' && (
                 <Card>
@@ -1382,36 +1380,81 @@ export default function Dashboard() {
               )}
 
               {selectedModule === 'contacts' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Phone className="h-5 w-5" />
-                        <span>WhatsApp Contacts</span>
+                <Card className="h-full flex flex-col">
+                  {/* Sticky Header */}
+                  <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Phone className="h-5 w-5" />
+                          <span>WhatsApp Contacts</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            onClick={handleAddToContactGroups}
+                            disabled={!sessionInfo || selectedContacts.size === 0}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            Add to Contact Groups
+                          </Button>
+                          <Button 
+                            onClick={exportContactsCSV}
+                            disabled={!sessionInfo || contacts.length === 0}
+                            size="sm"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Export CSV
+                          </Button>
+                        </div>
+                      </CardTitle>
+                      <CardDescription>
+                        Your WhatsApp contacts from connected device
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    {/* Sticky Controls */}
+                    {sessionInfo && contacts.length > 0 && (
+                      <div className="px-6 pb-4 space-y-4">
+                        {/* Select All and Search Bar */}
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="select-all-contacts"
+                              checked={
+                                filteredContacts.length > 0 &&
+                                selectedContacts.size === filteredContacts.length
+                              }
+                              onCheckedChange={handleSelectAllContacts}
+                              data-testid="checkbox-select-all-contacts"
+                            />
+                            <label 
+                              htmlFor="select-all-contacts" 
+                              className="text-sm font-medium cursor-pointer"
+                            >
+                              Select All ({filteredContacts.length} contacts)
+                            </label>
+                          </div>
+                          
+                          {/* Search Bar */}
+                          <div className="relative max-w-md flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              placeholder="Search contacts..."
+                              value={contactSearchTerm}
+                              onChange={(e) => setContactSearchTerm(e.target.value)}
+                              className="pl-10"
+                              data-testid="input-search-contacts"
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          onClick={handleAddToContactGroups}
-                          disabled={!sessionInfo || selectedContacts.size === 0}
-                          variant="outline"
-                        >
-                          <Users className="h-4 w-4 mr-2" />
-                          Add to Contact Groups
-                        </Button>
-                        <Button 
-                          onClick={exportContactsCSV}
-                          disabled={!sessionInfo || contacts.length === 0}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Export CSV
-                        </Button>
-                      </div>
-                    </CardTitle>
-                    <CardDescription>
-                      Your WhatsApp contacts from connected device
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                    )}
+                  </div>
+                  
+                  {/* Scrollable Content */}
+                  <CardContent className="flex-1 overflow-y-auto">
                     {!sessionInfo ? (
                       <div className="text-center p-8">
                         <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -1434,29 +1477,18 @@ export default function Dashboard() {
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {/* Select All Checkbox */}
-                        <div className="flex items-center space-x-2 p-2 border-b">
-                          <Checkbox
-                            id="select-all-contacts"
-                            checked={
-                              deduplicateContacts(contacts).filter(contact => contact.isMyContact).length > 0 &&
-                              selectedContacts.size === deduplicateContacts(contacts).filter(contact => contact.isMyContact).length
-                            }
-                            onCheckedChange={handleSelectAllContacts}
-                            data-testid="checkbox-select-all-contacts"
-                          />
-                          <label 
-                            htmlFor="select-all-contacts" 
-                            className="text-sm font-medium cursor-pointer"
-                          >
-                            Select All ({deduplicateContacts(contacts).filter(contact => contact.isMyContact).length} contacts)
-                          </label>
-                        </div>
-
+                      <div className="space-y-2 p-4">
                         {/* Contacts List */}
-                        <div className="space-y-2">
-                          {deduplicateContacts(contacts).filter(contact => contact.isMyContact).map((contact: Contact) => (
+                        {filteredContacts.length === 0 ? (
+                          <div className="text-center p-8">
+                            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No contacts found</h3>
+                            <p className="text-muted-foreground">
+                              {contactSearchTerm ? `No contacts match "${contactSearchTerm}"` : "No contacts available"}
+                            </p>
+                          </div>
+                        ) : (
+                          filteredContacts.map((contact: Contact) => (
                             <div key={contact.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -1517,8 +1549,8 @@ export default function Dashboard() {
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          ))
+                        )}
                       </div>
                     )}
                   </CardContent>
