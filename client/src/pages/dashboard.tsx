@@ -1388,9 +1388,9 @@ export default function Dashboard() {
             )}
 
             {selectedModule === 'contacts' && (
-                <div className="h-full flex flex-col overflow-hidden">
-                  {/* Sticky Header */}
-                  <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 pb-4 shrink-0">
+                <div className="p-6">
+                  {/* Header */}
+                  <div className="mb-6">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <Phone className="h-5 w-5" />
@@ -1456,8 +1456,8 @@ export default function Dashboard() {
                     )}
                   </div>
                   
-                  {/* Scrollable Content */}
-                  <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 p-6">
+                  {/* Content */}
+                  <div>
                     {!sessionInfo ? (
                       <div className="text-center p-8">
                         <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
