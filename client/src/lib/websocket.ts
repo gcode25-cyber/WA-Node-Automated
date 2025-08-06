@@ -5,7 +5,7 @@ let wsInstance: WebSocket | null = null;
 let reconnectTimeout: NodeJS.Timeout | null = null;
 
 export interface WebSocketMessage {
-  type: 'qr' | 'connected' | 'disconnected' | 'logout' | 'chats_updated' | 'contacts_updated' | 'groups_updated' | 'new_message';
+  type: 'qr' | 'connected' | 'disconnected' | 'logout' | 'chats_updated' | 'contacts_updated' | 'groups_updated' | 'new_message' | 'connection_status';
   data?: any;
 }
 
