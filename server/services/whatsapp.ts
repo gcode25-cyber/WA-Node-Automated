@@ -870,7 +870,7 @@ export class WhatsAppService {
     }
 
     try {
-      console.log(`📋 Fetching chat history for ${chatId} (limit: ${limit})`);
+
       const chat = await this.client.getChatById(chatId);
       const messages = await chat.fetchMessages({ limit });
       
@@ -949,7 +949,7 @@ export class WhatsAppService {
         isAdmin: chat.isGroup ? this.isUserGroupAdmin(chat) : false
       };
 
-      console.log(`✅ Retrieved ${messageData.length} messages for chat ${chatId}`);
+
       return {
         contact,
         messages: messageData
@@ -1077,7 +1077,7 @@ export class WhatsAppService {
         contactName: message._data?.notifyName || message.from
       });
       
-      console.log('✅ Real-time message stored and broadcasted');
+
       
     } catch (error: any) {
       console.error('Failed to store realtime message:', error.message);
@@ -1087,18 +1087,15 @@ export class WhatsAppService {
   // Fast data loading methods for chats, groups, and contacts
   async getChats(): Promise<any[]> {
     if (!this.client || !this.isReady) {
-      console.log('⚠️ WhatsApp client not ready for chat fetching');
       throw new Error('WhatsApp client is not ready');
     }
 
     // Additional check to ensure client is actually connected
     if (!this.client.info || !this.client.info.wid) {
-      console.log('⚠️ WhatsApp client info not available, waiting for connection...');
       throw new Error('WhatsApp client not fully connected');
     }
 
     try {
-      console.log('📋 Fetching all chats...');
       
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
@@ -1139,8 +1136,6 @@ export class WhatsAppService {
         return timestampB - timestampA; // Latest at top
       });
 
-      console.log(`✅ Retrieved ${sortedChats.length} chats (sorted by latest activity)`);
-      
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('chats_updated', sortedChats);
       
@@ -1154,18 +1149,15 @@ export class WhatsAppService {
 
   async getContacts(): Promise<any[]> {
     if (!this.client || !this.isReady) {
-      console.log('⚠️ WhatsApp client not ready for contact fetching');
       throw new Error('WhatsApp client is not ready');
     }
 
     // Additional check to ensure client is actually connected
     if (!this.client.info || !this.client.info.wid) {
-      console.log('⚠️ WhatsApp client info not available, waiting for connection...');
       throw new Error('WhatsApp client not fully connected');
     }
 
     try {
-      console.log('👥 Fetching all contacts...');
       
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
@@ -1175,7 +1167,7 @@ export class WhatsAppService {
       const contactsPromise = this.client.getContacts();
       const contacts = await Promise.race([contactsPromise, timeoutPromise]);
       
-      console.log(`📊 Raw WhatsApp contacts: ${contacts.length}`);
+
       
       const contactData = contacts.map((contact: any) => ({
         id: contact.id._serialized,
@@ -1234,16 +1226,7 @@ export class WhatsAppService {
       ).length;
       const invalidPhoneNumbers = beforeValidation - filteredContacts.length;
 
-      console.log(`🔍 Filtering stats:
-        Total mapped: ${contactData.length}
-        isWAContact: ${isWAContactCount}
-        isMyContact: ${isMyContactCount}
-        Both WA & My: ${bothCount}
-        Has name: ${hasNameCount}
-        Has number: ${hasNumberCount}
-        Before phone validation: ${beforeValidation}
-        Invalid phone numbers filtered: ${invalidPhoneNumbers}
-        Final valid contacts: ${filteredContacts.length}`);
+
 
       // Sort contacts alphabetically (A-Z) by name
       const sortedContacts = filteredContacts.sort((a: any, b: any) => {
@@ -1252,7 +1235,7 @@ export class WhatsAppService {
         return nameA.localeCompare(nameB);
       });
 
-      console.log(`✅ Retrieved ${sortedContacts.length} saved contacts (filtered out ${invalidPhoneNumbers} invalid phone numbers)`);
+
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('contacts_updated', sortedContacts);
@@ -1270,7 +1253,7 @@ export class WhatsAppService {
     }
 
     try {
-      console.log('👥 Fetching all groups...');
+
       const chats = await this.client.getChats();
       const groups = chats.filter((chat: any) => 
         chat.isGroup && 
@@ -1332,7 +1315,7 @@ export class WhatsAppService {
         return timestampB - timestampA; // Latest at top
       });
 
-      console.log(`✅ Retrieved ${sortedGroups.length} groups (sorted by latest activity)`);
+
       
       // Broadcast to WebSocket clients for real-time updates
       this.broadcastToClients('groups_updated', { groups: sortedGroups });
@@ -1351,7 +1334,7 @@ export class WhatsAppService {
     }
 
     try {
-      console.log(`👥 Fetching participants for group ${groupId}...`);
+
       const chat = await this.client.getChatById(groupId);
       
       if (!chat.isGroup) {
@@ -1426,10 +1409,7 @@ export class WhatsAppService {
   }
   // Comprehensive data synchronization method
   private async performFullDataSync() {
-    console.log('🔄 Starting full data synchronization...');
-    
     if (!this.client || !this.isReady) {
-      console.log('⚠️ Client not ready for data sync, skipping...');
       return;
     }
     
@@ -1447,16 +1427,11 @@ export class WhatsAppService {
       }
       
       attempts++;
-      console.log(`⏳ Waiting for client to be fully ready (${attempts}/${maxAttempts})...`);
+
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    if (attempts >= maxAttempts) {
-      console.log('⚠️ Client not fully ready after waiting, attempting sync anyway...');
-    }
-    
     try {
-      console.log('📊 Syncing all WhatsApp data...');
       
       // Load all data in sequence with retries for reliability
       const syncTasks = [
@@ -1467,45 +1442,36 @@ export class WhatsAppService {
       
       await Promise.allSettled(syncTasks);
       
-      console.log('✅ FULL DATA SYNCHRONIZATION COMPLETE');
+
       
     } catch (error: any) {
-      console.log('⚠️ Data sync encountered issues:', error.message);
+      // Silent handling
     }
   }
 
   private async syncChats() {
     try {
-      console.log('📋 Synchronizing chats...');
       const chats = await this.getChats();
-      console.log(`✅ Synchronized ${chats.length} chats`);
       return chats;
     } catch (error: any) {
-      console.log('❌ Chat sync failed:', error.message);
       return [];
     }
   }
 
   private async syncContacts() {
     try {
-      console.log('👥 Synchronizing contacts...');
       const contacts = await this.getContacts();
-      console.log(`✅ Synchronized ${contacts.length} contacts`);
       return contacts;
     } catch (error: any) {
-      console.log('❌ Contact sync failed:', error.message);
       return [];
     }
   }
 
   private async syncGroups() {
     try {
-      console.log('👥 Synchronizing groups...');
       const groups = await this.getGroups();
-      console.log(`✅ Synchronized ${groups.length} groups`);
       return groups;
     } catch (error: any) {
-      console.log('❌ Group sync failed:', error.message);
       return [];
     }
   }
