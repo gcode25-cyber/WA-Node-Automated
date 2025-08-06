@@ -15,6 +15,9 @@ export class WhatsAppService {
   private isInitializing: boolean = false;
   private messageCache: Map<string, any[]> = new Map(); // Cache for real-time messages
   private connectionCheckInterval: NodeJS.Timeout | null = null;
+  private currentState: string = 'DISCONNECTED';
+  private isPhoneConnected: boolean = false;
+  private lastStateCheck: Date = new Date();
 
   constructor() {
     this.initializeClient();
@@ -501,16 +504,39 @@ export class WhatsAppService {
   }
 
   private startConnectionMonitoring(): void {
-    // Check connection status every 30 seconds
+    // Real-time connection monitoring every 10 seconds - like WhatsApp Web
     this.connectionCheckInterval = setInterval(async () => {
-      if (this.client && this.isReady) {
-        try {
-          // Try to get client state to detect if connection is still alive
-          const state = await this.client.getState();
-          if (state !== 'CONNECTED') {
-            console.log('🔌 Connection state changed to:', state);
-            
-            if (state === 'UNPAIRED' || state === 'UNPAIRED_IDLE') {
+      await this.checkRealTimeConnection();
+    }, 10000);
+  }
+
+  private async checkRealTimeConnection() {
+    try {
+      if (!this.client) {
+        this.updateConnectionState('DISCONNECTED', false);
+        return;
+      }
+
+      // Get real-time state from WhatsApp Web instance
+      const currentState = await this.client.getState();
+      const wasConnected = this.isPhoneConnected;
+      const isNowConnected = currentState === 'CONNECTED';
+      
+      // Only broadcast if state actually changed
+      if (this.currentState !== currentState || this.isPhoneConnected !== isNowConnected) {
+        console.log(`🔌 Phone connection changed: ${this.currentState} → ${currentState} | Phone: ${this.isPhoneConnected ? 'Connected' : 'Disconnected'} → ${isNowConnected ? 'Connected' : 'Disconnected'}`);
+        
+        this.updateConnectionState(currentState, isNowConnected);
+        
+        // If phone disconnected, clear session info immediately  
+        if (wasConnected && !isNowConnected) {
+          console.log('📱 Phone disconnected - clearing session data');
+          this.sessionInfo = null;
+          this.isReady = false;
+        }
+        
+        // Handle different disconnection states
+        if (currentState === 'UNPAIRED' || currentState === 'UNPAIRED_IDLE') {
               console.log('📱 Phone disconnection detected via state monitoring');
               this.handlePhoneLogout();
             }
