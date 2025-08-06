@@ -153,7 +153,7 @@ export class WhatsAppService {
             '--disable-default-apps',
             '--disable-component-extensions-with-background-pages',
             '--force-single-process-tabs',
-            `--user-data-dir=./.chrome_user_data_${Date.now()}` // Use unique directory to avoid locks
+            `--user-data-dir=./.chrome_user_data` // Use consistent directory for session persistence
           ],
           handleSIGINT: false,
           handleSIGTERM: false,
@@ -220,6 +220,20 @@ export class WhatsAppService {
         try {
           // First clear any old sessions
           await storage.clearAllSessions();
+          
+          // Create comprehensive session backup
+          const sessionBackup = {
+            sessionId: "main_session",
+            userId: freshSessionInfo.number,
+            userName: freshSessionInfo.name,
+            timestamp: new Date().toISOString(),
+            status: "active"
+          };
+          
+          // Save to backup file
+          const fs = await import('fs');
+          await fs.promises.writeFile('.session_backup.json', JSON.stringify(sessionBackup, null, 2));
+          console.log('💾 Session backup saved to file');
           
           // Save the current active session
           await storage.saveSession({
