@@ -133,7 +133,6 @@ export class WhatsAppService {
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process',
             '--disable-gpu',
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
@@ -143,12 +142,23 @@ export class WhatsAppService {
             '--disable-ipc-flooding-protection',
             '--memory-pressure-off',
             '--max_old_space_size=4096',
-            `--user-data-dir=./.chrome_user_data` // Use persistent directory
+            '--disable-extensions',
+            '--disable-plugins',
+            '--disable-sync',
+            '--disable-translate',
+            '--hide-scrollbars',
+            '--mute-audio',
+            '--no-default-browser-check',
+            '--no-pings',
+            '--disable-default-apps',
+            '--disable-component-extensions-with-background-pages',
+            '--force-single-process-tabs',
+            `--user-data-dir=./.chrome_user_data_${Date.now()}` // Use unique directory to avoid locks
           ],
           handleSIGINT: false,
           handleSIGTERM: false,
           handleSIGHUP: false,
-          timeout: 60000 // 60 second timeout for initialization
+          timeout: 90000 // 90 second timeout for initialization
         }
       });
 

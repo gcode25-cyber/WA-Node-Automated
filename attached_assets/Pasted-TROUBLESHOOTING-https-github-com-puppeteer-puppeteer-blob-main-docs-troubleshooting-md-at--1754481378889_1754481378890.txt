@@ -1,0 +1,137 @@
+TROUBLESHOOTING: https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
+
+    at onClose (/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/src/node/BrowserRunner.ts:327:9)
+    at ChildProcess.<anonymous> (/home/runner/workspace/node_modules/whatsapp-web.js/node_modules/puppeteer-core/src/node/BrowserRunner.ts:316:16)
+    at ChildProcess.emit (node:events:536:35)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+🔄 Scheduling retry in 10 seconds...
+Browser failed to initialize - QR will be available when browser starts
+📡 WebSocket client connected
+📡 WebSocket client disconnected
+11:54:42 AM [express] GET /api/bulk-campaigns 200 in 3ms
+📦 Restoring session info from storage
+✅ Session restored from storage with file verification
+11:54:42 AM [express] GET /api/session-info 404 in 48ms :: {"error":"No active session","connected":f…
+11:54:43 AM [express] GET /api/contact-groups 200 in 312ms :: []
+📡 WebSocket client connected
+11:54:49 AM [express] GET /api/system-status 200 in 2ms :: {"client":"Running","puppeteer":"Stable","…
+11:54:49 AM [express] GET /api/get-qr 200 in 1ms :: {"qr":null}
+11:54:49 AM [express] GET /api/session-info 200 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+11:54:50 AM [express] GET /api/bulk-campaigns 200 in 4ms
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+Get groups error: TypeError: Cannot read properties of null (reading 'evaluate')
+    at Client.getChats (/home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:1032:42)
+    at WhatsAppService.getGroups (/home/runner/workspace/server/services/whatsapp.ts:1257:39)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:572:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:54:50 AM [express] GET /api/groups 500 in 28ms :: {"error":"Cannot read properties of null (readin…
+Get contacts error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getContacts (/home/runner/workspace/server/services/whatsapp.ts:1157:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:549:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:54:50 AM [express] GET /api/contacts 500 in 4ms :: {"error":"WhatsApp client not fully connected"}
+Get chats error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getChats (/home/runner/workspace/server/services/whatsapp.ts:1095:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:461:43)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:54:50 AM [express] GET /api/chats 500 in 2ms :: {"error":"WhatsApp client not fully connected"}
+Get chats error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getChats (/home/runner/workspace/server/services/whatsapp.ts:1095:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:461:43)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:54:53 AM [express] GET /api/chats 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+Get groups error: TypeError: Cannot read properties of null (reading 'evaluate')
+    at Client.getChats (/home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:1032:42)
+    at WhatsAppService.getGroups (/home/runner/workspace/server/services/whatsapp.ts:1257:39)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:572:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:54:53 AM [express] GET /api/groups 500 in 1ms :: {"error":"Cannot read properties of null (reading…
+Get contacts error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getContacts (/home/runner/workspace/server/services/whatsapp.ts:1157:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:549:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:54:53 AM [express] GET /api/contacts 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+11:54:53 AM [express] GET /api/bulk-campaigns 200 in 4ms
+Get chats error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getChats (/home/runner/workspace/server/services/whatsapp.ts:1095:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:461:43)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:00 AM [express] GET /api/chats 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+11:55:00 AM [express] GET /api/bulk-campaigns 200 in 6ms
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+Get groups error: TypeError: Cannot read properties of null (reading 'evaluate')
+    at Client.getChats (/home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:1032:42)
+    at WhatsAppService.getGroups (/home/runner/workspace/server/services/whatsapp.ts:1257:39)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:572:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:00 AM [express] GET /api/groups 500 in 1ms :: {"error":"Cannot read properties of null (reading…
+Get contacts error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getContacts (/home/runner/workspace/server/services/whatsapp.ts:1157:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:549:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:00 AM [express] GET /api/contacts 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+11:55:06 AM [express] POST /api/sync-data 200 in 10008ms :: {"success":true,"message":"Data synchroni…
+Get chats error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getChats (/home/runner/workspace/server/services/whatsapp.ts:1095:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:461:43)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:07 AM [express] GET /api/chats 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+Get groups error: TypeError: Cannot read properties of null (reading 'evaluate')
+    at Client.getChats (/home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:1032:42)
+    at WhatsAppService.getGroups (/home/runner/workspace/server/services/whatsapp.ts:1257:39)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:572:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:07 AM [express] GET /api/groups 500 in 1ms :: {"error":"Cannot read properties of null (reading…
+Get contacts error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getContacts (/home/runner/workspace/server/services/whatsapp.ts:1157:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:549:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:07 AM [express] GET /api/contacts 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+🔌 Connection check failed: Cannot read properties of null (reading 'evaluate')
+11:55:12 AM [express] GET /api/session-info 304 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+11:55:24 AM [express] GET /api/session-info 304 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+Get groups error: TypeError: Cannot read properties of null (reading 'evaluate')
+    at Client.getChats (/home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:1032:42)
+    at WhatsAppService.getGroups (/home/runner/workspace/server/services/whatsapp.ts:1257:39)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:572:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:27 AM [express] GET /api/groups 500 in 1ms :: {"error":"Cannot read properties of null (reading…
+Get chats error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getChats (/home/runner/workspace/server/services/whatsapp.ts:1095:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:461:43)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:27 AM [express] GET /api/chats 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+Get contacts error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getContacts (/home/runner/workspace/server/services/whatsapp.ts:1157:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:549:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:27 AM [express] GET /api/contacts 500 in 0ms :: {"error":"WhatsApp client not fully connected"}
+11:55:27 AM [express] GET /api/bulk-campaigns 200 in 3ms
+📡 WebSocket client disconnected
+🔌 Connection check failed: Cannot read properties of null (reading 'evaluate')
+11:55:40 AM [express] GET /api/session-info 304 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+11:55:40 AM [express] GET /api/bulk-campaigns 200 in 3ms
+11:55:41 AM [express] GET /api/contact-groups 304 in 323ms :: []
+Get chats error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getChats (/home/runner/workspace/server/services/whatsapp.ts:1095:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:461:43)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:41 AM [express] GET /api/chats 500 in 1ms :: {"error":"WhatsApp client not fully connected"}
+❌ Failed to fetch groups: Cannot read properties of null (reading 'evaluate')
+Get groups error: TypeError: Cannot read properties of null (reading 'evaluate')
+    at Client.getChats (/home/runner/workspace/node_modules/whatsapp-web.js/src/Client.js:1032:42)
+    at WhatsAppService.getGroups (/home/runner/workspace/server/services/whatsapp.ts:1257:39)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:572:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:41 AM [express] GET /api/groups 500 in 1ms :: {"error":"Cannot read properties of null (reading…
+Get contacts error: Error: WhatsApp client not fully connected
+    at WhatsAppService.getContacts (/home/runner/workspace/server/services/whatsapp.ts:1157:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:549:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:55:41 AM [express] GET /api/contacts 500 in 0ms :: {"error":"WhatsApp client not fully connected"}
+11:56:01 AM [express] GET /api/session-info 304 in 1ms :: {"number":"919428463575","name":"Parth","lo…
+🔌 Connection check failed: Cannot read properties of null (reading 'evaluate')
