@@ -221,7 +221,8 @@ export default function Dashboard() {
     queryKey: ['/api/bulk-campaigns'],
     refetchInterval: (data) => {
       // If there are any running campaigns, refresh every 5 seconds
-      const hasRunningCampaigns = data?.some((campaign: BulkCampaign) => campaign.status === 'running');
+      const campaigns = data as BulkCampaign[] | undefined;
+      const hasRunningCampaigns = campaigns?.some((campaign: BulkCampaign) => campaign.status === 'running');
       return hasRunningCampaigns ? 5000 : 30000; // 5 sec for active, 30 sec for inactive
     },
     refetchIntervalInBackground: true, // Keep refreshing even when tab is not focused
