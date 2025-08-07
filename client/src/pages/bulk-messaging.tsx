@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Play, Pause, Copy, RefreshCw, Send, MessageSquare, BarChart3 } from "lucide-react";
+import { Plus, Play, Pause, Copy, RefreshCw, Send, MessageSquare, BarChart3, Trash2, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import type { BulkMessageCampaign } from "@shared/schema";
@@ -134,11 +134,11 @@ export default function BulkMessaging() {
     }
   });
 
-  // Clone campaign mutation
-  const cloneCampaignMutation = useMutation({
+  // Restart campaign mutation (creates a copy with same settings)
+  const restartCampaignMutation = useMutation({
     mutationFn: async (campaign: BulkMessageCampaign) => {
       const formData = new FormData();
-      formData.append("name", `${campaign.name} (Copy)`);
+      formData.append("name", campaign.name);
       formData.append("message", campaign.message);
       formData.append("targetType", campaign.targetType);
       formData.append("scheduleType", campaign.scheduleType);
@@ -150,15 +150,33 @@ export default function BulkMessaging() {
         method: "POST",
         body: formData
       });
-      if (!response.ok) throw new Error('Failed to clone campaign');
+      if (!response.ok) throw new Error('Failed to restart campaign');
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Success", description: "Campaign cloned successfully" });
+      toast({ title: "Success", description: "Campaign restarted successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to clone campaign", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to restart campaign", variant: "destructive" });
+    }
+  });
+
+  // Delete campaign mutation
+  const deleteCampaignMutation = useMutation({
+    mutationFn: async (campaignId: string) => {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) throw new Error('Failed to delete campaign');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Campaign deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to delete campaign", variant: "destructive" });
     }
   });
 
@@ -332,15 +350,27 @@ export default function BulkMessaging() {
                             </Button>
                           )}
                           {(campaign.status === "completed" || campaign.status === "failed") && (
-                            <Button 
-                              size="sm"
-                              variant="outline"
-                              onClick={() => cloneCampaignMutation.mutate(campaign)}
-                              disabled={cloneCampaignMutation.isPending}
-                            >
-                              <Copy className="h-4 w-4 mr-1" />
-                              Clone & Reuse
-                            </Button>
+                            <>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                onClick={() => restartCampaignMutation.mutate(campaign)}
+                                disabled={restartCampaignMutation.isPending}
+                              >
+                                <RotateCcw className="h-4 w-4 mr-1" />
+                                Restart
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                onClick={() => deleteCampaignMutation.mutate(campaign.id)}
+                                disabled={deleteCampaignMutation.isPending}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -360,22 +390,22 @@ export default function BulkMessaging() {
                             <div className="flex justify-between items-center text-sm">
                               <span className="font-medium">Progress</span>
                               <span className="text-muted-foreground">
-                                {campaign.sentCount + campaign.failedCount} / {campaign.totalTargets} 
-                                ({Math.round(((campaign.sentCount + campaign.failedCount) / campaign.totalTargets) * 100)}%)
+                                {campaign.sentCount} / {campaign.totalTargets} 
+                                ({Math.round((campaign.sentCount / campaign.totalTargets) * 100)}%)
                               </span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div 
                                 className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                                 style={{
-                                  width: `${((campaign.sentCount + campaign.failedCount) / campaign.totalTargets) * 100}%`
+                                  width: `${(campaign.sentCount / campaign.totalTargets) * 100}%`
                                 }}
                               ></div>
                             </div>
                             <div className="flex justify-between text-xs">
                               <span className="text-green-600 font-medium">✓ {campaign.sentCount} sent</span>
                               <span className="text-red-600 font-medium">✗ {campaign.failedCount} failed</span>
-                              <span className="text-blue-600 font-medium">⏳ {campaign.totalTargets - campaign.sentCount - campaign.failedCount} remaining</span>
+                              <span className="text-blue-600 font-medium">⏳ {campaign.totalTargets - campaign.sentCount} remaining</span>
                             </div>
                             {campaign.status === "running" && (
                               <div className="text-xs text-muted-foreground flex justify-between items-center mt-2 pt-2 border-t">
@@ -394,29 +424,7 @@ export default function BulkMessaging() {
                           </div>
                         )}
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <span className="font-medium">Target Type:</span>
-                            <p className="text-muted-foreground capitalize">
-                              {campaign.targetType.replace("_", " ")}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Total Targets:</span>
-                            <p className="text-muted-foreground">{campaign.totalTargets}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Sent:</span>
-                            <p className="text-green-600 font-medium">
-                              {campaign.sentCount}
-                              {campaign.status === "running" && <span className="animate-pulse ml-1">●</span>}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Failed:</span>
-                            <p className="text-red-600 font-medium">{campaign.failedCount}</p>
-                          </div>
-                        </div>
+
                       </div>
                     </CardContent>
                   </Card>
