@@ -1640,9 +1640,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const contacts = await whatsappService.getContacts();
         totalTargets = contacts.length;
       } else if (validatedData.targetType === "whatsapp_group" && validatedData.whatsappGroupId) {
-        // Get WhatsApp group member count
-        const groupInfo = await whatsappService.getGroupInfo(validatedData.whatsappGroupId);
-        totalTargets = groupInfo ? groupInfo.participants.length : 0;
+        // For WhatsApp groups, we'll set a default target count
+        // This will be updated when the campaign is executed
+        totalTargets = 0;
       }
 
       // Create campaign with enhanced scheduling data
@@ -1862,14 +1862,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Send message
-        if (campaign.targetType === "whatsapp_group") {
-          await whatsappService.sendMessageToGroup(target.id, campaign.message);
+        if (campaign.mediaUrl) {
+          // For media messages, extract filename from URL
+          const fileName = campaign.mediaUrl.split('/').pop() || 'media';
+          await whatsappService.sendMediaMessage(target.id, campaign.message, campaign.mediaUrl, fileName);
         } else {
-          if (campaign.mediaUrl) {
-            await whatsappService.sendMediaMessage(target.id, campaign.message, campaign.mediaUrl);
-          } else {
-            await whatsappService.sendMessage(target.id, campaign.message);
-          }
+          // For text messages, use the same method for both individual and group chats
+          await whatsappService.sendMessage(target.id, campaign.message);
         }
         
         sentCount++;

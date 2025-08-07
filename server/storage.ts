@@ -461,9 +461,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBulkMessageCampaign(insertCampaign: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign> {
+    // Ensure required fields are present with defaults
+    const campaignData = {
+      name: insertCampaign.name || "Untitled Campaign",
+      targetType: insertCampaign.targetType || "contact_group",
+      message: insertCampaign.message || "",
+      status: insertCampaign.status || "draft",
+      minInterval: insertCampaign.minInterval || 1,
+      maxInterval: insertCampaign.maxInterval || 10,
+      scheduleType: insertCampaign.scheduleType || "immediate",
+      totalTargets: insertCampaign.totalTargets || 0,
+      sentCount: insertCampaign.sentCount || 0,
+      failedCount: insertCampaign.failedCount || 0,
+      ...insertCampaign
+    };
+
     const [campaign] = await db
       .insert(bulkMessageCampaigns)
-      .values(insertCampaign)
+      .values(campaignData)
       .returning();
     return campaign;
   }
