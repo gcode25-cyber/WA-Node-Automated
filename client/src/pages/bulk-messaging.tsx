@@ -192,21 +192,24 @@ export default function BulkMessaging() {
     });
   };
 
-  const handleCreateCampaign = () => {
-    if (!campaignForm.name || !campaignForm.message) {
-      toast({ title: "Error", description: "Campaign name and message are required", variant: "destructive" });
-      return;
-    }
-
-    if (!campaignForm.whatsappGroupId) {
-      toast({ title: "Error", description: "Please select a WhatsApp group", variant: "destructive" });
+  const handleCreateCampaign = async () => {
+    if (!campaignForm.name || !campaignForm.message || !campaignForm.whatsappGroupId) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
     const formData = new FormData();
-    Object.entries(campaignForm).forEach(([key, value]) => {
-      formData.append(key, value.toString());
-    });
+    formData.append("name", campaignForm.name);
+    formData.append("message", campaignForm.message);
+    formData.append("targetType", campaignForm.targetType);
+    formData.append("whatsappGroupId", campaignForm.whatsappGroupId);
+    formData.append("scheduleType", campaignForm.scheduleType);
+    formData.append("minInterval", campaignForm.minInterval.toString());
+    formData.append("maxInterval", campaignForm.maxInterval.toString());
 
     createCampaignMutation.mutate(formData);
   };
@@ -423,8 +426,6 @@ export default function BulkMessaging() {
                             )}
                           </div>
                         )}
-
-
                       </div>
                     </CardContent>
                   </Card>

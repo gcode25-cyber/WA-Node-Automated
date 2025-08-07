@@ -1,0 +1,28 @@
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://reactjs.org/link/invalid-hook-call for tips about how to debug and fix this problem.
+Cannot read properties of null (reading 'useContext')
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://reactjs.org/link/invalid-hook-call for tips about how to debug and fix this problem.
+Cannot read properties of null (reading 'useContext')
+The above error occurred in the <Navigation> component:
+
+    at Navigation (https://6c2f2d07-8a47-433a-a603-d08f08700c85-00-3ph1i08yvv0yr.worf.replit.dev/src/components/ui/navigation.tsx:20:38)
+    at div
+    at Landing
+    at Route (https://6c2f2d07-8a47-433a-a603-d08f08700c85-00-3ph1i08yvv0yr.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=12e2688c:280:16)
+    at Switch (https://6c2f2d07-8a47-433a-a603-d08f08700c85-00-3ph1i08yvv0yr.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=12e2688c:336:17)
+    at Router
+    at Provider (https://6c2f2d07-8a47-433a-a603-d08f08700c85-00-3ph1i08yvv0yr.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-C6R24THA.js?v=12e2688c:38:15)
+    at TooltipProvider (https://6c2f2d07-8a47-433a-a603-d08f08700c85-00-3ph1i08yvv0yr.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=12e2688c:59:5)
+    at QueryClientProvider (https://6c2f2d07-8a47-433a-a603-d08f08700c85-00-3ph1i08yvv0yr.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=12e2688c:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+Cannot read properties of null (reading 'useContext')

@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
@@ -6,7 +7,7 @@ interface NavigationProps {
   currentPage?: 'home' | 'login' | 'signup' | 'features' | 'pricing' | 'blogs';
 }
 
-export default function Navigation({ showAuthButtons = true, currentPage }: NavigationProps) {
+const Navigation: React.FC<NavigationProps> = ({ showAuthButtons = true, currentPage }) => {
   const [location] = useLocation();
 
   const isCurrentPage = (page: string) => {
@@ -85,4 +86,6 @@ export default function Navigation({ showAuthButtons = true, currentPage }: Navi
       </div>
     </nav>
   );
-}
+};
+
+export default Navigation;
