@@ -1651,9 +1651,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const contacts = await whatsappService.getContacts();
         totalTargets = contacts.length;
       } else if (validatedData.targetType === "whatsapp_group" && validatedData.whatsappGroupId) {
-        // For WhatsApp groups, we'll set a default target count
-        // This will be updated when the campaign is executed
-        totalTargets = 0;
+        // For WhatsApp groups, get the actual participant count
+        try {
+          const participants = await whatsappService.getGroupParticipants(validatedData.whatsappGroupId);
+          totalTargets = participants.length;
+          console.log(`🎯 WhatsApp group campaign will target ${totalTargets} participants`);
+        } catch (error) {
+          console.error(`Failed to get participant count for group ${validatedData.whatsappGroupId}:`, error);
+          totalTargets = 0;
+        }
       }
 
       // Create campaign with enhanced scheduling data
@@ -1717,7 +1723,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const contacts = await whatsappService.getContacts();
         targets = contacts.map(c => ({ id: c.id, name: c.name }));
       } else if (campaign.targetType === "whatsapp_group" && campaign.whatsappGroupId) {
-        targets = [{ id: campaign.whatsappGroupId, name: "WhatsApp Group" }];
+        // Get all participants of the WhatsApp group and send to each individually
+        try {
+          const participants = await whatsappService.getGroupParticipants(campaign.whatsappGroupId);
+          targets = participants.map((participant: any) => ({
+            id: participant.id,
+            name: participant.name || participant.number || participant.id.split('@')[0]
+          }));
+          console.log(`🎯 Group campaign will target ${targets.length} individual participants`);
+        } catch (error) {
+          console.error(`Failed to get participants for group ${campaign.whatsappGroupId}:`, error);
+          // Fallback: empty targets array
+          targets = [];
+        }
       }
 
       // Execute campaign with intelligent scheduling
