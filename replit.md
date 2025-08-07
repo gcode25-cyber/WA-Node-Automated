@@ -10,7 +10,6 @@ This project is a comprehensive WhatsApp bulk messaging platform inspired by Waz
 - Clean, maintainable code structure
 - Successfully migrated from Replit Agent to standard Replit environment (January 2025)
 - Migration completed: Database provisioned, dependencies installed, application running on port 5000
-- Migration completed: Database provisioned, dependencies installed, application running on port 5000
 
 ## System Architecture
 The application is built with a React frontend (TypeScript, Vite, TailwindCSS, shadcn/ui) and a Node.js backend (Express, TypeScript). Data is managed using PostgreSQL with Drizzle ORM. WhatsApp integration is handled via the `whatsapp-web.js` library, supporting QR code authentication, session persistence, and multiple WhatsApp accounts. Authentication is session-based. File storage utilizes the local file system with Multer.
