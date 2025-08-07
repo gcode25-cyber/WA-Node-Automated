@@ -46,6 +46,7 @@ export interface IStorage {
   getBulkMessageCampaigns(): Promise<BulkMessageCampaign[]>;
   createBulkMessageCampaign(campaign: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign>;
   updateBulkMessageCampaign(id: string, updates: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign | undefined>;
+  deleteBulkMessageCampaign(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -291,6 +292,10 @@ export class MemStorage implements IStorage {
     this.bulkMessageCampaigns.set(id, updatedCampaign);
     return updatedCampaign;
   }
+
+  async deleteBulkMessageCampaign(id: string): Promise<boolean> {
+    return this.bulkMessageCampaigns.delete(id);
+  }
 }
 
 // Database storage implementation
@@ -490,6 +495,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bulkMessageCampaigns.id, id))
       .returning();
     return campaign || undefined;
+  }
+
+  async deleteBulkMessageCampaign(id: string): Promise<boolean> {
+    const result = await db
+      .delete(bulkMessageCampaigns)
+      .where(eq(bulkMessageCampaigns.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 

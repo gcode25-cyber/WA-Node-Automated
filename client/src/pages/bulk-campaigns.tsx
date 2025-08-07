@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Play, Pause, Copy, RefreshCw } from "lucide-react";
+import { Plus, Play, Pause, Copy, RefreshCw, Trash2, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import type { BulkMessageCampaign } from "@shared/schema";
@@ -84,11 +84,11 @@ export default function BulkCampaigns() {
     }
   });
 
-  // Clone campaign mutation
-  const cloneCampaignMutation = useMutation({
+  // Restart campaign mutation (creates a copy with same settings)
+  const restartCampaignMutation = useMutation({
     mutationFn: async (campaign: BulkMessageCampaign) => {
       const formData = new FormData();
-      formData.append("name", `${campaign.name} (Copy)`);
+      formData.append("name", campaign.name);
       formData.append("message", campaign.message);
       formData.append("targetType", campaign.targetType);
       formData.append("scheduleType", campaign.scheduleType);
@@ -100,15 +100,33 @@ export default function BulkCampaigns() {
         method: "POST",
         body: formData
       });
-      if (!response.ok) throw new Error('Failed to clone campaign');
+      if (!response.ok) throw new Error('Failed to restart campaign');
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Success", description: "Campaign cloned successfully" });
+      toast({ title: "Success", description: "Campaign restarted successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to clone campaign", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to restart campaign", variant: "destructive" });
+    }
+  });
+
+  // Delete campaign mutation
+  const deleteCampaignMutation = useMutation({
+    mutationFn: async (campaignId: string) => {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) throw new Error('Failed to delete campaign');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Campaign deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to delete campaign", variant: "destructive" });
     }
   });
 
@@ -159,7 +177,7 @@ export default function BulkCampaigns() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen max-h-screen overflow-y-auto space-y-6 p-4">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bulk Campaigns</h1>
@@ -307,15 +325,27 @@ export default function BulkCampaigns() {
                         </Button>
                       )}
                       {(campaign.status === "completed" || campaign.status === "failed") && (
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          onClick={() => cloneCampaignMutation.mutate(campaign)}
-                          disabled={cloneCampaignMutation.isPending}
-                        >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Clone & Reuse
-                        </Button>
+                        <>
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            onClick={() => restartCampaignMutation.mutate(campaign)}
+                            disabled={restartCampaignMutation.isPending}
+                          >
+                            <RotateCcw className="h-4 w-4 mr-1" />
+                            Restart
+                          </Button>
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteCampaignMutation.mutate(campaign.id)}
+                            disabled={deleteCampaignMutation.isPending}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -335,22 +365,22 @@ export default function BulkCampaigns() {
                         <div className="flex justify-between items-center text-sm">
                           <span className="font-medium">Progress</span>
                           <span className="text-muted-foreground">
-                            {campaign.sentCount + campaign.failedCount} / {campaign.totalTargets} 
-                            ({Math.round(((campaign.sentCount + campaign.failedCount) / campaign.totalTargets) * 100)}%)
+                            {campaign.sentCount} / {campaign.totalTargets} 
+                            ({Math.round((campaign.sentCount / campaign.totalTargets) * 100)}%)
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                             style={{
-                              width: `${((campaign.sentCount + campaign.failedCount) / campaign.totalTargets) * 100}%`
+                              width: `${(campaign.sentCount / campaign.totalTargets) * 100}%`
                             }}
                           ></div>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-green-600 font-medium">✓ {campaign.sentCount} sent</span>
                           <span className="text-red-600 font-medium">✗ {campaign.failedCount} failed</span>
-                          <span className="text-blue-600 font-medium">⏳ {campaign.totalTargets - campaign.sentCount - campaign.failedCount} remaining</span>
+                          <span className="text-blue-600 font-medium">⏳ {campaign.totalTargets - campaign.sentCount} remaining</span>
                         </div>
                         {campaign.status === "running" && (
                           <div className="text-xs text-muted-foreground flex justify-between items-center mt-2 pt-2 border-t">
@@ -369,29 +399,7 @@ export default function BulkCampaigns() {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">Target Type:</span>
-                        <p className="text-muted-foreground capitalize">
-                          {campaign.targetType.replace("_", " ")}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Total Targets:</span>
-                        <p className="text-muted-foreground">{campaign.totalTargets}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Sent:</span>
-                        <p className="text-green-600 font-medium">
-                          {campaign.sentCount}
-                          {campaign.status === "running" && <span className="animate-pulse ml-1">●</span>}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Failed:</span>
-                        <p className="text-red-600 font-medium">{campaign.failedCount}</p>
-                      </div>
-                    </div>
+
                   </div>
                 </CardContent>
               </Card>
@@ -403,27 +411,36 @@ export default function BulkCampaigns() {
       {/* Analytics Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Campaign Analytics</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Campaign Analytics</CardTitle>
+            <p className="text-xs text-muted-foreground">Last updated: {new Date().toLocaleTimeString()}</p>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-blue-600">
                 {campaigns.length}
               </div>
-              <p className="text-sm text-muted-foreground">Total Campaigns</p>
+              <p className="text-xs text-muted-foreground">Total Campaigns</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-green-600">
                 {campaigns.reduce((sum, c) => sum + c.sentCount, 0)}
               </div>
-              <p className="text-sm text-muted-foreground">Messages Sent</p>
+              <p className="text-xs text-muted-foreground">Messages Sent</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-red-600">
                 {campaigns.reduce((sum, c) => sum + c.failedCount, 0)}
               </div>
-              <p className="text-sm text-muted-foreground">Failed Messages</p>
+              <p className="text-xs text-muted-foreground">Failed Messages</p>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {campaigns.filter(c => c.status === "completed").length}
+              </div>
+              <p className="text-xs text-muted-foreground">Completed</p>
             </div>
           </div>
         </CardContent>
