@@ -1,2 +1,3 @@
-2025/08/07-12:43:59.333 1d8c Creating DB /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB since it was missing.
-2025/08/07-12:43:59.349 1d8c Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/MANIFEST-000001
+2025/08/07-13:03:38.722 390 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/MANIFEST-000001
+2025/08/07-13:03:38.810 390 Recovering log #3
+2025/08/07-13:03:38.810 390 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/000003.log 
