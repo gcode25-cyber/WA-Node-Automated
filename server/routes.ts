@@ -1500,6 +1500,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk Message Campaigns API
+  // Get all bulk campaigns
+  app.get("/api/bulk-campaigns", async (req, res) => {
+    try {
+      const campaigns = await storage.getBulkMessageCampaigns();
+      res.json(campaigns);
+    } catch (error: any) {
+      console.error("Get bulk campaigns error:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch bulk campaigns" });
+    }
+  });
+
   app.post("/api/bulk-campaigns", async (req, res) => {
     try {
       const { campaignName, contactGroupId, message, scheduledAt } = req.body;
