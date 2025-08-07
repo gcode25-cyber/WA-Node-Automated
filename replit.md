@@ -17,11 +17,12 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
 - **Authentication:** User registration, login, and session management.
 - **WhatsApp Integration:** QR code authentication, session persistence, multiple account support, real-time connection status.
 - **Messaging:** Single and bulk message sending, media message support (images, videos, documents, audio), message scheduling, and advanced campaign management with options for target types (contact groups, local contacts, WhatsApp groups), scheduling (immediate, timed, odd/even hours), randomized delivery intervals, and real-time status monitoring.
+- **Campaign Management:** Real-time progress tracking with visual progress bars, sent/remaining/failed message counts, campaign cloning and reusability, auto-refresh for active campaigns, WebSocket integration for live updates, and comprehensive campaign status management.
 - **Contact Management:** Contact group creation, CSV import, validation, deduplication, group member management, and bulk contact-to-group assignment. Contacts are sorted alphabetically by name.
 - **Data Export/Import:** Export chats, contacts, and group participants as CSV; import contacts from CSV.
 - **Dashboard & Analytics:** System status monitoring, campaign tracking, message statistics, real-time notifications.
 - **UI/UX:** Component-based UI with shadcn/ui for a consistent and modern design. Illustrations are used for login/signup and landing pages, and lazy loading is implemented for images. Chat interface mirrors WhatsApp Web features.
-- **Technical Implementations:** WebSocket connections for real-time updates, comprehensive logout functionality, robust media handling and display, secure session configuration, and server-side sorting for consistent data display.
+- **Technical Implementations:** WebSocket connections for real-time updates, comprehensive logout functionality, robust media handling and display, secure session configuration, server-side sorting for consistent data display, and real-time campaign progress broadcasting.
 
 **Database Schema:**
 - **Users:** Authentication, profiles, email verification, WhatsApp number association.

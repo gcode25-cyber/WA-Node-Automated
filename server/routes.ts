@@ -1873,6 +1873,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         sentCount++;
         
+        // Update campaign progress in database and broadcast to clients
+        await storage.updateBulkMessageCampaign(campaign.id, {
+          sentCount,
+          failedCount
+        });
+        
+        // Broadcast progress update via WebSocket
+        try {
+          const wss = (global as any).wss;
+          if (wss && wss.clients) {
+            const progressMessage = JSON.stringify({ 
+              type: 'campaign_progress_update', 
+              data: { 
+                campaignId: campaign.id, 
+                sentCount, 
+                failedCount,
+                totalTargets: targets.length 
+              } 
+            });
+            wss.clients.forEach((client: any) => {
+              if (client.readyState === 1) {
+                client.send(progressMessage);
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Failed to broadcast campaign progress:', error);
+        }
+        
         // Random interval between messages
         const interval = getRandomInterval(campaign.minInterval * 1000, campaign.maxInterval * 1000);
         await new Promise(resolve => setTimeout(resolve, interval));
