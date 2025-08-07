@@ -219,11 +219,9 @@ export default function Dashboard() {
   // Fetch bulk campaigns with smart refresh based on active campaigns
   const { data: bulkCampaigns = [], isLoading: campaignsLoading } = useQuery<BulkCampaign[]>({
     queryKey: ['/api/bulk-campaigns'],
-    refetchInterval: (data) => {
-      // If there are any running campaigns, refresh every 5 seconds
-      const campaigns = data as BulkCampaign[] | undefined;
-      const hasRunningCampaigns = campaigns?.some((campaign: BulkCampaign) => campaign.status === 'running');
-      return hasRunningCampaigns ? 5000 : 30000; // 5 sec for active, 30 sec for inactive
+    refetchInterval: () => {
+      // Refresh every 30 seconds for bulk campaigns
+      return 30000;
     },
     refetchIntervalInBackground: true, // Keep refreshing even when tab is not focused
   });
