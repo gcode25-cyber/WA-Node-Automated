@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
-import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User } from "lucide-react";
+import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User, Copy, Play, Pause } from "lucide-react";
 
 import { useLocation } from "wouter";
 
@@ -216,10 +216,15 @@ export default function Dashboard() {
     staleTime: Infinity, // Data is always fresh from WebSocket
   });
 
-  // Fetch bulk campaigns
+  // Fetch bulk campaigns with smart refresh based on active campaigns
   const { data: bulkCampaigns = [], isLoading: campaignsLoading } = useQuery<BulkCampaign[]>({
     queryKey: ['/api/bulk-campaigns'],
-    refetchInterval: 30000,
+    refetchInterval: (data) => {
+      // If there are any running campaigns, refresh every 5 seconds
+      const hasRunningCampaigns = data?.some((campaign: BulkCampaign) => campaign.status === 'running');
+      return hasRunningCampaigns ? 5000 : 30000; // 5 sec for active, 30 sec for inactive
+    },
+    refetchIntervalInBackground: true, // Keep refreshing even when tab is not focused
   });
 
   // Helper function to determine if a phone number is valid (more inclusive)
@@ -761,6 +766,30 @@ export default function Dashboard() {
         variant: "destructive",
       });
     }
+  };
+
+  // Clone campaign function
+  const cloneCampaign = (campaign: BulkCampaign) => {
+    // Pre-fill the form with campaign data
+    setNewCampaignName(`${campaign.name} (Copy)`);
+    setBulkMessage(campaign.message);
+    if (campaign.contactGroupId) {
+      setSelectedContactGroup(campaign.contactGroupId);
+      setTargetType('contact_group');
+    }
+    setScheduleType('immediate');
+    setScheduledTime('');
+    setMinInterval(1);
+    setMaxInterval(10);
+    setSelectedMedia(null);
+    
+    // Open the dialog
+    setShowBulkMessageDialog(true);
+    
+    toast({
+      title: "Campaign Cloned",
+      description: "Campaign data has been loaded for editing. Review and create when ready.",
+    });
   };
 
   // Import CSV mutation
@@ -1907,13 +1936,23 @@ export default function Dashboard() {
                     <h1 className="text-3xl font-bold tracking-tight">Bulk Messaging</h1>
                     <p className="text-muted-foreground">Create and manage bulk messaging campaigns</p>
                   </div>
-                  <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
-                    <DialogTrigger asChild>
-                      <Button disabled={!sessionInfo}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Campaign
-                      </Button>
-                    </DialogTrigger>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/bulk-campaigns'] })}
+                      disabled={campaignsLoading}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${campaignsLoading ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
+                    <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
+                      <DialogTrigger asChild>
+                        <Button disabled={!sessionInfo}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Campaign
+                        </Button>
+                      </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Create New Campaign</DialogTitle>
@@ -2071,7 +2110,8 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </DialogContent>
-                  </Dialog>
+                    </Dialog>
+                  </div>
                 </div>
 
                 {/* Campaign List */}
@@ -2160,6 +2200,17 @@ export default function Dashboard() {
                                     Resume
                                   </Button>
                                 )}
+                                {(campaign.status === "completed" || campaign.status === "failed") && (
+                                  <Button 
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => cloneCampaign(campaign)}
+                                    disabled={createBulkCampaignMutation.isPending}
+                                  >
+                                    <Copy className="h-4 w-4 mr-1" />
+                                    Clone & Reuse
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </CardHeader>
@@ -2172,14 +2223,57 @@ export default function Dashboard() {
                                 </p>
                               </div>
 
+                              {/* Enhanced Progress Section */}
+                              {(campaign.sentCount > 0 || campaign.failedCount > 0) && (
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center text-sm">
+                                    <span className="font-medium">Progress</span>
+                                    <span className="text-muted-foreground">
+                                      {campaign.sentCount + campaign.failedCount} / {campaign.sentCount + campaign.failedCount + 1} 
+                                      ({Math.round(((campaign.sentCount + campaign.failedCount) / (campaign.sentCount + campaign.failedCount + 1)) * 100)}%)
+                                    </span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                      style={{
+                                        width: `${((campaign.sentCount + campaign.failedCount) / (campaign.sentCount + campaign.failedCount + 1)) * 100}%`
+                                      }}
+                                    ></div>
+                                  </div>
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-green-600 font-medium">✓ {campaign.sentCount} sent</span>
+                                    <span className="text-red-600 font-medium">✗ {campaign.failedCount} failed</span>
+                                    <span className="text-blue-600 font-medium">⏳ remaining</span>
+                                  </div>
+                                  {campaign.status === "running" && (
+                                    <div className="text-xs text-muted-foreground flex justify-between items-center mt-2 pt-2 border-t">
+                                      <span>Status: Active</span>
+                                      <span className="flex items-center">
+                                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></span>
+                                        Sending messages...
+                                      </span>
+                                    </div>
+                                  )}
+                                  {campaign.status === "completed" && (
+                                    <div className="text-xs text-green-600 font-medium mt-2 pt-2 border-t">
+                                      ✅ Campaign completed successfully
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                 <div>
                                   <span className="font-medium">Sent:</span>
-                                  <p className="text-muted-foreground">{campaign.sentCount}</p>
+                                  <p className="text-green-600 font-medium">
+                                    {campaign.sentCount}
+                                    {campaign.status === "running" && <span className="animate-pulse ml-1">●</span>}
+                                  </p>
                                 </div>
                                 <div>
                                   <span className="font-medium">Failed:</span>
-                                  <p className="text-muted-foreground">{campaign.failedCount}</p>
+                                  <p className="text-red-600 font-medium">{campaign.failedCount}</p>
                                 </div>
                                 <div>
                                   <span className="font-medium">Target Type:</span>
@@ -2197,35 +2291,111 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  {/* Analytics Section */}
+                  {/* Enhanced Analytics Section */}
                   {bulkCampaigns.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Campaign Analytics</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="text-center">
-                            <div className="text-3xl font-bold text-blue-600">
-                              {bulkCampaigns.length}
+                    <div className="space-y-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between">
+                            Campaign Analytics
+                            <Badge variant="outline" className="text-xs">
+                              Last updated: {new Date().toLocaleTimeString()}
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="text-center p-4 border rounded-lg">
+                              <div className="text-3xl font-bold text-blue-600 mb-1">
+                                {bulkCampaigns.length}
+                              </div>
+                              <p className="text-sm text-muted-foreground">Total Campaigns</p>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {bulkCampaigns.filter(c => c.status === 'running').length} active
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">Total Campaigns</p>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-3xl font-bold text-green-600">
-                              {bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0)}
+                            <div className="text-center p-4 border rounded-lg">
+                              <div className="text-3xl font-bold text-green-600 mb-1">
+                                {bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0)}
+                              </div>
+                              <p className="text-sm text-muted-foreground">Messages Sent</p>
+                              <div className="text-xs text-green-600 font-medium mt-1">
+                                ✓ Success Rate: {
+                                  Math.round(
+                                    (bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0) / 
+                                    Math.max(1, bulkCampaigns.reduce((sum, c) => sum + c.sentCount + c.failedCount, 0))) * 100
+                                  )
+                                }%
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">Messages Sent</p>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-3xl font-bold text-red-600">
-                              {bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0)}
+                            <div className="text-center p-4 border rounded-lg">
+                              <div className="text-3xl font-bold text-red-600 mb-1">
+                                {bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0)}
+                              </div>
+                              <p className="text-sm text-muted-foreground">Failed Messages</p>
+                              <div className="text-xs text-red-600 font-medium mt-1">
+                                ✗ Error Rate: {
+                                  Math.round(
+                                    (bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0) / 
+                                    Math.max(1, bulkCampaigns.reduce((sum, c) => sum + c.sentCount + c.failedCount, 0))) * 100
+                                  )
+                                }%
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">Failed Messages</p>
+                            <div className="text-center p-4 border rounded-lg">
+                              <div className="text-3xl font-bold text-purple-600 mb-1">
+                                {bulkCampaigns.filter(c => c.status === 'completed').length}
+                              </div>
+                              <p className="text-sm text-muted-foreground">Completed</p>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {bulkCampaigns.filter(c => c.status === 'draft').length} draft, 
+                                {bulkCampaigns.filter(c => c.status === 'paused').length} paused
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+
+                      {/* Active Campaigns Quick View */}
+                      {bulkCampaigns.some(c => c.status === 'running') && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center">
+                              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></span>
+                              Active Campaigns ({bulkCampaigns.filter(c => c.status === 'running').length})
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              {bulkCampaigns
+                                .filter(c => c.status === 'running')
+                                .map(campaign => (
+                                  <div key={campaign.id} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                    <div className="flex-1">
+                                      <h4 className="font-medium text-sm">{campaign.name}</h4>
+                                      <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
+                                        <span>✓ {campaign.sentCount} sent</span>
+                                        <span>✗ {campaign.failedCount} failed</span>
+                                        <span className="flex items-center">
+                                          <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse mr-1"></span>
+                                          Running...
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-lg font-bold text-green-600">
+                                        {Math.round(((campaign.sentCount + campaign.failedCount) / Math.max(1, campaign.sentCount + campaign.failedCount + 10)) * 100)}%
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">Progress</div>
+                                    </div>
+                                  </div>
+                                ))
+                              }
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
