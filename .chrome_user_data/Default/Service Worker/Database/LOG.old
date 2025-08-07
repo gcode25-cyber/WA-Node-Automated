@@ -1,3 +1,2 @@
-2025/08/07-12:11:33.352 1732 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/MANIFEST-000001
-2025/08/07-12:11:33.356 1732 Recovering log #3
-2025/08/07-12:11:33.356 1732 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/000003.log 
+2025/08/07-12:44:00.741 1d8c Creating DB /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database since it was missing.
+2025/08/07-12:44:00.749 1d8c Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Service Worker/Database/MANIFEST-000001
