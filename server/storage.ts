@@ -44,7 +44,7 @@ export interface IStorage {
   
   // Bulk message campaign methods
   getBulkMessageCampaigns(): Promise<BulkMessageCampaign[]>;
-  createBulkMessageCampaign(campaign: InsertBulkMessageCampaign): Promise<BulkMessageCampaign>;
+  createBulkMessageCampaign(campaign: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign>;
   updateBulkMessageCampaign(id: string, updates: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign | undefined>;
 }
 
@@ -255,11 +255,14 @@ export class MemStorage implements IStorage {
     return Array.from(this.bulkMessageCampaigns.values());
   }
 
-  async createBulkMessageCampaign(insertCampaign: InsertBulkMessageCampaign): Promise<BulkMessageCampaign> {
+  async createBulkMessageCampaign(insertCampaign: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign> {
     const id = randomUUID();
     const campaign: BulkMessageCampaign = { 
       ...insertCampaign, 
       id,
+      name: insertCampaign.name || "",
+      targetType: insertCampaign.targetType || "contact_group",
+      message: insertCampaign.message || "",
       status: insertCampaign.status || "draft",
       mediaUrl: insertCampaign.mediaUrl || null,
       mediaType: insertCampaign.mediaType || null,
@@ -270,10 +273,10 @@ export class MemStorage implements IStorage {
       minInterval: insertCampaign.minInterval || 1,
       maxInterval: insertCampaign.maxInterval || 10,
       scheduleType: insertCampaign.scheduleType || "immediate",
-      totalTargets: 0,
+      totalTargets: insertCampaign.totalTargets || 0,
       lastExecuted: null,
-      sentCount: 0,
-      failedCount: 0,
+      sentCount: insertCampaign.sentCount || 0,
+      failedCount: insertCampaign.failedCount || 0,
       createdAt: new Date()
     };
     this.bulkMessageCampaigns.set(id, campaign);
@@ -457,7 +460,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(bulkMessageCampaigns);
   }
 
-  async createBulkMessageCampaign(insertCampaign: InsertBulkMessageCampaign): Promise<BulkMessageCampaign> {
+  async createBulkMessageCampaign(insertCampaign: Partial<BulkMessageCampaign>): Promise<BulkMessageCampaign> {
     const [campaign] = await db
       .insert(bulkMessageCampaigns)
       .values(insertCampaign)

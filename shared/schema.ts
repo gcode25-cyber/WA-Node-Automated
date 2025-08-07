@@ -222,29 +222,38 @@ export const bulkMessageSchema = z.object({
 export const createCampaignSchema = z.object({
   name: z.string().min(1, "Campaign name is required"),
   targetType: z.enum(["contact_group", "local_contacts", "whatsapp_group"]),
-  contactGroupId: z.string().optional(),
-  whatsappGroupId: z.string().optional(),
+  contactGroupId: z.string().optional().transform(val => val || undefined),
+  whatsappGroupId: z.string().optional().transform(val => val || undefined),
   message: z.string().min(1, "Message is required").max(1000, "Message too long"),
   mediaUrl: z.string().optional(),
   mediaType: z.enum(["image", "video", "document", "audio"]).optional(),
-  timePost: z.string().optional(), // ISO string
+  timePost: z.string().optional().transform(val => val || undefined), // ISO string
   minInterval: z.number().min(1).max(3600).default(1),
   maxInterval: z.number().min(1).max(3600).default(10),
   scheduleType: z.enum(["immediate", "scheduled", "daytime", "nighttime", "odd_hours", "even_hours"]).default("immediate"),
   scheduleHours: z.array(z.number()).optional(), // Array of hours (0-23)
 }).refine(data => {
+  // More detailed validation with error messages
+  console.log("🔍 Campaign validation data:", data);
+  
   if (data.targetType === "contact_group" && !data.contactGroupId) {
+    console.log("❌ Validation failed: contact_group requires contactGroupId");
     return false;
   }
   if (data.targetType === "whatsapp_group" && !data.whatsappGroupId) {
+    console.log("❌ Validation failed: whatsapp_group requires whatsappGroupId");
     return false;
   }
   if (data.scheduleType === "scheduled" && !data.timePost) {
+    console.log("❌ Validation failed: scheduled requires timePost");
     return false;
   }
   if (data.minInterval > data.maxInterval) {
+    console.log("❌ Validation failed: minInterval > maxInterval");
     return false;
   }
+  
+  console.log("✅ Campaign validation passed");
   return true;
 }, {
   message: "Invalid campaign configuration"

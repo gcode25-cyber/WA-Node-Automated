@@ -1606,7 +1606,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         minInterval: req.body.minInterval ? parseInt(req.body.minInterval) : 1,
         maxInterval: req.body.maxInterval ? parseInt(req.body.maxInterval) : 10,
+        scheduleHours: req.body.scheduleHours ? JSON.parse(req.body.scheduleHours) : undefined,
       };
+
+      // Debug logging
+      console.log("🔍 Raw request data:", req.body);
+      console.log("🔍 Transformed request data:", requestData);
       
       const validatedData = createCampaignSchema.parse(requestData);
       
@@ -1641,15 +1646,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create campaign with enhanced scheduling data
-      const campaign = await storage.createBulkMessageCampaign({
-        ...validatedData,
-        mediaUrl,
-        mediaType: mediaType as any,
+      const campaignData = {
+        name: validatedData.name,
+        targetType: validatedData.targetType,
+        contactGroupId: validatedData.contactGroupId || null,
+        whatsappGroupId: validatedData.whatsappGroupId || null,
+        message: validatedData.message,
+        mediaUrl: mediaUrl || null,
+        mediaType: mediaType as any || null,
         timePost: validatedData.timePost ? new Date(validatedData.timePost) : null,
+        minInterval: validatedData.minInterval,
+        maxInterval: validatedData.maxInterval,
+        scheduleType: validatedData.scheduleType,
         scheduleHours: validatedData.scheduleHours ? JSON.stringify(validatedData.scheduleHours) : null,
+        status: "draft" as const,
         totalTargets,
-        status: "draft"
-      });
+        sentCount: 0,
+        failedCount: 0
+      };
+
+      console.log("🔍 Campaign data being inserted:", campaignData);
+      const campaign = await storage.createBulkMessageCampaign(campaignData);
 
       res.json({ 
         success: true, 
