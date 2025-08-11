@@ -786,6 +786,24 @@ export default function Dashboard() {
     }
   };
 
+  // Delete campaign function
+  const deleteCampaign = async (campaignId: string) => {
+    try {
+      await apiRequest(`/api/campaigns/${campaignId}`, "DELETE");
+      toast({
+        title: "Campaign Deleted",
+        description: "Campaign has been deleted successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Delete Campaign",
+        description: error.message || "Failed to delete campaign.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Clone campaign function
   const cloneCampaign = (campaign: BulkCampaign) => {
     // Pre-fill the form with campaign data
@@ -1955,15 +1973,6 @@ export default function Dashboard() {
                     <p className="text-muted-foreground">Create and manage bulk messaging campaigns</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/bulk-campaigns'] })}
-                      disabled={campaignsLoading}
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${campaignsLoading ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
                     <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
                       <DialogTrigger asChild>
                         <Button disabled={!sessionInfo}>
@@ -2229,6 +2238,15 @@ export default function Dashboard() {
                                     Restart
                                   </Button>
                                 )}
+                                <Button 
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => deleteCampaign(campaign.id)}
+                                  disabled={sendBulkCampaignMutation.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                           </CardHeader>

@@ -1815,6 +1815,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete campaign
+  app.delete("/api/campaigns/:campaignId", async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      
+      const success = await storage.deleteBulkMessageCampaign(campaignId);
+      
+      if (!success) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      res.json({ success: true, message: "Campaign deleted successfully" });
+    } catch (error: any) {
+      console.error("Delete campaign error:", error);
+      res.status(500).json({ error: error.message || "Failed to delete campaign" });
+    }
+  });
+
   // Delete campaign API
   app.delete("/api/campaigns/:campaignId", async (req, res) => {
     try {
