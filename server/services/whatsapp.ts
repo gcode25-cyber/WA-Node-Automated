@@ -1403,14 +1403,21 @@ export class WhatsAppService {
             // Check if group has admin-only messaging enabled using the announce property
             let onlyAdminsCanMessage = false;
             try {
-              // Get group metadata to check announce property
-              const metadata = await group.fetchGroupMetadata();
-              // announce: true means only admins can send messages
-              onlyAdminsCanMessage = metadata.announce || false;
-            } catch (metadataError) {
-              console.log(`Could not fetch group metadata for ${group.name}, checking group object properties`);
-              // Fallback: check if group object has announce property directly
+              // Method 1: Try to get chat object which might have group metadata
+              const chatObj = await this.client.getChatById(group.id._serialized);
+              if (chatObj && chatObj.isGroup && chatObj.groupMetadata) {
+                onlyAdminsCanMessage = chatObj.groupMetadata.announce || false;
+                console.log(`Group ${group.name}: announce=${chatObj.groupMetadata.announce}, onlyAdminsCanMessage=${onlyAdminsCanMessage}`);
+              } else {
+                // Method 2: Try direct access to group properties
+                onlyAdminsCanMessage = group.groupMetadata?.announce || group.announce || false;
+                console.log(`Group ${group.name}: Using fallback method, onlyAdminsCanMessage=${onlyAdminsCanMessage}`);
+              }
+            } catch (metadataError: any) {
+              console.log(`Could not fetch group metadata for ${group.name}: ${metadataError.message}`);
+              // Final fallback: check if group object has announce property directly
               onlyAdminsCanMessage = group.groupMetadata?.announce || group.announce || false;
+              console.log(`Group ${group.name}: Using final fallback, onlyAdminsCanMessage=${onlyAdminsCanMessage}`);
             }
             
             return {
