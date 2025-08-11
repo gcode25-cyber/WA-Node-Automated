@@ -1400,11 +1400,18 @@ export class WhatsAppService {
             // Check if current user is admin in this group
             const isAdmin = currentUserParticipant ? (currentUserParticipant.isAdmin || currentUserParticipant.isSuperAdmin) : false;
             
-            // For demonstration: simulate some groups having admin-only messaging
-            // In a real implementation, this would be fetched from WhatsApp group settings
-            const onlyAdminsCanMessage = group.onlyAdminsCanMessage || 
-              group.name.toLowerCase().includes('admin') || 
-              group.name.toLowerCase().includes('restricted');
+            // Get the actual group info to check admin-only messaging settings
+            let onlyAdminsCanMessage = false;
+            try {
+              // Try to get detailed group info which includes restrict property
+              const groupInfo = await this.client.getChat(group.id._serialized);
+              // Check if group has admin-only messaging enabled
+              onlyAdminsCanMessage = groupInfo.restrict || false;
+            } catch (infoError) {
+              console.log(`Could not fetch detailed group info for ${group.name}, checking fallback properties`);
+              // Fallback: check if group object has restrict or onlyAdminsCanMessage property
+              onlyAdminsCanMessage = group.restrict || group.onlyAdminsCanMessage || false;
+            }
             
             return {
               id: group.id._serialized,
