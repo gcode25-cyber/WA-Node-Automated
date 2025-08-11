@@ -1668,9 +1668,7 @@ export class WhatsAppService {
       
       console.log(`✅ Chat ${contactId} hidden from website interface immediately`);
       
-      // Try to clear and archive the chat in the background (but don't wait for success)
-      // This runs asynchronously without blocking the user experience
-      this.clearAndArchiveChatInBackground(contactId);
+      // No phone-side operations needed - just hide from website interface
       
       return { 
         success: true, 
@@ -1683,26 +1681,7 @@ export class WhatsAppService {
     }
   }
 
-  // Background method to clear and archive chat without blocking UI
-  private async clearAndArchiveChatInBackground(contactId: string): Promise<void> {
-    try {
-      console.log(`🧹 Background: Clearing and archiving chat ${contactId}...`);
-      
-      const chat = await this.client.getChatById(contactId);
-      
-      // Clear messages first
-      await chat.clearMessages();
-      console.log(`✅ Background: Messages cleared for ${contactId}`);
-      
-      // Try to archive the chat to prevent it from reappearing
-      await chat.archive();
-      console.log(`✅ Background: Chat ${contactId} archived successfully`);
-      
-    } catch (error: any) {
-      console.log(`⚠️ Background: Failed to clear/archive chat ${contactId}:`, error.message);
-      // Don't throw error here as this is background cleanup
-    }
-  }
+  // Background method removed - no phone-side operations for deletion
 
   // Clear chat history (for both personal and group chats)
   async clearChatHistory(contactId: string): Promise<{ success: boolean; message: string }> {
