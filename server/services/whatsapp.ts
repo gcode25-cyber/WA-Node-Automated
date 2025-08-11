@@ -1208,7 +1208,8 @@ export class WhatsAppService {
   }
 
   // Fast data loading methods for chats, groups, and contacts
-  async getChats(): Promise<any[]> {
+  // Helper method to get chats without broadcasting (prevents recursion)
+  private async getChatsWithoutBroadcast(): Promise<any[]> {
     if (!this.client || !this.isReady) {
       throw new Error('WhatsApp client is not ready');
     }
@@ -1259,13 +1260,25 @@ export class WhatsAppService {
         return timestampB - timestampA; // Latest at top
       });
 
-      // Broadcast to WebSocket clients for real-time updates
-      this.broadcastToClients('chats_updated', sortedChats);
-      
       return sortedChats;
     } catch (error: any) {
       console.error('❌ Failed to fetch chats:', error.message);
       console.log('Get chats error:', error);
+      throw error;
+    }
+  }
+
+  async getChats(): Promise<any[]> {
+    try {
+      // Use helper method and broadcast the result
+      const sortedChats = await this.getChatsWithoutBroadcast();
+      
+      // Broadcast to WebSocket clients for real-time updates
+      this.broadcastToClients('chats_updated', { chats: sortedChats });
+      
+      return sortedChats;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch chats:', error.message);
       throw error;
     }
   }
@@ -1651,8 +1664,9 @@ export class WhatsAppService {
 
       console.log(`✅ Chat ${contactId} deleted successfully`);
       
-      // Broadcast real-time update to refresh chats list
-      this.broadcastToClients('chats_updated', {});
+      // Get updated chats list and broadcast it (without re-broadcasting)
+      const updatedChats = await this.getChatsWithoutBroadcast();
+      this.broadcastToClients('chats_updated', { chats: updatedChats });
       
       return { 
         success: true, 
@@ -1677,8 +1691,9 @@ export class WhatsAppService {
 
       console.log(`✅ Chat history for ${contactId} cleared successfully`);
       
-      // Broadcast real-time update to refresh chats list and chat history
-      this.broadcastToClients('chats_updated', {});
+      // Get updated chats list and broadcast it (without re-broadcasting)
+      const updatedChats = await this.getChatsWithoutBroadcast();
+      this.broadcastToClients('chats_updated', { chats: updatedChats });
       this.broadcastToClients('chat_history_cleared', { contactId });
       
       return { 

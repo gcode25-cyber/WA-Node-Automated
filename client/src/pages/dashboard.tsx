@@ -387,9 +387,12 @@ export default function Dashboard() {
           queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
           break;
         case 'chats_updated':
-          // Update chats cache with real-time data
+          // Update chats cache with real-time data or invalidate for fresh fetch
           if (message.data?.chats) {
             queryClient.setQueryData(['/api/chats'], message.data.chats);
+          } else {
+            // If no data provided, invalidate cache to trigger fresh fetch
+            queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
           }
           break;
         case 'contacts_updated':
