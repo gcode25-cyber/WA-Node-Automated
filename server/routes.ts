@@ -1791,6 +1791,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Restart campaign
+  app.post("/api/campaigns/:campaignId/restart", async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      
+      // Reset campaign status and counters
+      const campaign = await storage.updateBulkMessageCampaign(campaignId, {
+        status: "draft",
+        sentCount: 0,
+        failedCount: 0,
+        lastExecuted: null
+      });
+      
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      res.json({ success: true, message: "Campaign restarted successfully" });
+    } catch (error: any) {
+      console.error("Restart campaign error:", error);
+      res.status(500).json({ error: error.message || "Failed to restart campaign" });
+    }
+  });
+
   // Delete campaign API
   app.delete("/api/campaigns/:campaignId", async (req, res) => {
     try {

@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
-import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User, Copy, Play, Pause } from "lucide-react";
+import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User, Copy, Play, Pause, RotateCcw } from "lucide-react";
 
 import { useLocation } from "wouter";
 
@@ -72,6 +72,7 @@ interface BulkCampaign {
   status: string;
   sentCount: number;
   failedCount: number;
+  totalTargets: number;
   createdAt: string;
 }
 
@@ -762,6 +763,24 @@ export default function Dashboard() {
       toast({
         title: "Failed to Resume Campaign",
         description: error.message || "Failed to resume campaign.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Restart campaign function
+  const restartCampaign = async (campaignId: string) => {
+    try {
+      await apiRequest(`/api/campaigns/${campaignId}/restart`, "POST");
+      toast({
+        title: "Campaign Restarted",
+        description: "Campaign has been restarted successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bulk-campaigns"] });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Restart Campaign",
+        description: error.message || "Failed to restart campaign.",
         variant: "destructive",
       });
     }
@@ -1929,7 +1948,7 @@ export default function Dashboard() {
 
             {/* Enhanced Bulk Messaging Module */}
             {selectedModule === 'bulk-messaging' && (
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6 overflow-y-auto max-h-screen">
                 <div className="flex justify-between items-center">
                   <div>
                     <h1 className="text-3xl font-bold tracking-tight">Bulk Messaging</h1>
@@ -2144,7 +2163,7 @@ export default function Dashboard() {
                       </CardContent>
                     </Card>
                   ) : (
-                    <div className="grid gap-4">
+                    <div className="grid gap-4 max-h-[calc(100vh-300px)] overflow-y-auto">
                       {bulkCampaigns.map((campaign: BulkCampaign) => (
                         <Card key={campaign.id}>
                           <CardHeader>
@@ -2203,11 +2222,11 @@ export default function Dashboard() {
                                   <Button 
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => cloneCampaign(campaign)}
-                                    disabled={createBulkCampaignMutation.isPending}
+                                    onClick={() => restartCampaign(campaign.id)}
+                                    disabled={sendBulkCampaignMutation.isPending}
                                   >
-                                    <Copy className="h-4 w-4 mr-1" />
-                                    Clone & Reuse
+                                    <RotateCcw className="h-4 w-4 mr-1" />
+                                    Restart
                                   </Button>
                                 )}
                               </div>
@@ -2228,22 +2247,22 @@ export default function Dashboard() {
                                   <div className="flex justify-between items-center text-sm">
                                     <span className="font-medium">Progress</span>
                                     <span className="text-muted-foreground">
-                                      {campaign.sentCount + campaign.failedCount} / {campaign.sentCount + campaign.failedCount + 1} 
-                                      ({Math.round(((campaign.sentCount + campaign.failedCount) / (campaign.sentCount + campaign.failedCount + 1)) * 100)}%)
+                                      {campaign.sentCount + campaign.failedCount} / {campaign.totalTargets} 
+                                      ({Math.round(((campaign.sentCount + campaign.failedCount) / Math.max(1, campaign.totalTargets)) * 100)}%)
                                     </span>
                                   </div>
                                   <div className="w-full bg-gray-200 rounded-full h-2">
                                     <div 
                                       className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                                       style={{
-                                        width: `${((campaign.sentCount + campaign.failedCount) / (campaign.sentCount + campaign.failedCount + 1)) * 100}%`
+                                        width: `${((campaign.sentCount + campaign.failedCount) / Math.max(1, campaign.totalTargets)) * 100}%`
                                       }}
                                     ></div>
                                   </div>
                                   <div className="flex justify-between text-xs">
                                     <span className="text-green-600 font-medium">✓ {campaign.sentCount} sent</span>
                                     <span className="text-red-600 font-medium">✗ {campaign.failedCount} failed</span>
-                                    <span className="text-blue-600 font-medium">⏳ remaining</span>
+                                    <span className="text-blue-600 font-medium">⏳ {campaign.totalTargets - campaign.sentCount - campaign.failedCount} remaining</span>
                                   </div>
                                   {campaign.status === "running" && (
                                     <div className="text-xs text-muted-foreground flex justify-between items-center mt-2 pt-2 border-t">
