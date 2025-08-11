@@ -1,3 +1,2 @@
-2025/08/11-06:11:01.348 941 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/MANIFEST-000001
-2025/08/11-06:11:01.359 941 Recovering log #3
-2025/08/11-06:11:01.359 941 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/000003.log 
+2025/08/11-06:42:12.587 289 Creating DB /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb since it was missing.
+2025/08/11-06:42:12.608 289 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Local Storage/leveldb/MANIFEST-000001

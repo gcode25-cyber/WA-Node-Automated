@@ -1,3 +1,2 @@
-2025/08/11-06:11:01.314 91d Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/shared_proto_db/MANIFEST-000001
-2025/08/11-06:11:01.315 91d Recovering log #3
-2025/08/11-06:11:01.315 91d Reusing old log /home/runner/workspace/.chrome_user_data/Default/shared_proto_db/000003.log 
+2025/08/11-06:42:14.038 25e Creating DB /home/runner/workspace/.chrome_user_data/Default/shared_proto_db since it was missing.
+2025/08/11-06:42:14.054 25e Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/shared_proto_db/MANIFEST-000001
