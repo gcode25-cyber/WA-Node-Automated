@@ -1659,86 +1659,193 @@ export class WhatsAppService {
         throw new Error('Cannot delete group chats');
       }
 
-      // Get the chat first
-      const chat = await this.client.getChatById(contactId);
-      
-      // Check if chat has delete method available
-      if (typeof chat.delete !== 'function') {
-        console.log(`⚠️ Chat delete method not available for ${contactId}`);
-        throw new Error('Chat deletion is not supported for this chat type');
-      }
-      
       console.log(`🗑️ Attempting to delete chat ${contactId}...`);
       
-      // WhatsApp Web.js limitation workaround: Try multiple approaches
-      let deleteResult = false;
-      let approach = '';
+      // Get the underlying Puppeteer page for direct DOM manipulation
+      const page = this.client.pupPage;
       
-      try {
-        // Approach 1: Direct deletion
-        approach = 'direct';
-        deleteResult = await chat.delete();
-        console.log(`🔍 Direct delete result:`, deleteResult);
-        
-        // Wait a moment and verify deletion
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check if chat still exists by trying to fetch it
-        try {
-          await this.client.getChatById(contactId);
-          console.log(`⚠️ Direct deletion failed - chat still exists`);
-          deleteResult = false;
-        } catch (e: any) {
-          // If getChatById fails, the chat was successfully deleted
-          if (e.message.includes('not found') || e.message.includes('does not exist')) {
-            console.log(`✅ Direct deletion confirmed - chat no longer exists`);
-            deleteResult = true;
-          } else {
-            deleteResult = false;
-          }
-        }
-        
-      } catch (error: any) {
-        console.log(`❌ Direct deletion failed:`, error.message);
-        deleteResult = false;
-      }
-      
-      // If direct deletion failed, try fallback approach
-      if (!deleteResult) {
-        try {
-          approach = 'archive';
-          console.log(`📦 Fallback: Archiving chat ${contactId} instead of deleting...`);
-          await chat.archive();
-          
-          // Clear the chat history as well for better user experience
-          await chat.clearMessages();
-          
-          console.log(`✅ Chat ${contactId} archived and cleared successfully`);
-          
-          // Get updated chats list and broadcast it
-          const updatedChats = await this.getChatsWithoutBroadcast();
-          this.broadcastToClients('chats_updated', { chats: updatedChats });
-          
-          return { 
-            success: true, 
-            message: 'Chat archived and cleared successfully (WhatsApp Web limitation prevents permanent deletion)' 
-          };
-        } catch (archiveError: any) {
-          console.error(`❌ Fallback archive also failed:`, archiveError.message);
-          throw new Error(`Unable to delete or archive chat: ${archiveError.message}`);
-        }
+      if (!page) {
+        throw new Error('Cannot access WhatsApp Web page for deletion');
       }
 
-      console.log(`✅ Chat ${contactId} deleted successfully using ${approach} approach`);
+      // Try DOM-based deletion first (more reliable)
+      const domDeleteResult = await page.evaluate(async (chatId) => {
+        // Function to find chat element by various selectors
+        const findChatElement = () => {
+          // Try multiple possible selectors for chat elements
+          const selectors = [
+            `[data-id="${chatId}"]`,
+            `div[data-testid="chat-list-item"][title*="${chatId.split('@')[0]}"]`,
+            `div[role="listitem"]:has([title*="${chatId.split('@')[0]}"])`,
+            `div[data-testid="cell-frame-container"]:has([data-id="${chatId}"])`
+          ];
+          
+          for (const selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element) return element;
+          }
+          
+          // Fallback: search by contact number in chat titles
+          const chatElements = document.querySelectorAll('[data-testid="chat-list-item"]');
+          for (const element of chatElements) {
+            const titleElement = element.querySelector('[title]');
+            if (titleElement && titleElement.getAttribute('title')?.includes(chatId.split('@')[0])) {
+              return element;
+            }
+          }
+          
+          return null;
+        };
+
+        try {
+          const chatElement = findChatElement();
+          
+          if (!chatElement) {
+            return { success: false, reason: 'Chat element not found in DOM' };
+          }
+
+          // Right-click to open context menu
+          chatElement.dispatchEvent(new MouseEvent('contextmenu', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          }));
+
+          // Wait for context menu to appear
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+          // Find and click delete option
+          const deleteSelectors = [
+            '[data-testid="delete-chat"]',
+            '[data-testid="mi-delete-chat"]',
+            'div[role="button"]:has-text("Delete chat")',
+            'div[role="menuitem"]:has-text("Delete")'
+          ];
+
+          let deleteButton = null;
+          for (const selector of deleteSelectors) {
+            deleteButton = document.querySelector(selector);
+            if (deleteButton) break;
+          }
+
+          if (!deleteButton) {
+            // Try to find by text content
+            const menuItems = document.querySelectorAll('div[role="menuitem"], li[role="menuitem"]');
+            for (const item of menuItems) {
+              if (item.textContent?.toLowerCase().includes('delete')) {
+                deleteButton = item;
+                break;
+              }
+            }
+          }
+
+          if (deleteButton) {
+            deleteButton.click();
+            
+            // Wait for confirmation dialog
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Find and click confirm button
+            const confirmSelectors = [
+              '[data-testid="popup-controls-ok"]',
+              'div[role="button"]:has-text("Delete")',
+              'button:has-text("Delete")'
+            ];
+            
+            for (const selector of confirmSelectors) {
+              const confirmButton = document.querySelector(selector);
+              if (confirmButton) {
+                confirmButton.click();
+                return { success: true, reason: 'DOM deletion successful' };
+              }
+            }
+            
+            return { success: false, reason: 'Could not find confirmation button' };
+          }
+
+          return { success: false, reason: 'Could not find delete option in context menu' };
+        } catch (error) {
+          return { success: false, reason: `DOM deletion error: ${error.message}` };
+        }
+      }, contactId);
+
+      console.log(`🔍 DOM deletion result:`, domDeleteResult);
+
+      // If DOM deletion succeeded, verify and return
+      if (domDeleteResult.success) {
+        // Wait for WhatsApp to process the deletion
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        console.log(`✅ Chat ${contactId} deleted successfully via DOM manipulation`);
+        
+        // Get updated chats list and broadcast it
+        const updatedChats = await this.getChatsWithoutBroadcast();
+        this.broadcastToClients('chats_updated', { chats: updatedChats });
+        
+        return { 
+          success: true, 
+          message: 'Chat deleted successfully' 
+        };
+      }
+
+      // Fallback to API method if DOM deletion failed
+      console.log(`⚠️ DOM deletion failed (${domDeleteResult.reason}), trying API method...`);
       
-      // Get updated chats list and broadcast it
-      const updatedChats = await this.getChatsWithoutBroadcast();
-      this.broadcastToClients('chats_updated', { chats: updatedChats });
+      try {
+        const chat = await this.client.getChatById(contactId);
+        const apiDeleteResult = await chat.delete();
+        console.log(`🔍 API delete result:`, apiDeleteResult);
+        
+        if (apiDeleteResult) {
+          // Wait and verify deletion
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          try {
+            await this.client.getChatById(contactId);
+            console.log(`⚠️ API deletion appeared successful but chat still exists`);
+            throw new Error('API deletion verification failed');
+          } catch (e: any) {
+            if (e.message.includes('not found') || e.message.includes('does not exist')) {
+              console.log(`✅ API deletion confirmed - chat no longer exists`);
+              
+              const updatedChats = await this.getChatsWithoutBroadcast();
+              this.broadcastToClients('chats_updated', { chats: updatedChats });
+              
+              return { 
+                success: true, 
+                message: 'Chat deleted successfully' 
+              };
+            } else {
+              throw new Error('API deletion verification failed');
+            }
+          }
+        }
+      } catch (apiError: any) {
+        console.log(`❌ API deletion also failed:`, apiError.message);
+      }
+
+      // Final fallback: Archive and clear (hidden from main list)
+      console.log(`📦 Final fallback: Archiving and clearing chat ${contactId}...`);
       
-      return { 
-        success: true, 
-        message: 'Chat deleted successfully' 
-      };
+      try {
+        const chat = await this.client.getChatById(contactId);
+        await chat.archive();
+        await chat.clearMessages();
+        
+        console.log(`✅ Chat ${contactId} archived and cleared (hidden from main view)`);
+        
+        const updatedChats = await this.getChatsWithoutBroadcast();
+        this.broadcastToClients('chats_updated', { chats: updatedChats });
+        
+        return { 
+          success: true, 
+          message: 'Chat archived and cleared (hidden from view due to WhatsApp Web limitations)' 
+        };
+      } catch (archiveError: any) {
+        console.error(`❌ All deletion methods failed:`, archiveError.message);
+        throw new Error(`Unable to delete chat: ${archiveError.message}`);
+      }
+      
     } catch (error: any) {
       console.error(`❌ Failed to delete chat ${contactId}:`, error.message);
       throw error;
