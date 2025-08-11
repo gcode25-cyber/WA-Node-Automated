@@ -1659,29 +1659,79 @@ export class WhatsAppService {
         throw new Error('Cannot delete group chats');
       }
 
-      console.log(`🗑️ Attempting to hide chat ${contactId} from website interface...`);
+      // Get the chat first
+      const chat = await this.client.getChatById(contactId);
       
-      // Immediately broadcast removal from website (hide from interface)
-      const currentChats = await this.getChatsWithoutBroadcast();
-      const filteredChats = currentChats.filter(chat => chat.id !== contactId);
-      this.broadcastToClients('chats_updated', { chats: filteredChats });
+      // Check if chat has delete method available
+      if (typeof chat.delete !== 'function') {
+        console.log(`⚠️ Chat delete method not available for ${contactId}`);
+        throw new Error('Chat deletion is not supported for this chat type');
+      }
       
-      console.log(`✅ Chat ${contactId} hidden from website interface immediately`);
+      console.log(`🗑️ Attempting to delete chat ${contactId}...`);
       
-      // No phone-side operations needed - just hide from website interface
-      
-      return { 
-        success: true, 
-        message: 'Chat removed from interface successfully' 
-      };
-      
+      // Try to delete the chat
+      try {
+        const deleteResult = await chat.delete();
+        console.log(`🔍 Delete result:`, deleteResult);
+        
+        if (deleteResult) {
+          // Wait a moment and verify deletion
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Check if chat still exists by trying to fetch it
+          try {
+            await this.client.getChatById(contactId);
+            console.log(`⚠️ Deletion failed - chat still exists`);
+            throw new Error('Chat deletion verification failed');
+          } catch (e: any) {
+            // If getChatById fails, the chat was successfully deleted
+            if (e.message.includes('not found') || e.message.includes('does not exist')) {
+              console.log(`✅ Chat deletion confirmed - chat no longer exists`);
+              
+              // Get updated chats list and broadcast it
+              const updatedChats = await this.getChatsWithoutBroadcast();
+              this.broadcastToClients('chats_updated', { chats: updatedChats });
+              
+              return { 
+                success: true, 
+                message: 'Chat deleted successfully' 
+              };
+            } else {
+              throw new Error('Chat deletion verification failed');
+            }
+          }
+        } else {
+          throw new Error('Chat deletion returned false');
+        }
+      } catch (error: any) {
+        console.log(`❌ Direct deletion failed:`, error.message);
+        
+        // Fallback: Archive the chat if deletion doesn't work
+        try {
+          console.log(`📦 Fallback: Archiving chat ${contactId} instead of deleting...`);
+          await chat.archive();
+          
+          console.log(`✅ Chat ${contactId} archived successfully`);
+          
+          // Get updated chats list and broadcast it
+          const updatedChats = await this.getChatsWithoutBroadcast();
+          this.broadcastToClients('chats_updated', { chats: updatedChats });
+          
+          return { 
+            success: true, 
+            message: 'Chat archived successfully (WhatsApp Web limitation prevents permanent deletion)' 
+          };
+        } catch (archiveError: any) {
+          console.error(`❌ Fallback archive also failed:`, archiveError.message);
+          throw new Error(`Unable to delete or archive chat: ${archiveError.message}`);
+        }
+      }
     } catch (error: any) {
-      console.error(`❌ Failed to hide chat ${contactId}:`, error.message);
+      console.error(`❌ Failed to delete chat ${contactId}:`, error.message);
       throw error;
     }
   }
-
-  // Background method removed - no phone-side operations for deletion
 
   // Clear chat history (for both personal and group chats)
   async clearChatHistory(contactId: string): Promise<{ success: boolean; message: string }> {
@@ -1690,34 +1740,16 @@ export class WhatsAppService {
     }
 
     try {
-      // Immediately broadcast chat clearing to update UI in real-time
-      this.broadcastToClients('chat_history_cleared', { contactId });
-      
-      // Also immediately update the chat list to show cleared state
-      const currentChats = await this.getChatsWithoutBroadcast();
-      const updatedChats = currentChats.map(chat => {
-        if (chat.id === contactId) {
-          return {
-            ...chat,
-            lastMessage: null, // Clear the last message preview
-            unreadCount: 0     // Reset unread count
-          };
-        }
-        return chat;
-      });
-      this.broadcastToClients('chats_updated', { chats: updatedChats });
-      
-      console.log(`📡 Chat clearing broadcasted immediately for ${contactId}`);
-      
-      // Then perform actual clearing in background
+      // Get the chat and clear all messages
       const chat = await this.client.getChatById(contactId);
       await chat.clearMessages();
 
-      console.log(`✅ Chat history for ${contactId} cleared successfully on WhatsApp`);
+      console.log(`✅ Chat history for ${contactId} cleared successfully`);
       
-      // Get final updated chats list and broadcast it
-      const finalUpdatedChats = await this.getChatsWithoutBroadcast();
-      this.broadcastToClients('chats_updated', { chats: finalUpdatedChats });
+      // Get updated chats list and broadcast it
+      const updatedChats = await this.getChatsWithoutBroadcast();
+      this.broadcastToClients('chats_updated', { chats: updatedChats });
+      this.broadcastToClients('chat_history_cleared', { contactId });
       
       return { 
         success: true, 

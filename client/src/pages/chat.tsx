@@ -84,49 +84,28 @@ export default function ChatPage() {
     staleTime: 3000,
   });
 
-  // Listen for real-time messages and chat clearing via WebSocket
+  // Listen for real-time messages via WebSocket
   useEffect(() => {
     if (!contactId) return;
 
-    const handleWebSocketMessage = (message: any) => {
-      switch (message.type) {
-        case 'new_message':
-          if (message.data.chatId === contactId) {
-            // Invalidate and refetch chat history when new message arrives for this chat
-            queryClient.invalidateQueries({ queryKey: ['/api/chat-history', contactId] });
-            console.log('🔄 New message received for current chat, refreshing...');
-          }
-          break;
+    const handleNewMessage = (message: any) => {
+      if (message.type === 'new_message' && message.data.chatId === contactId) {
+        // Invalidate and refetch chat history when new message arrives for this chat
+        queryClient.invalidateQueries({ queryKey: ['/api/chat-history', contactId] });
         
-        case 'chat_history_cleared':
-          if (message.data?.contactId === contactId) {
-            // Immediately clear the chat history in the UI
-            queryClient.setQueryData(['/api/chat-history', contactId], (oldHistory: any) => {
-              if (oldHistory) {
-                return {
-                  ...oldHistory,
-                  messages: []
-                };
-              }
-              return oldHistory;
-            });
-            
-            console.log(`🗑️ Chat ${contactId} history cleared in real-time UI`);
-            setIsClearingChat(false); // Reset clearing state
-          }
-          break;
+        console.log('🔄 New message received for current chat, refreshing...');
       }
     };
 
     // Import WebSocket manager dynamically to avoid issues
     import('../lib/websocket').then(({ websocketManager }) => {
-      websocketManager.addEventHandler(handleWebSocketMessage);
+      websocketManager.addEventHandler(handleNewMessage);
     });
 
     // Cleanup function
     return () => {
       import('../lib/websocket').then(({ websocketManager }) => {
-        websocketManager.removeEventHandler(handleWebSocketMessage);
+        websocketManager.removeEventHandler(handleNewMessage);
       });
     };
   }, [contactId, queryClient]);
