@@ -1400,17 +1400,17 @@ export class WhatsAppService {
             // Check if current user is admin in this group
             const isAdmin = currentUserParticipant ? (currentUserParticipant.isAdmin || currentUserParticipant.isSuperAdmin) : false;
             
-            // Get the actual group info to check admin-only messaging settings
+            // Check if group has admin-only messaging enabled using the announce property
             let onlyAdminsCanMessage = false;
             try {
-              // Try to get detailed group info which includes restrict property
-              const groupInfo = await this.client.getChat(group.id._serialized);
-              // Check if group has admin-only messaging enabled
-              onlyAdminsCanMessage = groupInfo.restrict || false;
-            } catch (infoError) {
-              console.log(`Could not fetch detailed group info for ${group.name}, checking fallback properties`);
-              // Fallback: check if group object has restrict or onlyAdminsCanMessage property
-              onlyAdminsCanMessage = group.restrict || group.onlyAdminsCanMessage || false;
+              // Get group metadata to check announce property
+              const metadata = await group.fetchGroupMetadata();
+              // announce: true means only admins can send messages
+              onlyAdminsCanMessage = metadata.announce || false;
+            } catch (metadataError) {
+              console.log(`Could not fetch group metadata for ${group.name}, checking group object properties`);
+              // Fallback: check if group object has announce property directly
+              onlyAdminsCanMessage = group.groupMetadata?.announce || group.announce || false;
             }
             
             return {
