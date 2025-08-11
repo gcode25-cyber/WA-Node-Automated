@@ -11,6 +11,7 @@ This project is a comprehensive WhatsApp bulk messaging platform inspired by Waz
 - Successfully migrated from Replit Agent to standard Replit environment (January 2025)
 - Migration completed: Database provisioned, dependencies installed, application running on port 5000
 - Bulk messaging module improvements completed (January 2025): Replaced "Clone & Reuse" with "Restart" functionality, fixed progress counters to use totalTargets, added scrollable interface, removed redundant bulk-messaging.tsx file, removed Refresh button and added Delete campaign functionality, removed Active Campaigns quick view component
+- Advanced scheduling features implemented (August 2025): Enhanced bulk messaging with time post scheduling, random message intervals (1-3600 seconds), schedule time controls (daytime/nighttime/odd/even hours), dynamic hour management with add/remove functionality, major performance optimization by replacing heavy dropdowns with fast number inputs
 
 ## System Architecture
 The application is built with a React frontend (TypeScript, Vite, TailwindCSS, shadcn/ui) and a Node.js backend (Express, TypeScript). Data is managed using PostgreSQL with Drizzle ORM. WhatsApp integration is handled via the `whatsapp-web.js` library, supporting QR code authentication, session persistence, and multiple WhatsApp accounts. Authentication is session-based. File storage utilizes the local file system with Multer.
