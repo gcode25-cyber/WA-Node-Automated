@@ -788,6 +788,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear chat history (POST route for frontend compatibility)
+  app.post("/api/chats/:contactId/clear", async (req, res) => {
+    try {
+      const { contactId } = req.params;
+      const result = await whatsappService.clearChatHistory(contactId);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Clear chat history error:", error);
+      res.status(500).json({ error: error.message || "Failed to clear chat history" });
+    }
+  });
+
   // Contact Groups API
   app.get("/api/contact-groups", async (req, res) => {
     try {
