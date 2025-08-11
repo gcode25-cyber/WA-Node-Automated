@@ -135,10 +135,11 @@ export default function Dashboard() {
   const [targetType, setTargetType] = useState('contact_group');
   const [selectedWhatsAppGroup, setSelectedWhatsAppGroup] = useState('');
   const [scheduleType, setScheduleType] = useState('immediate');
-  const [scheduledTime, setScheduledTime] = useState('');
+  const [timePost, setTimePost] = useState('');
   const [minInterval, setMinInterval] = useState(1);
   const [maxInterval, setMaxInterval] = useState(10);
   const [selectedMedia, setSelectedMedia] = useState<File | null>(null);
+  const [scheduleHours, setScheduleHours] = useState<number[]>([]);
   
   // Contact selection dropdown state
   const [showContactsDropdown, setShowContactsDropdown] = useState(false);
@@ -688,8 +689,12 @@ export default function Dashboard() {
       formData.append('whatsappGroupId', selectedWhatsAppGroup);
     }
 
-    if (scheduleType === 'scheduled' && scheduledTime) {
-      formData.append('timePost', scheduledTime);
+    if (scheduleType === 'scheduled' && timePost) {
+      formData.append('timePost', timePost);
+    }
+    
+    if (scheduleHours.length > 0) {
+      formData.append('scheduleHours', JSON.stringify(scheduleHours));
     }
 
     if (selectedMedia) {
@@ -706,10 +711,11 @@ export default function Dashboard() {
       setSelectedWhatsAppGroup('');
       setTargetType('contact_group');
       setScheduleType('immediate');
-      setScheduledTime('');
+      setTimePost('');
       setMinInterval(1);
       setMaxInterval(10);
       setSelectedMedia(null);
+      setScheduleHours([]);
       setShowBulkMessageDialog(false);
     } catch (error) {
       // Error handled by mutation
@@ -814,7 +820,7 @@ export default function Dashboard() {
       setTargetType('contact_group');
     }
     setScheduleType('immediate');
-    setScheduledTime('');
+    setTimePost('');
     setMinInterval(1);
     setMaxInterval(10);
     setSelectedMedia(null);
@@ -2072,55 +2078,154 @@ export default function Dashboard() {
                             )}
                           </div>
 
+                          {/* Time Post Field */}
                           <div className="space-y-2">
-                            <Label>Schedule Type</Label>
-                            <Select value={scheduleType} onValueChange={setScheduleType}>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="immediate">Send Immediately</SelectItem>
-                                <SelectItem value="scheduled">Schedule for Specific Time</SelectItem>
-                                <SelectItem value="daytime">Daytime Hours (6AM-6PM)</SelectItem>
-                                <SelectItem value="nighttime">Nighttime Hours (7PM-5AM)</SelectItem>
-                                <SelectItem value="odd_hours">Odd Hours Only</SelectItem>
-                                <SelectItem value="even_hours">Even Hours Only</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Label>Time post</Label>
+                            <Input
+                              type="datetime-local"
+                              value={timePost}
+                              onChange={(e) => setTimePost(e.target.value)}
+                              placeholder="Select starting date and time"
+                            />
                           </div>
 
-                          {scheduleType === "scheduled" && (
-                            <div className="space-y-2">
-                              <Label>Schedule Time</Label>
-                              <Input
-                                type="datetime-local"
-                                value={scheduledTime}
-                                onChange={(e) => setScheduledTime(e.target.value)}
-                              />
-                            </div>
-                          )}
-
+                          {/* Random Message Interval Controls */}
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label>Min Interval (seconds)</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                max="300"
-                                value={minInterval}
-                                onChange={(e) => setMinInterval(parseInt(e.target.value) || 1)}
-                              />
+                              <Label>Random message interval by minimum (second)</Label>
+                              <Select value={minInterval.toString()} onValueChange={(value) => setMinInterval(parseInt(value))}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select min second" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 3600 }, (_, i) => i + 1).map((second) => (
+                                    <SelectItem key={second} value={second.toString()}>
+                                      {second} second{second > 1 ? 's' : ''}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Max Interval (seconds)</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                max="300"
-                                value={maxInterval}
-                                onChange={(e) => setMaxInterval(parseInt(e.target.value) || 10)}
-                              />
+                              <Label>Random message interval by maximum (second)</Label>
+                              <Select value={maxInterval.toString()} onValueChange={(value) => setMaxInterval(parseInt(value))}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select max second" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 3600 }, (_, i) => i + 1).filter(s => s >= minInterval).map((second) => (
+                                    <SelectItem key={second} value={second.toString()}>
+                                      {second} second{second > 1 ? 's' : ''}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
+                          </div>
+
+                          {/* Schedule Time */}
+                          <div className="space-y-4">
+                            <Label>Schedule time</Label>
+                            
+                            {/* Four scheduling buttons */}
+                            <div className="flex gap-2 flex-wrap">
+                              <Button
+                                type="button"
+                                variant={scheduleType === 'daytime' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => {
+                                  setScheduleType('daytime');
+                                  setScheduleHours([7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+                                }}
+                              >
+                                Daytime
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={scheduleType === 'nighttime' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => {
+                                  setScheduleType('nighttime');
+                                  setScheduleHours([0, 1, 2, 3, 4, 5, 6, 19, 20, 21, 22, 23]);
+                                }}
+                              >
+                                Nighttime
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={scheduleType === 'odd_hours' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => {
+                                  setScheduleType('odd_hours');
+                                  setScheduleHours([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]);
+                                }}
+                              >
+                                Odd
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={scheduleType === 'even_hours' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => {
+                                  setScheduleType('even_hours');
+                                  setScheduleHours([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]);
+                                }}
+                              >
+                                Even
+                              </Button>
+                            </div>
+
+                            {/* Hour Selection Tags */}
+                            {scheduleHours.length > 0 && (
+                              <div className="space-y-2">
+                                <div className="flex flex-wrap gap-1">
+                                  {scheduleHours.map((hour) => (
+                                    <Badge key={hour} variant="secondary" className="flex items-center gap-1">
+                                      {hour}
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-auto p-0 w-4 h-4"
+                                        onClick={() => {
+                                          setScheduleHours(prev => prev.filter(h => h !== hour));
+                                        }}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </Badge>
+                                  ))}
+                                </div>
+                                
+                                {/* Add hour dropdown */}
+                                <div className="flex items-center gap-2">
+                                  <Select
+                                    onValueChange={(value) => {
+                                      const hour = parseInt(value);
+                                      if (!scheduleHours.includes(hour)) {
+                                        setScheduleHours(prev => [...prev, hour].sort((a, b) => a - b));
+                                      }
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-40">
+                                      <SelectValue placeholder="Add hour" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Array.from({ length: 24 }, (_, i) => i).filter(h => !scheduleHours.includes(h)).map((hour) => (
+                                        <SelectItem key={hour} value={hour.toString()}>
+                                          {hour}:00
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <p className="text-sm text-muted-foreground">
+                              The schedule allows you to set up a unique schedule by time for your campaign to run. 
+                              Set empty to campaign run anytime.
+                            </p>
                           </div>
                         </div>
 

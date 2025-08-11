@@ -78,10 +78,10 @@ export const bulkMessageCampaigns = pgTable("bulk_message_campaigns", {
   mediaType: varchar("media_type", { enum: ["image", "video", "document", "audio"] }),
   // Scheduling configuration
   timePost: timestamp("time_post"),
-  minInterval: integer("min_interval").default(1).notNull(), // seconds
-  maxInterval: integer("max_interval").default(10).notNull(), // seconds
+  minInterval: integer("min_interval").default(1).notNull(), // seconds (1-3600)
+  maxInterval: integer("max_interval").default(10).notNull(), // seconds (1-3600)
   scheduleType: varchar("schedule_type", { enum: ["immediate", "scheduled", "daytime", "nighttime", "odd_hours", "even_hours"] }).default("immediate").notNull(),
-  scheduleHours: text("schedule_hours"), // JSON array of hours for custom scheduling
+  scheduleHours: text("schedule_hours"), // JSON array of hours (0-23) for custom scheduling
   // Status and tracking
   status: varchar("status", { enum: ["draft", "scheduled", "running", "paused", "completed", "failed"] }).default("draft").notNull(),
   sentCount: integer("sent_count").default(0).notNull(),
@@ -231,7 +231,7 @@ export const createCampaignSchema = z.object({
   minInterval: z.number().min(1).max(3600).default(1),
   maxInterval: z.number().min(1).max(3600).default(10),
   scheduleType: z.enum(["immediate", "scheduled", "daytime", "nighttime", "odd_hours", "even_hours"]).default("immediate"),
-  scheduleHours: z.array(z.number()).optional(), // Array of hours (0-23)
+  scheduleHours: z.array(z.number().optional()).optional(), // Array of hours (0-23)
 }).refine(data => {
   // More detailed validation with error messages
   console.log("🔍 Campaign validation data:", data);
