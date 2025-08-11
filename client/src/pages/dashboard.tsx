@@ -2392,45 +2392,7 @@ export default function Dashboard() {
                         </CardContent>
                       </Card>
 
-                      {/* Active Campaigns Quick View */}
-                      {bulkCampaigns.some(c => c.status === 'running') && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center">
-                              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></span>
-                              Active Campaigns ({bulkCampaigns.filter(c => c.status === 'running').length})
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-3">
-                              {bulkCampaigns
-                                .filter(c => c.status === 'running')
-                                .map(campaign => (
-                                  <div key={campaign.id} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                    <div className="flex-1">
-                                      <h4 className="font-medium text-sm">{campaign.name}</h4>
-                                      <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
-                                        <span>✓ {campaign.sentCount} sent</span>
-                                        <span>✗ {campaign.failedCount} failed</span>
-                                        <span className="flex items-center">
-                                          <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse mr-1"></span>
-                                          Running...
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="text-right">
-                                      <div className="text-lg font-bold text-green-600">
-                                        {Math.round(((campaign.sentCount + campaign.failedCount) / Math.max(1, campaign.sentCount + campaign.failedCount + 10)) * 100)}%
-                                      </div>
-                                      <div className="text-xs text-muted-foreground">Progress</div>
-                                    </div>
-                                  </div>
-                                ))
-                              }
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
+
                     </div>
                   )}
                 </div>
