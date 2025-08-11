@@ -13,3 +13,14 @@
 2025/08/11-13:36:02.175 aaa Delete type=2 #113
 2025/08/11-13:36:02.177 aaa Delete type=2 #114
 2025/08/11-13:36:02.177 aaa Delete type=2 #117
+2025/08/11-13:42:14.557 aac Level-0 table #121: started
+2025/08/11-13:42:14.653 aac Level-0 table #121: 1247636 bytes OK
+2025/08/11-13:42:14.674 aac Delete type=0 #116
+2025/08/11-13:42:17.282 aaa Compacting 1@1 + 2@2 files
+2025/08/11-13:42:17.443 aaa Generated table #122@1: 58692 keys, 2223056 bytes
+2025/08/11-13:42:17.511 aaa Generated table #123@1: 14008 keys, 785046 bytes
+2025/08/11-13:42:17.511 aaa Compacted 1@1 + 2@2 files => 3008102 bytes
+2025/08/11-13:42:17.518 aaa compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/11-13:42:17.519 aaa Delete type=2 #118
+2025/08/11-13:42:17.519 aaa Delete type=2 #119
+2025/08/11-13:42:17.519 aaa Delete type=2 #121

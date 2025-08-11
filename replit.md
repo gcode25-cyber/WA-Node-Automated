@@ -9,7 +9,7 @@ This project is a comprehensive WhatsApp bulk messaging platform inspired by Waz
 - Component-based UI with shadcn/ui
 - Clean, maintainable code structure
 - Successfully migrated from Replit Agent to standard Replit environment (August 2025)
-- Migration completed: Database provisioned, dependencies installed, application running on port 5000, missing tsx package installed, database tables created via migration, missing POST /api/chats/:contactId/clear route added for chat clearing functionality
+- Migration completed: Database provisioned, dependencies installed, application running on port 5000, missing tsx package installed, database tables created via migration, missing POST /api/chats/:contactId/clear route added for chat clearing functionality, WebSocket broadcast issues for chat deletion and clearing resolved (August 2025)
 - Enhanced scrolling functionality for chats and groups modules with sticky headers and scrollable content areas (August 2025)
 - Bulk messaging module improvements completed (January 2025): Replaced "Clone & Reuse" with "Restart" functionality, fixed progress counters to use totalTargets, added scrollable interface, removed redundant bulk-messaging.tsx file, removed Refresh button and added Delete campaign functionality, removed Active Campaigns quick view component
 - Advanced scheduling features implemented (August 2025): Enhanced bulk messaging with time post scheduling, random message intervals (1-3600 seconds), schedule time controls (daytime/nighttime/odd/even hours), dynamic hour management with add/remove functionality, major performance optimization by replacing heavy dropdowns with fast number inputs
