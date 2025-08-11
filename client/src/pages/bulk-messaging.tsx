@@ -14,11 +14,12 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 interface Campaign {
   id: number;
   title: string;
+  name: string;
   message: string;
   targetType: string;
   status: string;
   sentCount: number;
-  totalCount: number;
+  totalTargets: number;
   createdAt: string;
 }
 
@@ -255,7 +256,7 @@ export default function BulkMessaging() {
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg" data-testid={`campaign-title-${campaign.id}`}>
-                              {campaign.title}
+                              {campaign.name || campaign.title}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               {campaign.targetType.replace('_', ' ')} • Created {new Date(campaign.createdAt).toLocaleDateString()}
@@ -274,12 +275,12 @@ export default function BulkMessaging() {
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span data-testid={`campaign-progress-text-${campaign.id}`}>
-                                {campaign.sentCount} of {campaign.totalCount} sent
+                                {campaign.sentCount} of {campaign.totalTargets} sent
                               </span>
-                              <span>{Math.round((campaign.sentCount / campaign.totalCount) * 100)}%</span>
+                              <span>{Math.round((campaign.sentCount / campaign.totalTargets) * 100)}%</span>
                             </div>
                             <Progress 
-                              value={(campaign.sentCount / campaign.totalCount) * 100}
+                              value={(campaign.sentCount / campaign.totalTargets) * 100}
                               data-testid={`campaign-progress-${campaign.id}`}
                             />
                             {campaign.status === 'completed' && (
