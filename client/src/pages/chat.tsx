@@ -337,16 +337,7 @@ export default function ChatPage() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {contact.isMyContact && (
-                  <Badge variant="default" className="text-xs">
-                    My Contact
-                  </Badge>
-                )}
-                {contact.isWAContact && (
-                  <Badge variant="secondary" className="text-xs">
-                    WhatsApp
-                  </Badge>
-                )}
+                {/* Removed My Contact and WhatsApp labels as requested */}
               </div>
             </div>
           </CardHeader>
