@@ -10,6 +10,7 @@ This project is a comprehensive WhatsApp bulk messaging platform inspired by Waz
 - Clean, maintainable code structure
 - Successfully migrated from Replit Agent to standard Replit environment (January 2025)
 - Migration completed: Database provisioned, dependencies installed, application running on port 5000
+- Enhanced scrolling functionality for chats and groups modules with sticky headers and scrollable content areas (August 2025)
 - Bulk messaging module improvements completed (January 2025): Replaced "Clone & Reuse" with "Restart" functionality, fixed progress counters to use totalTargets, added scrollable interface, removed redundant bulk-messaging.tsx file, removed Refresh button and added Delete campaign functionality, removed Active Campaigns quick view component
 - Advanced scheduling features implemented (August 2025): Enhanced bulk messaging with time post scheduling, random message intervals (1-3600 seconds), schedule time controls (daytime/nighttime/odd/even hours), dynamic hour management with add/remove functionality, major performance optimization by replacing heavy dropdowns with fast number inputs
 - Admin-only messaging restrictions implemented (August 2025): Added security feature that prevents non-admin users from sending bulk messages to WhatsApp groups with admin-only messaging enabled, includes visual warnings and disabled form controls

@@ -2546,186 +2546,191 @@ export default function Dashboard() {
 
             {/* Chats Module */}
             {selectedModule === 'chats' && (
-              <div className="p-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
+              <div className="flex flex-col h-full">
+                {/* Sticky Header */}
+                <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
                       <MessageSquare className="h-5 w-5" />
-                      <span>WhatsApp Chats</span>
-                    </CardTitle>
-                    <CardDescription>
-                      View and manage your WhatsApp conversations
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {!sessionInfo ? (
-                      <div className="text-center p-8">
-                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
-                        <p className="text-muted-foreground">
-                          Please connect to WhatsApp first to view your chats.
-                        </p>
-                      </div>
-                    ) : chatsLoading ? (
-                      <div className="text-center p-8">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-4 text-muted-foreground">Loading chats...</p>
-                      </div>
-                    ) : chats.length === 0 ? (
-                      <div className="text-center p-8">
-                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Chats Found</h3>
-                        <p className="text-muted-foreground">
-                          Your WhatsApp chats will appear here once you start conversations.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {chats.map((chat: Chat) => (
-                          <div key={chat.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                  {chat.isGroup ? <Users className="h-5 w-5" /> : <Phone className="h-5 w-5" />}
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold">{chat.name}</h4>
-                                  {chat.lastMessage && (
-                                    <p className="text-sm text-muted-foreground truncate max-w-xs">
-                                      {chat.lastMessage.fromMe ? 'You: ' : ''}{chat.lastMessage.body}
-                                    </p>
-                                  )}
-                                </div>
+                      <span className="text-lg font-semibold">WhatsApp Chats</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    View and manage your WhatsApp conversations
+                  </p>
+                </div>
+                
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-6 pr-2 min-h-0">
+                  {!sessionInfo ? (
+                    <div className="text-center p-8">
+                      <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
+                      <p className="text-muted-foreground">
+                        Please connect to WhatsApp first to view your chats.
+                      </p>
+                    </div>
+                  ) : chatsLoading ? (
+                    <div className="text-center p-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                      <p className="mt-4 text-muted-foreground">Loading chats...</p>
+                    </div>
+                  ) : chats.length === 0 ? (
+                    <div className="text-center p-8">
+                      <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Chats Found</h3>
+                      <p className="text-muted-foreground">
+                        Your WhatsApp chats will appear here once you start conversations.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {chats.map((chat: Chat) => (
+                        <div key={chat.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                {chat.isGroup ? <Users className="h-5 w-5" /> : <Phone className="h-5 w-5" />}
                               </div>
-                              <div className="text-right">
-                                {chat.unreadCount > 0 && (
-                                  <Badge variant="default" className="mb-1">
-                                    {chat.unreadCount}
-                                  </Badge>
+                              <div>
+                                <h4 className="font-semibold">{chat.name}</h4>
+                                {chat.lastMessage && (
+                                  <p className="text-sm text-muted-foreground truncate max-w-xs">
+                                    {chat.lastMessage.fromMe ? 'You: ' : ''}{chat.lastMessage.body}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {chat.unreadCount > 0 && (
+                                <Badge variant="default" className="mb-1">
+                                  {chat.unreadCount}
+                                </Badge>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(chat.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(chat.timestamp * 1000).toLocaleTimeString()}
+                              </p>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="mt-2"
+                                onClick={() => setLocation(`/chat/${chat.id}`)}
+                              >
+                                Open Chat
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Groups Module */}
+            {selectedModule === 'groups' && (
+              <div className="flex flex-col h-full">
+                {/* Sticky Header */}
+                <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-5 w-5" />
+                      <span className="text-lg font-semibold">WhatsApp Groups</span>
+                    </div>
+                    <Button 
+                      onClick={exportAllGroupsCSV}
+                      disabled={!sessionInfo || groups.length === 0}
+                      size="sm"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Extract all to CSVs
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    View and manage your WhatsApp group conversations
+                  </p>
+                </div>
+                
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-6 pr-2 min-h-0">
+                  {!sessionInfo ? (
+                    <div className="text-center p-8">
+                      <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
+                      <p className="text-muted-foreground">
+                        Please connect to WhatsApp first to view your groups.
+                      </p>
+                    </div>
+                  ) : groupsLoading ? (
+                    <div className="text-center p-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                      <p className="mt-4 text-muted-foreground">Loading groups...</p>
+                    </div>
+                  ) : groups.length === 0 ? (
+                    <div className="text-center p-8">
+                      <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Groups Found</h3>
+                      <p className="text-muted-foreground">
+                        Your WhatsApp groups will appear here once you join some groups.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {groups.map((group: Group) => (
+                        <div key={group.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 rounded-full bg-green-200 dark:bg-green-700 flex items-center justify-center">
+                                <Users className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold">{group.name}</h4>
+                                {group.lastMessage && (
+                                  <p className="text-sm text-muted-foreground truncate max-w-xs">
+                                    {group.lastMessage.fromMe ? 'You: ' : ''}{group.lastMessage.body}
+                                  </p>
                                 )}
                                 <p className="text-xs text-muted-foreground">
-                                  {new Date(chat.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(chat.timestamp * 1000).toLocaleTimeString()}
+                                  {group.participants.length} participants
                                 </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {group.unreadCount > 0 && (
+                                <Badge variant="default" className="mb-1">
+                                  {group.unreadCount}
+                                </Badge>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(group.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(group.timestamp * 1000).toLocaleTimeString()}
+                              </p>
+                              <div className="flex items-center space-x-2 mt-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="mt-2"
-                                  onClick={() => setLocation(`/chat/${chat.id}`)}
+                                  onClick={() => window.open(`/api/groups/${group.id}/export`)}
+                                >
+                                  <Download className="h-4 w-4 mr-1" />
+                                  Export
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setLocation(`/chat/${group.id}`)}
                                 >
                                   Open Chat
                                 </Button>
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-
-            {/* Groups Module */}
-            {selectedModule === 'groups' && (
-              <div className="p-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-5 w-5" />
-                        <span>WhatsApp Groups</span>
-                      </div>
-                      <Button 
-                        onClick={exportAllGroupsCSV}
-                        disabled={!sessionInfo || groups.length === 0}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Extract all to CSVs
-                      </Button>
-                    </CardTitle>
-                    <CardDescription>
-                      View and manage your WhatsApp group conversations
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {!sessionInfo ? (
-                      <div className="text-center p-8">
-                        <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
-                        <p className="text-muted-foreground">
-                          Please connect to WhatsApp first to view your groups.
-                        </p>
-                      </div>
-                    ) : groupsLoading ? (
-                      <div className="text-center p-8">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-4 text-muted-foreground">Loading groups...</p>
-                      </div>
-                    ) : groups.length === 0 ? (
-                      <div className="text-center p-8">
-                        <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Groups Found</h3>
-                        <p className="text-muted-foreground">
-                          Your WhatsApp groups will appear here once you join some groups.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {groups.map((group: Group) => (
-                          <div key={group.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-full bg-green-200 dark:bg-green-700 flex items-center justify-center">
-                                  <Users className="h-5 w-5" />
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold">{group.name}</h4>
-                                  {group.lastMessage && (
-                                    <p className="text-sm text-muted-foreground truncate max-w-xs">
-                                      {group.lastMessage.fromMe ? 'You: ' : ''}{group.lastMessage.body}
-                                    </p>
-                                  )}
-                                  <p className="text-xs text-muted-foreground">
-                                    {group.participants.length} participants
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                {group.unreadCount > 0 && (
-                                  <Badge variant="default" className="mb-1">
-                                    {group.unreadCount}
-                                  </Badge>
-                                )}
-                                <p className="text-xs text-muted-foreground">
-                                  {new Date(group.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(group.timestamp * 1000).toLocaleTimeString()}
-                                </p>
-                                <div className="flex items-center space-x-2 mt-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => window.open(`/api/groups/${group.id}/export`)}
-                                  >
-                                    <Download className="h-4 w-4 mr-1" />
-                                    Export
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setLocation(`/chat/${group.id}`)}
-                                  >
-                                    Open Chat
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-                </div>
-              )}
+              </div>
+            )}
 
             {/* Reports Module */}
             {selectedModule === 'reports' && (
