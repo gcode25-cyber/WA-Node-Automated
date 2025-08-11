@@ -1299,6 +1299,20 @@ export default function Dashboard() {
 
               <div 
                 className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedModule === 'groups' 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedModule('groups')}
+              >
+                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="font-medium text-sm">Groups</div>
+              </div>
+
+              <div 
+                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
                   selectedModule === 'contact-groups' 
                     ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
                     : 'hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -1323,22 +1337,6 @@ export default function Dashboard() {
                   <Send className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <div className="font-medium text-sm">Bulk Messaging</div>
-              </div>
-
-
-
-              <div 
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedModule === 'groups' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedModule('groups')}
-              >
-                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="font-medium text-sm">Groups</div>
               </div>
 
 
