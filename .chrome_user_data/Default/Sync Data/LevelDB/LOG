@@ -1,3 +1,3 @@
-2025/08/11-07:13:15.259 1def Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/MANIFEST-000001
-2025/08/11-07:13:15.261 1def Recovering log #3
-2025/08/11-07:13:15.261 1def Reusing old log /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/000003.log 
+2025/08/11-07:52:02.550 406 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/MANIFEST-000001
+2025/08/11-07:52:02.551 406 Recovering log #3
+2025/08/11-07:52:02.551 406 Reusing old log /home/runner/workspace/.chrome_user_data/Default/Sync Data/LevelDB/000003.log 
