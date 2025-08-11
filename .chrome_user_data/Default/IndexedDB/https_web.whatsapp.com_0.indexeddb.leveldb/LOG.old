@@ -1,0 +1,25 @@
+2025/08/11-12:18:26.641 2fa Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/08/11-12:18:26.642 2fa Recovering log #59
+2025/08/11-12:18:26.652 2fa Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000059.log 
+2025/08/11-12:18:27.494 2f2 Compacting 1@1 + 1@2 files
+2025/08/11-12:18:27.626 2f2 Generated table #62@1: 47710 keys, 2210411 bytes
+2025/08/11-12:18:27.639 2f2 Generated table #63@1: 4314 keys, 170374 bytes
+2025/08/11-12:18:27.639 2f2 Compacted 1@1 + 1@2 files => 2380785 bytes
+2025/08/11-12:18:27.648 2f2 compacted to: files[ 0 0 4 0 0 0 0 ]
+2025/08/11-12:18:27.648 2f2 Delete type=2 #57
+2025/08/11-12:18:27.648 2f2 Delete type=2 #60
+2025/08/11-12:18:28.195 2f2 Manual compaction at level-0 from '\x00\x18\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x19\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/11-12:18:28.200 2f2 Level-0 table #65: started
+2025/08/11-12:18:28.216 2f2 Level-0 table #65: 265524 bytes OK
+2025/08/11-12:18:28.226 2f2 Delete type=0 #59
+2025/08/11-12:18:28.227 2f1 Manual compaction at level-0 from '\x00\x19\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x1a\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/11-12:18:29.925 2f2 Compacting 1@1 + 4@2 files
+2025/08/11-12:18:30.660 2f2 Generated table #66@1: 49575 keys, 2213877 bytes
+2025/08/11-12:18:31.375 2f2 Generated table #67@1: 2844 keys, 172927 bytes
+2025/08/11-12:18:31.376 2f2 Compacted 1@1 + 4@2 files => 2386804 bytes
+2025/08/11-12:18:31.395 2f2 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/11-12:18:31.395 2f2 Delete type=2 #51
+2025/08/11-12:18:31.396 2f2 Delete type=2 #58
+2025/08/11-12:18:31.396 2f2 Delete type=2 #62
+2025/08/11-12:18:31.396 2f2 Delete type=2 #63
+2025/08/11-12:18:31.396 2f2 Delete type=2 #65
