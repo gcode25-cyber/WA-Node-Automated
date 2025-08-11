@@ -412,6 +412,45 @@ export default function Dashboard() {
           queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
           console.log('🔄 New message received, refreshing chat list...');
           break;
+        case 'chat_history_cleared':
+          // Immediately update the specific chat in cache to show cleared state
+          if (message.data?.contactId) {
+            const contactId = message.data.contactId;
+            
+            // Update the chats cache to show cleared state immediately
+            queryClient.setQueryData(['/api/chats'], (oldChats: any) => {
+              if (oldChats) {
+                return oldChats.map((chat: any) => {
+                  if (chat.id === contactId) {
+                    return {
+                      ...chat,
+                      lastMessage: null,
+                      unreadCount: 0
+                    };
+                  }
+                  return chat;
+                });
+              }
+              return oldChats;
+            });
+            
+            // Also clear the chat history cache
+            queryClient.setQueryData(['/api/chat-history', contactId], (oldHistory: any) => {
+              if (oldHistory) {
+                return {
+                  ...oldHistory,
+                  messages: []
+                };
+              }
+              return oldHistory;
+            });
+            
+            console.log(`🗑️ Chat ${contactId} cleared in real-time UI`);
+          }
+          
+          // Also refresh to ensure consistency
+          queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+          break;
       }
     };
 
