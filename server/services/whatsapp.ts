@@ -1229,10 +1229,11 @@ export class WhatsAppService {
       const chatsPromise = this.client.getChats();
       const chats = await Promise.race([chatsPromise, timeoutPromise]);
       
-      // Filter out status@broadcast and other broadcast chats
+      // Filter out status@broadcast, other broadcast chats, and archived chats
       const filteredChats = chats.filter((chat: any) => 
         !chat.id._serialized.includes('status@broadcast') && 
-        !chat.id._serialized.includes('@broadcast')
+        !chat.id._serialized.includes('@broadcast') &&
+        !chat.archived // Hide archived chats from main list
       );
       
       const chatData = filteredChats.map((chat: any) => ({
@@ -1658,13 +1659,79 @@ export class WhatsAppService {
         throw new Error('Cannot delete group chats');
       }
 
-      // Get the chat and delete it
+      // Get the chat first
       const chat = await this.client.getChatById(contactId);
-      await chat.delete();
-
-      console.log(`✅ Chat ${contactId} deleted successfully`);
       
-      // Get updated chats list and broadcast it (without re-broadcasting)
+      // Check if chat has delete method available
+      if (typeof chat.delete !== 'function') {
+        console.log(`⚠️ Chat delete method not available for ${contactId}`);
+        throw new Error('Chat deletion is not supported for this chat type');
+      }
+      
+      console.log(`🗑️ Attempting to delete chat ${contactId}...`);
+      
+      // WhatsApp Web.js limitation workaround: Try multiple approaches
+      let deleteResult = false;
+      let approach = '';
+      
+      try {
+        // Approach 1: Direct deletion
+        approach = 'direct';
+        deleteResult = await chat.delete();
+        console.log(`🔍 Direct delete result:`, deleteResult);
+        
+        // Wait a moment and verify deletion
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if chat still exists by trying to fetch it
+        try {
+          await this.client.getChatById(contactId);
+          console.log(`⚠️ Direct deletion failed - chat still exists`);
+          deleteResult = false;
+        } catch (e: any) {
+          // If getChatById fails, the chat was successfully deleted
+          if (e.message.includes('not found') || e.message.includes('does not exist')) {
+            console.log(`✅ Direct deletion confirmed - chat no longer exists`);
+            deleteResult = true;
+          } else {
+            deleteResult = false;
+          }
+        }
+        
+      } catch (error: any) {
+        console.log(`❌ Direct deletion failed:`, error.message);
+        deleteResult = false;
+      }
+      
+      // If direct deletion failed, try fallback approach
+      if (!deleteResult) {
+        try {
+          approach = 'archive';
+          console.log(`📦 Fallback: Archiving chat ${contactId} instead of deleting...`);
+          await chat.archive();
+          
+          // Clear the chat history as well for better user experience
+          await chat.clearMessages();
+          
+          console.log(`✅ Chat ${contactId} archived and cleared successfully`);
+          
+          // Get updated chats list and broadcast it
+          const updatedChats = await this.getChatsWithoutBroadcast();
+          this.broadcastToClients('chats_updated', { chats: updatedChats });
+          
+          return { 
+            success: true, 
+            message: 'Chat archived and cleared successfully (WhatsApp Web limitation prevents permanent deletion)' 
+          };
+        } catch (archiveError: any) {
+          console.error(`❌ Fallback archive also failed:`, archiveError.message);
+          throw new Error(`Unable to delete or archive chat: ${archiveError.message}`);
+        }
+      }
+
+      console.log(`✅ Chat ${contactId} deleted successfully using ${approach} approach`);
+      
+      // Get updated chats list and broadcast it
       const updatedChats = await this.getChatsWithoutBroadcast();
       this.broadcastToClients('chats_updated', { chats: updatedChats });
       
