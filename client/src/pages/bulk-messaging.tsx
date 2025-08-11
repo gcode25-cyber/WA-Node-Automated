@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Users, Clock, Send, Play, Pause, Copy } from "lucide-react";
+import { MessageCircle, Users, Clock, Send, Play, Pause, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -81,6 +81,22 @@ export default function BulkMessaging() {
     }
   });
 
+  // Restart campaign mutation
+  const restartCampaignMutation = useMutation({
+    mutationFn: (campaignId: number) => apiRequest(`/api/bulk-campaigns/${campaignId}/restart`, 'POST'),
+    onSuccess: () => {
+      toast({ title: "Campaign restarted!" });
+      queryClient.invalidateQueries({ queryKey: ['/api/bulk-campaigns'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to restart campaign", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
+  });
+
   const handleCreateCampaign = () => {
     if (!campaignTitle.trim() || !message.trim() || !selectedGroupId) {
       toast({
@@ -113,7 +129,7 @@ export default function BulkMessaging() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4" data-testid="bulk-messaging-page">
+    <div className="min-h-screen bg-background p-4 overflow-y-auto" data-testid="bulk-messaging-page">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -215,7 +231,7 @@ export default function BulkMessaging() {
                   Campaigns ({campaigns?.length || 0})
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="max-h-[70vh] overflow-y-auto">
                 {campaignsLoading ? (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">Loading campaigns...</p>
@@ -266,6 +282,20 @@ export default function BulkMessaging() {
                               value={(campaign.sentCount / campaign.totalCount) * 100}
                               data-testid={`campaign-progress-${campaign.id}`}
                             />
+                            {campaign.status === 'completed' && (
+                              <div className="flex gap-2 mt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => restartCampaignMutation.mutate(campaign.id)}
+                                  disabled={restartCampaignMutation.isPending}
+                                  data-testid={`button-restart-campaign-${campaign.id}`}
+                                >
+                                  <RotateCcw className="w-4 h-4 mr-1" />
+                                  Restart
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <div className="flex gap-2">
@@ -277,14 +307,6 @@ export default function BulkMessaging() {
                             >
                               <Play className="w-4 h-4 mr-1" />
                               Start
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              data-testid={`button-clone-campaign-${campaign.id}`}
-                            >
-                              <Copy className="w-4 h-4 mr-1" />
-                              Clone
                             </Button>
                           </div>
                         )}
