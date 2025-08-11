@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -19,7 +20,9 @@ import {
   Music, 
   File,
   Phone,
-  Users
+  Users,
+  MoreVertical,
+  Trash2
 } from "lucide-react";
 
 interface Contact {
@@ -56,6 +59,7 @@ export default function ChatPage() {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isClearingChat, setIsClearingChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -183,6 +187,35 @@ export default function ChatPage() {
       });
     }
   });
+
+  // Clear chat mutation 
+  const clearChatMutation = useMutation({
+    mutationFn: (contactId: string) => apiRequest(`/api/chats/${contactId}/clear`, "POST"),
+    onSuccess: () => {
+      toast({
+        title: "Chat Cleared",
+        description: "Chat history has been cleared successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/chat-history', contactId] });
+      setIsClearingChat(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Clear Chat",
+        description: error.message || "Failed to clear chat history",
+        variant: "destructive",
+      });
+      setIsClearingChat(false);
+    },
+  });
+
+  // Handle clear chat
+  const handleClearChat = () => {
+    if (!contactId) return;
+    
+    setIsClearingChat(true);
+    clearChatMutation.mutate(contactId);
+  };
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -337,7 +370,24 @@ export default function ChatPage() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {/* Removed My Contact and WhatsApp labels as requested */}
+                {/* Chat options dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={handleClearChat}
+                      disabled={isClearingChat}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {isClearingChat ? "Clearing..." : "Clear Chat"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </CardHeader>

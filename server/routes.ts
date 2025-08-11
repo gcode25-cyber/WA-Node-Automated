@@ -758,6 +758,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a chat (for personal chats only)
+  app.delete("/api/chats/:contactId", async (req, res) => {
+    try {
+      const { contactId } = req.params;
+      
+      // Validate that this is not a group chat
+      if (contactId.includes('@g.us')) {
+        return res.status(400).json({ error: "Cannot delete group chats" });
+      }
+      
+      const result = await whatsappService.deleteChat(contactId);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Delete chat error:", error);
+      res.status(500).json({ error: error.message || "Failed to delete chat" });
+    }
+  });
+
+  // Clear chat history (for both personal and group chats)
+  app.delete("/api/chat-history/:contactId", async (req, res) => {
+    try {
+      const { contactId } = req.params;
+      const result = await whatsappService.clearChatHistory(contactId);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Clear chat history error:", error);
+      res.status(500).json({ error: error.message || "Failed to clear chat history" });
+    }
+  });
+
   // Contact Groups API
   app.get("/api/contact-groups", async (req, res) => {
     try {

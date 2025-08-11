@@ -1633,6 +1633,64 @@ export class WhatsAppService {
     }
   }
 
+  // Delete a chat completely (for personal chats only)
+  async deleteChat(contactId: string): Promise<{ success: boolean; message: string }> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      // Validate that this is not a group chat
+      if (contactId.includes('@g.us')) {
+        throw new Error('Cannot delete group chats');
+      }
+
+      // Get the chat and delete it
+      const chat = await this.client.getChatById(contactId);
+      await chat.delete();
+
+      console.log(`✅ Chat ${contactId} deleted successfully`);
+      
+      // Broadcast real-time update to refresh chats list
+      this.broadcastToClients('chats_updated', {});
+      
+      return { 
+        success: true, 
+        message: 'Chat deleted successfully' 
+      };
+    } catch (error: any) {
+      console.error(`❌ Failed to delete chat ${contactId}:`, error.message);
+      throw error;
+    }
+  }
+
+  // Clear chat history (for both personal and group chats)
+  async clearChatHistory(contactId: string): Promise<{ success: boolean; message: string }> {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp client is not ready');
+    }
+
+    try {
+      // Get the chat and clear all messages
+      const chat = await this.client.getChatById(contactId);
+      await chat.clearMessages();
+
+      console.log(`✅ Chat history for ${contactId} cleared successfully`);
+      
+      // Broadcast real-time update to refresh chats list and chat history
+      this.broadcastToClients('chats_updated', {});
+      this.broadcastToClients('chat_history_cleared', { contactId });
+      
+      return { 
+        success: true, 
+        message: 'Chat history cleared successfully' 
+      };
+    } catch (error: any) {
+      console.error(`❌ Failed to clear chat history for ${contactId}:`, error.message);
+      throw error;
+    }
+  }
+
   // Public method to trigger data sync manually
   async triggerDataSync() {
     if (!this.isReady) {

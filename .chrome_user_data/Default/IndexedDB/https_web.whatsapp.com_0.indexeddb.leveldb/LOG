@@ -1,15 +1,15 @@
-2025/08/11-12:35:24.954 107f Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/08/11-12:35:24.954 107f Recovering log #86
-2025/08/11-12:35:24.966 107f Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000086.log 
-2025/08/11-12:35:26.557 107f Level-0 table #92: started
-2025/08/11-12:35:26.584 107f Level-0 table #92: 205592 bytes OK
-2025/08/11-12:35:26.597 107f Delete type=0 #86
-2025/08/11-12:35:26.597 107f Manual compaction at level-0 from '\x00 \x00\x00\x00' @ 72057594037927935 : 1 .. '\x00!\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/08/11-12:35:29.733 1080 Compacting 1@1 + 2@2 files
-2025/08/11-12:35:29.988 1080 Generated table #93@1: 48884 keys, 2213763 bytes
-2025/08/11-12:35:30.084 1080 Generated table #94@1: 7129 keys, 290698 bytes
-2025/08/11-12:35:30.084 1080 Compacted 1@1 + 2@2 files => 2504461 bytes
-2025/08/11-12:35:30.098 1080 compacted to: files[ 0 0 2 0 0 0 0 ]
-2025/08/11-12:35:30.099 1080 Delete type=2 #88
-2025/08/11-12:35:30.099 1080 Delete type=2 #89
-2025/08/11-12:35:30.099 1080 Delete type=2 #92
+2025/08/11-12:53:47.402 17d1 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/08/11-12:53:47.402 17d1 Recovering log #101
+2025/08/11-12:53:47.409 17d1 Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000101.log 
+2025/08/11-12:53:48.888 17d1 Level-0 table #107: started
+2025/08/11-12:53:48.910 17d1 Level-0 table #107: 178356 bytes OK
+2025/08/11-12:53:48.923 17d1 Delete type=0 #101
+2025/08/11-12:53:48.925 17d1 Manual compaction at level-0 from '\x00#\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00$\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/11-12:53:50.788 17d1 Compacting 1@1 + 2@2 files
+2025/08/11-12:53:50.934 17d1 Generated table #108@1: 52251 keys, 2216064 bytes
+2025/08/11-12:53:50.968 17d1 Generated table #109@1: 9646 keys, 460262 bytes
+2025/08/11-12:53:50.969 17d1 Compacted 1@1 + 2@2 files => 2676326 bytes
+2025/08/11-12:53:51.001 17d1 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/11-12:53:51.002 17d1 Delete type=2 #103
+2025/08/11-12:53:51.002 17d1 Delete type=2 #104
+2025/08/11-12:53:51.002 17d1 Delete type=2 #107
