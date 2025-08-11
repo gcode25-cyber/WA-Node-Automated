@@ -10,6 +10,7 @@ This project is a comprehensive WhatsApp bulk messaging platform inspired by Waz
 - Clean, maintainable code structure
 - Successfully migrated from Replit Agent to standard Replit environment (January 2025)
 - Migration completed: Database provisioned, dependencies installed, application running on port 5000
+- Bulk messaging module improvements completed (January 2025): Replaced "Clone & Reuse" with "Restart" functionality, fixed progress counters to use totalTargets, added scrollable interface, removed redundant bulk-messaging.tsx file
 
 ## System Architecture
 The application is built with a React frontend (TypeScript, Vite, TailwindCSS, shadcn/ui) and a Node.js backend (Express, TypeScript). Data is managed using PostgreSQL with Drizzle ORM. WhatsApp integration is handled via the `whatsapp-web.js` library, supporting QR code authentication, session persistence, and multiple WhatsApp accounts. Authentication is session-based. File storage utilizes the local file system with Multer.
@@ -18,7 +19,7 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
 - **Authentication:** User registration, login, and session management.
 - **WhatsApp Integration:** QR code authentication, session persistence, multiple account support, real-time connection status.
 - **Messaging:** Single and bulk message sending, media message support (images, videos, documents, audio), message scheduling, and advanced campaign management with options for target types (contact groups, local contacts, WhatsApp groups), scheduling (immediate, timed, odd/even hours), randomized delivery intervals, and real-time status monitoring.
-- **Campaign Management:** Real-time progress tracking with visual progress bars, sent/remaining/failed message counts, campaign cloning and reusability, auto-refresh for active campaigns, WebSocket integration for live updates, and comprehensive campaign status management.
+- **Campaign Management:** Real-time progress tracking with visual progress bars using accurate totalTargets field, sent/remaining/failed message counts, campaign restart functionality for completed campaigns, auto-refresh for active campaigns, WebSocket integration for live updates, comprehensive campaign status management, and scrollable interface for better navigation.
 - **Contact Management:** Contact group creation, CSV import, validation, deduplication, group member management, and bulk contact-to-group assignment. Contacts are sorted alphabetically by name.
 - **Data Export/Import:** Export chats, contacts, and group participants as CSV; import contacts from CSV.
 - **Dashboard & Analytics:** System status monitoring, campaign tracking, message statistics, real-time notifications.

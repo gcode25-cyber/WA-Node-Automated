@@ -15,8 +15,6 @@ import AccountManagement from "@/pages/account-management";
 import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import GroupContacts from "@/pages/group-contacts";
-import BulkMessaging from "@/pages/bulk-messaging";
-
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,8 +32,6 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/chat/:contactId" component={ChatPage} />
       <Route path="/group-contacts/:groupId" component={GroupContacts} />
-      <Route path="/bulk-campaigns" component={BulkMessaging} />
-
       <Route component={NotFound} />
     </Switch>
   );
