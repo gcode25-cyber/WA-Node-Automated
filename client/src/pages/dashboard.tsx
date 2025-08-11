@@ -2255,6 +2255,73 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                {/* Enhanced Analytics Section - Moved to top */}
+                {bulkCampaigns.length > 0 && (
+                  <div className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          Campaign Analytics
+                          <Badge variant="outline" className="text-xs">
+                            Last updated: {new Date().toLocaleTimeString()}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="text-center p-4 border rounded-lg">
+                            <div className="text-3xl font-bold text-blue-600 mb-1">
+                              {bulkCampaigns.length}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total Campaigns</p>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {bulkCampaigns.filter(c => c.status === 'running').length} active
+                            </div>
+                          </div>
+                          <div className="text-center p-4 border rounded-lg">
+                            <div className="text-3xl font-bold text-green-600 mb-1">
+                              {bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0)}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Messages Sent</p>
+                            <div className="text-xs text-green-600 font-medium mt-1">
+                              ✓ Success Rate: {
+                                Math.round(
+                                  (bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0) / 
+                                  Math.max(1, bulkCampaigns.reduce((sum, c) => sum + c.sentCount + c.failedCount, 0))) * 100
+                                )
+                              }%
+                            </div>
+                          </div>
+                          <div className="text-center p-4 border rounded-lg">
+                            <div className="text-3xl font-bold text-red-600 mb-1">
+                              {bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0)}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Failed Messages</p>
+                            <div className="text-xs text-red-600 font-medium mt-1">
+                              ✗ Error Rate: {
+                                Math.round(
+                                  (bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0) / 
+                                  Math.max(1, bulkCampaigns.reduce((sum, c) => sum + c.sentCount + c.failedCount, 0))) * 100
+                                )
+                              }%
+                            </div>
+                          </div>
+                          <div className="text-center p-4 border rounded-lg">
+                            <div className="text-3xl font-bold text-purple-600 mb-1">
+                              {bulkCampaigns.filter(c => c.status === 'completed').length}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Completed</p>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {bulkCampaigns.filter(c => c.status === 'draft').length} draft, 
+                              {bulkCampaigns.filter(c => c.status === 'paused').length} paused
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
                 {/* Campaign List */}
                 <div className="space-y-4">
                   {!sessionInfo ? (
@@ -2441,74 +2508,7 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  {/* Enhanced Analytics Section */}
-                  {bulkCampaigns.length > 0 && (
-                    <div className="space-y-4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center justify-between">
-                            Campaign Analytics
-                            <Badge variant="outline" className="text-xs">
-                              Last updated: {new Date().toLocaleTimeString()}
-                            </Badge>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="text-center p-4 border rounded-lg">
-                              <div className="text-3xl font-bold text-blue-600 mb-1">
-                                {bulkCampaigns.length}
-                              </div>
-                              <p className="text-sm text-muted-foreground">Total Campaigns</p>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {bulkCampaigns.filter(c => c.status === 'running').length} active
-                              </div>
-                            </div>
-                            <div className="text-center p-4 border rounded-lg">
-                              <div className="text-3xl font-bold text-green-600 mb-1">
-                                {bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0)}
-                              </div>
-                              <p className="text-sm text-muted-foreground">Messages Sent</p>
-                              <div className="text-xs text-green-600 font-medium mt-1">
-                                ✓ Success Rate: {
-                                  Math.round(
-                                    (bulkCampaigns.reduce((sum, c) => sum + c.sentCount, 0) / 
-                                    Math.max(1, bulkCampaigns.reduce((sum, c) => sum + c.sentCount + c.failedCount, 0))) * 100
-                                  )
-                                }%
-                              </div>
-                            </div>
-                            <div className="text-center p-4 border rounded-lg">
-                              <div className="text-3xl font-bold text-red-600 mb-1">
-                                {bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0)}
-                              </div>
-                              <p className="text-sm text-muted-foreground">Failed Messages</p>
-                              <div className="text-xs text-red-600 font-medium mt-1">
-                                ✗ Error Rate: {
-                                  Math.round(
-                                    (bulkCampaigns.reduce((sum, c) => sum + c.failedCount, 0) / 
-                                    Math.max(1, bulkCampaigns.reduce((sum, c) => sum + c.sentCount + c.failedCount, 0))) * 100
-                                  )
-                                }%
-                              </div>
-                            </div>
-                            <div className="text-center p-4 border rounded-lg">
-                              <div className="text-3xl font-bold text-purple-600 mb-1">
-                                {bulkCampaigns.filter(c => c.status === 'completed').length}
-                              </div>
-                              <p className="text-sm text-muted-foreground">Completed</p>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {bulkCampaigns.filter(c => c.status === 'draft').length} draft, 
-                                {bulkCampaigns.filter(c => c.status === 'paused').length} paused
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
 
-
-                    </div>
-                  )}
                 </div>
               </div>
             )}
