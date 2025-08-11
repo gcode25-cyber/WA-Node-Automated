@@ -2093,33 +2093,34 @@ export default function Dashboard() {
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <Label>Random message interval by minimum (second)</Label>
-                              <Select value={minInterval.toString()} onValueChange={(value) => setMinInterval(parseInt(value))}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select min second" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from({ length: 3600 }, (_, i) => i + 1).map((second) => (
-                                    <SelectItem key={second} value={second.toString()}>
-                                      {second} second{second > 1 ? 's' : ''}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="3600"
+                                value={minInterval}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value) || 1;
+                                  setMinInterval(Math.max(1, Math.min(3600, value)));
+                                  if (value > maxInterval) {
+                                    setMaxInterval(value);
+                                  }
+                                }}
+                                placeholder="Enter seconds (1-3600)"
+                              />
                             </div>
                             <div className="space-y-2">
                               <Label>Random message interval by maximum (second)</Label>
-                              <Select value={maxInterval.toString()} onValueChange={(value) => setMaxInterval(parseInt(value))}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select max second" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from({ length: 3600 }, (_, i) => i + 1).filter(s => s >= minInterval).map((second) => (
-                                    <SelectItem key={second} value={second.toString()}>
-                                      {second} second{second > 1 ? 's' : ''}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <Input
+                                type="number"
+                                min={minInterval}
+                                max="3600"
+                                value={maxInterval}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value) || 10;
+                                  setMaxInterval(Math.max(minInterval, Math.min(3600, value)));
+                                }}
+                                placeholder="Enter seconds (1-3600)"
+                              />
                             </div>
                           </div>
 
@@ -2211,11 +2212,19 @@ export default function Dashboard() {
                                       <SelectValue placeholder="Add hour" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {Array.from({ length: 24 }, (_, i) => i).filter(h => !scheduleHours.includes(h)).map((hour) => (
-                                        <SelectItem key={hour} value={hour.toString()}>
-                                          {hour}:00
-                                        </SelectItem>
-                                      ))}
+                                      {(() => {
+                                        const availableHours = [];
+                                        for (let i = 0; i < 24; i++) {
+                                          if (!scheduleHours.includes(i)) {
+                                            availableHours.push(i);
+                                          }
+                                        }
+                                        return availableHours.map((hour) => (
+                                          <SelectItem key={hour} value={hour.toString()}>
+                                            {hour}:00
+                                          </SelectItem>
+                                        ));
+                                      })()}
                                     </SelectContent>
                                   </Select>
                                 </div>
