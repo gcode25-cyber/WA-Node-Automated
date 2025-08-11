@@ -1,2 +1,3 @@
-2025/08/11-06:08:35.109 5a6 Creating DB /home/runner/workspace/.chrome_user_data/Default/Extension State since it was missing.
-2025/08/11-06:08:35.124 5a6 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Extension State/MANIFEST-000001
+2025/08/11-06:11:01.337 91d Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/Extension State/MANIFEST-000001
+2025/08/11-06:11:01.337 91d Recovering log #3
+2025/08/11-06:11:01.337 91d Reusing old log /home/runner/workspace/.chrome_user_data/Default/Extension State/000003.log 
