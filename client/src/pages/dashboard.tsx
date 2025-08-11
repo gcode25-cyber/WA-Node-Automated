@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
@@ -51,6 +52,8 @@ interface Group {
   } | null;
   timestamp: number;
   participants: any[];
+  isAdmin?: boolean;
+  onlyAdminsCanMessage?: boolean;
 }
 
 interface ContactGroup {
@@ -2048,6 +2051,15 @@ export default function Dashboard() {
                                   ))}
                                 </SelectContent>
                               </Select>
+                              {selectedWhatsAppGroup && 
+                               groups.find(g => g.id === selectedWhatsAppGroup)?.onlyAdminsCanMessage && 
+                               !groups.find(g => g.id === selectedWhatsAppGroup)?.isAdmin && (
+                                <Alert className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+                                  <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                                    ⚠️ Only group admins can send messages to this group. You are not an admin, so messaging is disabled.
+                                  </AlertDescription>
+                                </Alert>
+                              )}
                             </div>
                           )}
                           
@@ -2055,10 +2067,23 @@ export default function Dashboard() {
                             <Label htmlFor="message">Message</Label>
                             <Textarea
                               id="message"
-                              placeholder="Type your message here..."
+                              placeholder={
+                                targetType === "whatsapp_group" && 
+                                selectedWhatsAppGroup && 
+                                groups.find(g => g.id === selectedWhatsAppGroup)?.onlyAdminsCanMessage && 
+                                !groups.find(g => g.id === selectedWhatsAppGroup)?.isAdmin
+                                  ? "Only admins can send messages to this group"
+                                  : "Type your message here..."
+                              }
                               rows={4}
                               value={bulkMessage}
                               onChange={(e) => setBulkMessage(e.target.value)}
+                              disabled={!!(
+                                targetType === "whatsapp_group" && 
+                                selectedWhatsAppGroup && 
+                                groups.find(g => g.id === selectedWhatsAppGroup)?.onlyAdminsCanMessage && 
+                                !groups.find(g => g.id === selectedWhatsAppGroup)?.isAdmin
+                              )}
                             />
                           </div>
 
@@ -2242,7 +2267,13 @@ export default function Dashboard() {
                           </Button>
                           <Button 
                             onClick={handleCreateEnhancedCampaign}
-                            disabled={createBulkCampaignMutation.isPending}
+                            disabled={
+                              createBulkCampaignMutation.isPending ||
+                              !!(targetType === "whatsapp_group" && 
+                                 selectedWhatsAppGroup && 
+                                 groups.find(g => g.id === selectedWhatsAppGroup)?.onlyAdminsCanMessage && 
+                                 !groups.find(g => g.id === selectedWhatsAppGroup)?.isAdmin)
+                            }
                           >
                             {createBulkCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
                           </Button>

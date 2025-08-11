@@ -12,6 +12,7 @@ This project is a comprehensive WhatsApp bulk messaging platform inspired by Waz
 - Migration completed: Database provisioned, dependencies installed, application running on port 5000
 - Bulk messaging module improvements completed (January 2025): Replaced "Clone & Reuse" with "Restart" functionality, fixed progress counters to use totalTargets, added scrollable interface, removed redundant bulk-messaging.tsx file, removed Refresh button and added Delete campaign functionality, removed Active Campaigns quick view component
 - Advanced scheduling features implemented (August 2025): Enhanced bulk messaging with time post scheduling, random message intervals (1-3600 seconds), schedule time controls (daytime/nighttime/odd/even hours), dynamic hour management with add/remove functionality, major performance optimization by replacing heavy dropdowns with fast number inputs
+- Admin-only messaging restrictions implemented (August 2025): Added security feature that prevents non-admin users from sending bulk messages to WhatsApp groups with admin-only messaging enabled, includes visual warnings and disabled form controls
 
 ## System Architecture
 The application is built with a React frontend (TypeScript, Vite, TailwindCSS, shadcn/ui) and a Node.js backend (Express, TypeScript). Data is managed using PostgreSQL with Drizzle ORM. WhatsApp integration is handled via the `whatsapp-web.js` library, supporting QR code authentication, session persistence, and multiple WhatsApp accounts. Authentication is session-based. File storage utilizes the local file system with Multer.
@@ -25,7 +26,7 @@ The application is built with a React frontend (TypeScript, Vite, TailwindCSS, s
 - **Data Export/Import:** Export chats, contacts, and group participants as CSV; import contacts from CSV.
 - **Dashboard & Analytics:** System status monitoring, campaign tracking, message statistics, real-time notifications.
 - **UI/UX:** Component-based UI with shadcn/ui for a consistent and modern design. Illustrations are used for login/signup and landing pages, and lazy loading is implemented for images. Chat interface mirrors WhatsApp Web features.
-- **Technical Implementations:** WebSocket connections for real-time updates, comprehensive logout functionality, robust media handling and display, secure session configuration, server-side sorting for consistent data display, and real-time campaign progress broadcasting.
+- **Technical Implementations:** WebSocket connections for real-time updates, comprehensive logout functionality, robust media handling and display, secure session configuration, server-side sorting for consistent data display, real-time campaign progress broadcasting, and admin-only messaging restrictions with dynamic form controls and user permission validation.
 
 **Database Schema:**
 - **Users:** Authentication, profiles, email verification, WhatsApp number association.

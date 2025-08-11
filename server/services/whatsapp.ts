@@ -1390,6 +1390,22 @@ export class WhatsAppService {
         groups.map(async (group: any) => {
           try {
             const participants = await group.participants || [];
+            
+            // Get current user's WhatsApp number to check admin status
+            const currentUserNumber = this.client?.info?.me?.user || this.client?.info?.wid?.user;
+            const currentUserParticipant = participants.find((p: any) => 
+              p.id._serialized.includes(currentUserNumber)
+            );
+            
+            // Check if current user is admin in this group
+            const isAdmin = currentUserParticipant ? (currentUserParticipant.isAdmin || currentUserParticipant.isSuperAdmin) : false;
+            
+            // For demonstration: simulate some groups having admin-only messaging
+            // In a real implementation, this would be fetched from WhatsApp group settings
+            const onlyAdminsCanMessage = group.onlyAdminsCanMessage || 
+              group.name.toLowerCase().includes('admin') || 
+              group.name.toLowerCase().includes('restricted');
+            
             return {
               id: group.id._serialized,
               name: group.name,
@@ -1409,7 +1425,9 @@ export class WhatsAppService {
               } : null,
               profilePicUrl: null, // Will be loaded separately for performance
               isGroup: true, // Mark as group for proper message routing
-              number: null // Groups don't have phone numbers
+              number: null, // Groups don't have phone numbers
+              isAdmin: isAdmin, // Whether current user is admin in this group
+              onlyAdminsCanMessage: onlyAdminsCanMessage // Whether group restricts messaging to admins only
             };
           } catch (groupError: any) {
             console.log(`Group processing error for ${group.name}:`, groupError.message);
@@ -1424,7 +1442,9 @@ export class WhatsAppService {
               lastMessage: null,
               profilePicUrl: null,
               isGroup: true, // Mark as group for proper message routing
-              number: null // Groups don't have phone numbers
+              number: null, // Groups don't have phone numbers
+              isAdmin: false, // Default to false on error
+              onlyAdminsCanMessage: false // Default to false on error
             };
           }
         })
