@@ -135,3 +135,69 @@
 2025/08/12-10:26:57.899 428 compacted to: files[ 0 0 1 0 0 0 0 ]
 2025/08/12-10:26:57.900 428 Delete type=2 #37
 2025/08/12-10:26:57.949 457 Manual compaction at level-1 from '\x00\x10\x00\x00\x05' @ 1812 : 0 .. '\x00\x11\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/12-10:29:02.000 630 Level-0 table #40: started
+2025/08/12-10:29:02.069 630 Level-0 table #40: 1060469 bytes OK
+2025/08/12-10:29:02.078 630 Delete type=2 #35
+2025/08/12-10:29:02.078 630 Delete type=0 #36
+2025/08/12-10:29:02.082 630 Compacting 1@1 + 1@2 files
+2025/08/12-10:29:02.124 630 Generated table #41@1: 14143 keys, 516869 bytes
+2025/08/12-10:29:02.124 630 Compacted 1@1 + 1@2 files => 516869 bytes
+2025/08/12-10:29:02.129 630 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-10:29:06.147 639 Level-0 table #43: started
+2025/08/12-10:29:06.194 639 Level-0 table #43: 1112616 bytes OK
+2025/08/12-10:29:06.207 639 Delete type=2 #38
+2025/08/12-10:29:06.207 639 Delete type=0 #39
+2025/08/12-10:29:06.207 639 Delete type=2 #40
+2025/08/12-10:29:06.268 62d Compacting 1@1 + 1@2 files
+2025/08/12-10:29:06.343 62d Generated table #44@1: 23858 keys, 1014990 bytes
+2025/08/12-10:29:06.343 62d Compacted 1@1 + 1@2 files => 1014990 bytes
+2025/08/12-10:29:06.349 62d compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-10:29:07.359 62d Level-0 table #46: started
+2025/08/12-10:29:07.399 62d Level-0 table #46: 1085172 bytes OK
+2025/08/12-10:29:07.409 62d Delete type=2 #41
+2025/08/12-10:29:07.409 62d Delete type=0 #42
+2025/08/12-10:29:07.409 62d Delete type=2 #43
+2025/08/12-10:29:07.411 62d Compacting 1@1 + 1@2 files
+2025/08/12-10:29:07.489 62d Generated table #47@1: 38565 keys, 1653170 bytes
+2025/08/12-10:29:07.490 62d Compacted 1@1 + 1@2 files => 1653170 bytes
+2025/08/12-10:29:07.494 62d compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-10:29:07.494 62d Delete type=2 #44
+2025/08/12-10:29:07.494 62d Delete type=2 #46
+2025/08/12-10:29:08.627 638 Level-0 table #49: started
+2025/08/12-10:29:08.669 638 Level-0 table #49: 1060570 bytes OK
+2025/08/12-10:29:08.674 638 Delete type=0 #45
+2025/08/12-10:29:08.681 638 Compacting 1@1 + 1@2 files
+2025/08/12-10:29:08.791 638 Generated table #50@1: 55579 keys, 2215345 bytes
+2025/08/12-10:29:08.798 638 Generated table #51@1: 1709 keys, 95829 bytes
+2025/08/12-10:29:08.798 638 Compacted 1@1 + 1@2 files => 2311174 bytes
+2025/08/12-10:29:08.802 638 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/12-10:29:09.879 63a Level-0 table #53: started
+2025/08/12-10:29:09.911 63a Level-0 table #53: 931175 bytes OK
+2025/08/12-10:29:09.919 63a Delete type=2 #47
+2025/08/12-10:29:09.919 63a Delete type=0 #48
+2025/08/12-10:29:09.919 63a Delete type=2 #49
+2025/08/12-10:29:09.927 638 Compacting 1@1 + 2@2 files
+2025/08/12-10:29:10.066 638 Generated table #54@1: 45119 keys, 2051733 bytes
+2025/08/12-10:29:10.067 638 Compacted 1@1 + 2@2 files => 2051733 bytes
+2025/08/12-10:29:10.072 638 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-10:29:10.074 638 Delete type=2 #50
+2025/08/12-10:29:10.074 638 Delete type=2 #51
+2025/08/12-10:29:10.074 638 Delete type=2 #53
+2025/08/12-10:29:16.773 63a Level-0 table #56: started
+2025/08/12-10:29:16.875 63a Level-0 table #56: 1193577 bytes OK
+2025/08/12-10:29:16.899 63a Delete type=0 #52
+2025/08/12-10:29:17.027 638 Compacting 1@1 + 1@2 files
+2025/08/12-10:29:17.227 638 Generated table #57@1: 51039 keys, 2211783 bytes
+2025/08/12-10:29:17.240 638 Generated table #58@1: 2550 keys, 198767 bytes
+2025/08/12-10:29:17.240 638 Compacted 1@1 + 1@2 files => 2410550 bytes
+2025/08/12-10:29:17.247 638 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/12-10:29:17.247 638 Delete type=2 #54
+2025/08/12-10:29:17.247 638 Delete type=2 #56
+2025/08/12-10:29:49.022 62d Level-0 table #60: started
+2025/08/12-10:29:49.127 62d Level-0 table #60: 1089105 bytes OK
+2025/08/12-10:29:49.140 62d Delete type=0 #55
+2025/08/12-10:29:49.189 62d Compacting 1@1 + 2@2 files
+2025/08/12-10:29:49.339 62d Generated table #61@1: 49596 keys, 2209925 bytes
+2025/08/12-10:29:49.354 62d Generated table #62@1: 5575 keys, 286100 bytes
+2025/08/12-10:29:49.354 62d Compacted 1@1 + 2@2 files => 2496025 bytes
+2025/08/12-10:29:49.361 62d compacted to: files[ 0 0 2 0 0 0 0 ]
