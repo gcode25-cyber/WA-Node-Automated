@@ -440,54 +440,69 @@ export class WhatsAppService {
       try {
         console.log('🎯 Attempting comprehensive logout with phone disconnection...');
         
-        // Method 1: Try UI-based logout to properly disconnect phone
+        // Method 1: PRIORITY - Use client.logout() to properly unlink phone
         try {
-          const page = await this.client.pupPage;
-          if (page) {
-            console.log('📱 Executing UI-based logout to disconnect phone...');
-            
-            const uiLogoutPromise = page.evaluate(() => {
-              try {
-                const menuBtn = document.querySelector("span[data-icon='menu']");
-                if (menuBtn) {
-                  (menuBtn as HTMLElement).click();
-                  setTimeout(() => {
-                    const logoutElements = Array.from(document.querySelectorAll('div')).filter(
-                      el => el.textContent?.includes('Log out')
-                    );
-                    if (logoutElements.length > 0) {
-                      (logoutElements[0] as HTMLElement).click();
-                      setTimeout(() => {
-                        const confirmElements = Array.from(document.querySelectorAll('div')).filter(
-                          el => el.textContent?.includes('Log out')
-                        );
-                        if (confirmElements.length > 0) {
-                          (confirmElements[0] as HTMLElement).click();
-                        }
-                      }, 1000);
-                    }
-                  }, 1000);
+          console.log('📱 CRITICAL: Calling client.logout() to unlink from phone\'s Linked Devices...');
+          await this.client.logout();
+          console.log('✅ Phone successfully unlinked from Linked Devices list');
+          
+          // Wait for logout to fully process on WhatsApp servers
+          await new Promise(resolve => setTimeout(resolve, 4000));
+        } catch (logoutError: any) {
+          console.log('⚠️ Primary logout failed, trying fallback methods:', logoutError.message);
+          
+          // Fallback: Try UI-based logout if API fails
+          try {
+            const page = await this.client.pupPage;
+            if (page) {
+              console.log('📱 Fallback: UI-based logout to disconnect phone...');
+              
+              const uiLogoutPromise = page.evaluate(() => {
+                try {
+                  const menuBtn = document.querySelector("span[data-icon='menu']");
+                  if (menuBtn) {
+                    (menuBtn as HTMLElement).click();
+                    setTimeout(() => {
+                      const logoutElements = Array.from(document.querySelectorAll('div')).filter(
+                        el => el.textContent?.includes('Log out')
+                      );
+                      if (logoutElements.length > 0) {
+                        (logoutElements[0] as HTMLElement).click();
+                        setTimeout(() => {
+                          const confirmElements = Array.from(document.querySelectorAll('div')).filter(
+                            el => el.textContent?.includes('Log out')
+                          );
+                          if (confirmElements.length > 0) {
+                            (confirmElements[0] as HTMLElement).click();
+                          }
+                        }, 1000);
+                      }
+                    }, 1000);
+                  }
+                } catch (e) {
+                  console.log('UI logout failed:', e);
                 }
-              } catch (e) {
-                console.log('UI logout failed:', e);
-              }
-            });
-            
-            const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
-            await Promise.race([uiLogoutPromise, timeoutPromise]);
-            console.log('✅ UI logout attempt completed');
-            await new Promise(resolve => setTimeout(resolve, 2000));
+              });
+              
+              const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+              await Promise.race([uiLogoutPromise, timeoutPromise]);
+              console.log('✅ Fallback UI logout completed');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+          } catch (pageError: any) {
+            console.log('🔧 Fallback also failed (expected during logout):', pageError.message);
           }
-        } catch (pageError: any) {
-          console.log('🔧 Page access failed (expected during logout):', pageError.message);
         }
         
-        // Method 2: Standard client logout
+        // Method 2: CRITICAL - Standard client logout to unlink from phone
         try {
+          console.log('📱 Calling client.logout() to unlink from phone\'s Linked Devices...');
           await this.client.logout();
-          console.log('✅ Client logout successful');
+          console.log('✅ Phone successfully unlinked from Linked Devices');
+          // Wait longer for logout to fully process on WhatsApp servers
+          await new Promise(resolve => setTimeout(resolve, 5000));
         } catch (logoutError: any) {
-          console.log('Client logout (expected):', logoutError.message);
+          console.log('⚠️ Client logout failed - phone may still be linked:', logoutError.message);
         }
         
         // Method 3: Destroy client with timeout
