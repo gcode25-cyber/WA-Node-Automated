@@ -1217,12 +1217,12 @@ export default function Dashboard() {
           
           {/* WhatsApp and RCS buttons - Show when not connected */}
           {!sessionInfo && (
-            <div className="px-3 py-4 space-y-3">
+            <div className="px-3 py-4 space-y-2">
               <div 
-                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors border-2 ${
+                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
                   selectedFeature === 'whatsapp' 
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-700' 
-                    : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-transparent hover:bg-green-100 dark:hover:bg-green-900/30 hover:border-green-200 dark:hover:border-green-800'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}
                 onClick={() => setSelectedFeature('whatsapp')}
               >
@@ -1233,10 +1233,10 @@ export default function Dashboard() {
               </div>
               
               <div 
-                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors border-2 ${
+                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
                   selectedFeature === 'rcs' 
-                    ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-700' 
-                    : 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-transparent hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}
                 onClick={() => setSelectedFeature('rcs')}
               >
