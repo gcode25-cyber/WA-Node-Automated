@@ -410,175 +410,204 @@ export class WhatsAppService {
     try {
       console.log('🔌 Starting comprehensive logout process...');
       
-      // Clear session info first
-      this.sessionInfo = null;
-      this.qrCode = null;
-      this.isReady = false;
-      this.isInitializing = false;
-      this.messageCache.clear();
-      
-      // Clear storage
-      await storage.clearAllSessions();
-      
-      // Enhanced logout with phone disconnection
-      if (this.client) {
-        try {
-          console.log('🎯 Attempting comprehensive logout with phone disconnection...');
-          
-          // Method 1: Try to access the puppeteer page for UI-based logout
-          try {
-            const page = await this.client.pupPage;
-            if (page) {
-              console.log('📱 Executing UI-based logout to disconnect phone...');
-              
-              // Try to click the menu and logout with timeout
-              const uiLogoutPromise = page.evaluate(() => {
-                try {
-                  // Look for menu button and click it
-                  const menuBtn = document.querySelector("span[data-icon='menu']");
-                  if (menuBtn) {
-                    (menuBtn as HTMLElement).click();
-                    
-                    // Wait a bit then look for logout
-                    setTimeout(() => {
-                      const logoutElements = Array.from(document.querySelectorAll('div')).filter(
-                        el => el.textContent?.includes('Log out')
-                      );
-                      if (logoutElements.length > 0) {
-                        (logoutElements[0] as HTMLElement).click();
-                        
-                        // Handle confirmation if it appears
-                        setTimeout(() => {
-                          const confirmElements = Array.from(document.querySelectorAll('div')).filter(
-                            el => el.textContent?.includes('Log out')
-                          );
-                          if (confirmElements.length > 0) {
-                            (confirmElements[0] as HTMLElement).click();
-                          }
-                        }, 1000);
-                      }
-                    }, 1000);
-                  }
-                } catch (e) {
-                  console.log('UI logout failed:', e);
-                }
-              });
-              
-              // Add timeout to prevent hanging
-              const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
-              await Promise.race([uiLogoutPromise, timeoutPromise]);
-              
-              console.log('✅ UI logout attempt completed');
-              await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for logout to process
-            }
-          } catch (pageError: any) {
-            if (pageError.message.includes('Protocol error') || 
-                pageError.message.includes('Target closed')) {
-              console.log('🔧 Page access failed during logout (expected):', pageError.message);
-            } else {
-              console.log('Page access failed:', pageError.message);
-            }
-          }
-          
-          // Method 2: Standard client logout
-          try {
-            await this.client.logout();
-            console.log('✅ Client logout successful');
-          } catch (logoutError: any) {
-            console.log('Client logout (expected):', logoutError.message);
-          }
-          
-          // Method 3: Destroy client with timeout protection
-          console.log('🧹 Destroying WhatsApp client...');
-          try {
-            const destroyPromise = this.client.destroy();
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Client destroy timeout')), 8000)
-            );
-            
-            await Promise.race([destroyPromise, timeoutPromise]);
-            console.log('✅ Client destroyed');
-          } catch (destroyError: any) {
-            if (destroyError.message.includes('Protocol error') || 
-                destroyError.message.includes('Target closed') ||
-                destroyError.message.includes('timeout')) {
-              console.log('🔧 Client destruction completed (expected during logout)');
-            } else {
-              console.log('Client destroy error:', destroyError.message);
-            }
-          }
-          
-        } catch (clientError: any) {
-          console.log('Client operation failed:', clientError.message);
-        }
-        
-        this.client = null;
-      }
-      
-      // Stop connection monitoring
-      if (this.connectionCheckInterval) {
-        clearInterval(this.connectionCheckInterval);
-        this.connectionCheckInterval = null;
-      }
-      
-      // Clear session files manually
-      try {
-        const fs = await import('fs');
-        const path = await import('path');
-        const sessionPath = path.resolve('./.wwebjs_auth');
-        
-        if (fs.existsSync(sessionPath)) {
-          console.log('🗑️ Removing session files to force phone disconnect...');
-          fs.rmSync(sessionPath, { recursive: true, force: true });
-          console.log('✅ Session files cleared - phone should disconnect');
-        }
-        
-        // Clear Chrome user data directories
-        const tmpDir = '/tmp';
-        try {
-          const chromeDataDirs = fs.readdirSync(tmpDir).filter(dir => dir.startsWith('chrome-'));
-          for (const dir of chromeDataDirs) {
-            try {
-              fs.rmSync(path.join(tmpDir, dir), { recursive: true, force: true });
-              console.log(`🗑️ Cleared Chrome data: ${dir}`);
-            } catch (e) {
-              // Non-critical cleanup
-            }
-          }
-        } catch (e) {
-          // Non-critical
-        }
-      } catch (fsError: any) {
-        console.log('Session file cleanup (non-critical):', fsError.message);
-      }
-      
-      console.log('✅ Logout successful - reinitializing for new QR');
-      
-      // Broadcast logout event to clients
-      this.broadcastToClients('logout', { connected: false });
-      
-      // Force a complete restart after logout to ensure QR code generation
-      setTimeout(async () => {
-        console.log('🔄 Starting fresh initialization after logout...');
-        this.isInitializing = false; // Reset flag to allow initialization
-        this.client = null; // Clear client reference
-        
-        try {
-          await this.initializeClient();
-          console.log('✅ Fresh initialization completed after logout');
-        } catch (error: any) {
-          console.error('❌ Fresh initialization failed:', error.message);
-          // Try once more with longer delay
-          setTimeout(() => {
-            this.isInitializing = false;
-            this.initializeClient();
-          }, 5000);
-        }
-      }, 4000);
+      // Use the same logic as force restart but with UI logout
+      await this.performCompleteLogout();
       
     } catch (error: any) {
       console.error('❌ Logout failed:', error.message);
       throw error;
+    }
+  }
+
+  private async performCompleteLogout(): Promise<void> {
+    // Stop connection monitoring to prevent conflicts
+    if (this.connectionCheckInterval) {
+      clearInterval(this.connectionCheckInterval);
+      this.connectionCheckInterval = null;
+    }
+    
+    // Clear session info first
+    this.sessionInfo = null;
+    this.qrCode = null;
+    this.isReady = false;
+    this.messageCache.clear();
+    
+    // Clear storage
+    await storage.clearAllSessions();
+    
+    // Enhanced logout with phone disconnection
+    if (this.client) {
+      try {
+        console.log('🎯 Attempting comprehensive logout with phone disconnection...');
+        
+        // Method 1: Try UI-based logout to properly disconnect phone
+        try {
+          const page = await this.client.pupPage;
+          if (page) {
+            console.log('📱 Executing UI-based logout to disconnect phone...');
+            
+            const uiLogoutPromise = page.evaluate(() => {
+              try {
+                const menuBtn = document.querySelector("span[data-icon='menu']");
+                if (menuBtn) {
+                  (menuBtn as HTMLElement).click();
+                  setTimeout(() => {
+                    const logoutElements = Array.from(document.querySelectorAll('div')).filter(
+                      el => el.textContent?.includes('Log out')
+                    );
+                    if (logoutElements.length > 0) {
+                      (logoutElements[0] as HTMLElement).click();
+                      setTimeout(() => {
+                        const confirmElements = Array.from(document.querySelectorAll('div')).filter(
+                          el => el.textContent?.includes('Log out')
+                        );
+                        if (confirmElements.length > 0) {
+                          (confirmElements[0] as HTMLElement).click();
+                        }
+                      }, 1000);
+                    }
+                  }, 1000);
+                }
+              } catch (e) {
+                console.log('UI logout failed:', e);
+              }
+            });
+            
+            const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+            await Promise.race([uiLogoutPromise, timeoutPromise]);
+            console.log('✅ UI logout attempt completed');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (pageError: any) {
+          console.log('🔧 Page access failed (expected during logout):', pageError.message);
+        }
+        
+        // Method 2: Standard client logout
+        try {
+          await this.client.logout();
+          console.log('✅ Client logout successful');
+        } catch (logoutError: any) {
+          console.log('Client logout (expected):', logoutError.message);
+        }
+        
+        // Method 3: Destroy client with timeout
+        console.log('🧹 Destroying WhatsApp client...');
+        try {
+          const destroyPromise = this.client.destroy();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('timeout')), 5000)
+          );
+          await Promise.race([destroyPromise, timeoutPromise]);
+          console.log('✅ Client destroyed');
+        } catch (destroyError: any) {
+          console.log('🔧 Client destruction completed (expected)');
+        }
+        
+        this.client = null;
+      } catch (clientError: any) {
+        console.log('Client operation completed:', clientError.message);
+      }
+    }
+    
+    // Force clear all session data
+    await this.clearAllSessionData();
+    
+    // Broadcast logout event
+    this.broadcastToClients('logout', { connected: false });
+    
+    // Start fresh with delay
+    setTimeout(async () => {
+      console.log('🔄 Starting completely fresh client...');
+      this.isInitializing = false;
+      try {
+        await this.initializeClient();
+        console.log('✅ Fresh client started successfully');
+      } catch (error: any) {
+        console.error('❌ Fresh client start failed:', error.message);
+        // Retry with longer delay
+        setTimeout(() => {
+          this.isInitializing = false;
+          this.initializeClient();
+        }, 5000);
+      }
+    }, 3000);
+  }
+
+  private async clearAllSessionData(): Promise<void> {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      // Kill any remaining Chrome processes first
+      try {
+        const { execSync } = await import('child_process');
+        execSync('pkill -f chrome || pkill -f chromium || true', { stdio: 'ignore' });
+        console.log('🔫 Killed existing Chrome processes');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for processes to die
+      } catch (e) {
+        // Process kill might fail, that's OK
+      }
+      
+      const pathsToClean = [
+        './.wwebjs_auth',
+        './.chrome_user_data',
+        './.session_backup.json'
+      ];
+      
+      for (const dirPath of pathsToClean) {
+        const fullPath = path.resolve(dirPath);
+        if (fs.existsSync(fullPath)) {
+          // For Chrome data directory, clear lock files first
+          if (dirPath === './.chrome_user_data') {
+            try {
+              const lockFiles = [
+                path.join(fullPath, 'SingletonLock'),
+                path.join(fullPath, 'SingletonSocket'),
+                path.join(fullPath, 'Default', 'Session Storage'),
+                path.join(fullPath, 'Default', 'Local Storage')
+              ];
+              
+              for (const lockFile of lockFiles) {
+                if (fs.existsSync(lockFile)) {
+                  if (fs.statSync(lockFile).isDirectory()) {
+                    fs.rmSync(lockFile, { recursive: true, force: true });
+                  } else {
+                    fs.unlinkSync(lockFile);
+                  }
+                  console.log(`🔓 Removed lock: ${path.basename(lockFile)}`);
+                }
+              }
+            } catch (e) {}
+          }
+          
+          if (fs.statSync(fullPath).isDirectory()) {
+            fs.rmSync(fullPath, { recursive: true, force: true });
+            console.log(`🗑️ Cleared directory: ${dirPath}`);
+          } else {
+            fs.unlinkSync(fullPath);
+            console.log(`🗑️ Cleared file: ${dirPath}`);
+          }
+        }
+      }
+      
+      // Also clear temp Chrome data
+      const tmpDir = '/tmp';
+      try {
+        const chromeDataDirs = fs.readdirSync(tmpDir).filter(dir => 
+          dir.startsWith('chrome-') || dir.startsWith('chromium-')
+        );
+        for (const dir of chromeDataDirs) {
+          try {
+            fs.rmSync(path.join(tmpDir, dir), { recursive: true, force: true });
+            console.log(`🗑️ Cleared temp Chrome data: ${dir}`);
+          } catch (e) {}
+        }
+      } catch (e) {}
+      
+      // Wait a bit more for filesystem to stabilize
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (fsError: any) {
+      console.log('Session cleanup:', fsError.message);
     }
   }
 
