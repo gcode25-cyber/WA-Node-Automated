@@ -621,10 +621,10 @@ export class WhatsAppService {
   }
 
   private startConnectionMonitoring(): void {
-    // Real-time connection monitoring every 10 seconds - like WhatsApp Web
+    // Real-time connection monitoring every 30 seconds - reduced frequency to prevent aggressive restarts
     this.connectionCheckInterval = setInterval(async () => {
       await this.checkRealTimeConnection();
-    }, 10000);
+    }, 30000);
   }
 
   private async checkRealTimeConnection() {
@@ -652,10 +652,10 @@ export class WhatsAppService {
           this.isReady = false;
         }
         
-        // Handle different disconnection states
+        // Handle different disconnection states (disabled automatic restart)
         if (currentState === 'UNPAIRED' || currentState === 'UNPAIRED_IDLE') {
-          console.log('📱 Phone was unpaired - triggering restart for new QR');
-          this.handleUnpairedRestart();
+          console.log('📱 Phone was unpaired - but not auto-restarting to prevent connection loops');
+          // this.handleUnpairedRestart(); // Disabled to prevent automatic logouts
         }
       }
       
