@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { websocketManager, type WebSocketMessage } from "@/lib/websocket";
-import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, RefreshCw, UserCheck, ChevronDown, Loader2, User, Copy, Play, Pause, RotateCcw } from "lucide-react";
+import { Send, MessageSquare, Users, Plus, Smartphone, Paperclip, X, Upload, FileText, Image, Video, Music, File, Download, Search, Clock, Phone, Trash2, BarChart3, UserCheck, ChevronDown, Loader2, User, Copy, Play, Pause, RotateCcw, LogOut } from "lucide-react";
 
 import { useLocation } from "wouter";
 
@@ -122,6 +122,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
   
   // Contact Groups state
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
@@ -192,6 +193,13 @@ export default function Dashboard() {
   }>({
     queryKey: ['/api/session-info'],
     refetchInterval: 10000, // Check every 10 seconds
+  });
+
+  // Fetch QR code when needed
+  const { data: qrData } = useQuery<{qr?: string | null}>({
+    queryKey: ['/api/get-qr'],
+    enabled: showQRCode && !sessionInfo,
+    refetchInterval: showQRCode && !sessionInfo ? 5000 : false,
   });
 
   // Fetch contact groups
@@ -412,10 +420,12 @@ export default function Dashboard() {
           queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
           console.log('🔄 New message received, refreshing chat list...');
           break;
-        case 'chat_history_cleared':
-          // Refresh chat list to update last message status
-          queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-          console.log('🗑️ Chat history cleared, refreshing chat list...');
+        default:
+          // Handle unknown message types gracefully
+          if (message.type === 'chat_history_cleared') {
+            queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+            console.log('🗑️ Chat history cleared, refreshing chat list...');
+          }
           break;
       }
     };
@@ -1031,28 +1041,51 @@ export default function Dashboard() {
     }
   };
 
-  // Data sync mutation
-  const syncDataMutation = useMutation({
-    mutationFn: () => apiRequest("/api/sync-data", "POST", {}),
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: () => apiRequest('/api/logout', 'POST'),
     onSuccess: () => {
-      // Invalidate all queries to refresh data
+      // Show QR code and refresh data
+      setShowQRCode(true);
+      queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
       queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
-      
       toast({
-        title: "Data Synchronized",
-        description: "Your WhatsApp data has been refreshed successfully!",
+        title: "Logged Out",
+        description: "Successfully logged out from WhatsApp. Scan QR to reconnect.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Sync Failed",
-        description: error.message || "Failed to synchronize data",
+        title: "Logout Failed",
+        description: error.message || "Failed to logout. Please try again.",
         variant: "destructive",
       });
     },
   });
+
+  // Auto refresh data every 60 seconds (automated resync)
+  useEffect(() => {
+    if (!sessionInfo) return;
+    
+    const autoRefreshInterval = setInterval(() => {
+      // Silently refresh data in background
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+    }, 60000); // Every 60 seconds
+
+    return () => clearInterval(autoRefreshInterval);
+  }, [sessionInfo, queryClient]);
+
+  // Hide QR code when user successfully authenticates
+  useEffect(() => {
+    if (sessionInfo && showQRCode) {
+      setShowQRCode(false);
+    }
+  }, [sessionInfo, showQRCode]);
 
   const exportContactsCSV = async () => {
     try {
@@ -1121,10 +1154,7 @@ export default function Dashboard() {
       <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div 
-            className="flex items-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
-            onClick={() => setLocation('/account')}
-          >
+          <div className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
               {sessionInfo?.name ? (
                 <span className="text-white font-bold text-sm">
@@ -1135,7 +1165,7 @@ export default function Dashboard() {
               )}
             </div>
             <div className="flex-1 text-center ml-3">
-              <Badge variant={sessionInfo ? "default" : "secondary"} className="text-sm px-3 py-1 cursor-pointer">
+              <Badge variant={sessionInfo ? "default" : "secondary"} className="text-sm px-3 py-1">
                 <div className={`w-2 h-2 rounded-full mr-2 ${sessionInfo ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
                 <span className="whitespace-nowrap">{sessionInfo ? "Connected" : "Not Connected"}</span>
               </Badge>
@@ -1144,53 +1174,93 @@ export default function Dashboard() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => syncDataMutation.mutate()}
-                disabled={syncDataMutation.isPending}
-                className="ml-2 p-2"
-                data-testid="button-sync-data"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logoutMutation.mutate();
+                }}
+                disabled={logoutMutation.isPending}
+                className="ml-2 p-2 hover:bg-red-50 hover:text-red-600"
+                data-testid="button-logout"
               >
-                <RefreshCw className={`h-4 w-4 ${syncDataMutation.isPending ? 'animate-spin' : ''}`} />
+                <LogOut className="h-4 w-4" />
               </Button>
             )}
           </div>
+          
+          {/* Account Name */}
+          {sessionInfo && (
+            <div className="px-3 py-2">
+              <h3 className="font-medium text-gray-900 dark:text-white">{sessionInfo.name}</h3>
+            </div>
+          )}
+          
+          {/* QR Code Section */}
+          {showQRCode && !sessionInfo && qrData?.qr && (
+            <div className="px-3 py-4 space-y-4">
+              <div className="bg-white p-4 rounded-lg border flex justify-center">
+                <img
+                  src={qrData.qr.startsWith('data:') ? qrData.qr : `data:image/png;base64,${qrData.qr}`}
+                  alt="QR Code for WhatsApp Authentication"
+                  className="w-48 h-48 rounded"
+                />
+              </div>
+              
+              {/* WhatsApp and RCS buttons */}
+              <div className="space-y-2">
+                <div className="flex items-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+                  <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="font-medium ml-3">WhatsApp</span>
+                </div>
+                
+                <div className="flex items-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+                    <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="font-medium ml-3">RCS</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         
 
 
-        {/* Features List */}
-        <div className="flex-1 p-4 space-y-2">
-          {/* WhatsApp Feature */}
-          <div 
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-              selectedFeature === 'whatsapp' 
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}
-            onClick={() => setSelectedFeature('whatsapp')}
-          >
-            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
-              <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
+        {/* Features List - Hide when QR is showing */}
+        {!(showQRCode && !sessionInfo) && (
+          <div className="flex-1 p-4 space-y-2">
+            {/* WhatsApp Feature */}
+            <div 
+              className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+                selectedFeature === 'whatsapp' 
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+              onClick={() => setSelectedFeature('whatsapp')}
+            >
+              <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+              <span className="font-medium ml-3">WhatsApp</span>
             </div>
-            <span className="font-medium ml-3">WhatsApp</span>
-          </div>
 
-          {/* RCS Feature */}
-          <div 
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-              selectedFeature === 'rcs' 
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}
-            onClick={() => setSelectedFeature('rcs')}
-          >
-            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
-              <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            {/* RCS Feature */}
+            <div 
+              className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+                selectedFeature === 'rcs' 
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+              onClick={() => setSelectedFeature('rcs')}
+            >
+              <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+                <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
+              <span className="font-medium ml-3">RCS</span>
             </div>
-            <span className="font-medium ml-3">RCS</span>
           </div>
-
-
-        </div>
+        )}
       </div>
 
       {/* Middle Sidebar - Modules */}

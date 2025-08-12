@@ -11,7 +11,7 @@ import Pricing from "@/pages/pricing";
 import Blogs from "@/pages/blogs";
 import Terms from "@/pages/terms";
 import ForgotPassword from "@/pages/forgot-password";
-import AccountManagement from "@/pages/account-management";
+
 import Dashboard from "@/pages/dashboard";
 import ChatPage from "@/pages/chat";
 import GroupContacts from "@/pages/group-contacts";
@@ -28,7 +28,7 @@ function Router() {
       <Route path="/blogs" component={Blogs} />
       <Route path="/terms" component={Terms} />
       <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/account" component={AccountManagement} />
+
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/chat/:contactId" component={ChatPage} />
       <Route path="/group-contacts/:groupId" component={GroupContacts} />
