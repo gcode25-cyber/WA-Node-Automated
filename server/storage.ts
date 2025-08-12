@@ -38,6 +38,7 @@ export interface IStorage {
   getContactGroupMembers(groupId: string): Promise<ContactGroupMember[]>;
   createContactGroupMember(member: InsertContactGroupMember): Promise<ContactGroupMember>;
   createContactGroupMembersBulk(members: InsertContactGroupMember[]): Promise<ContactGroupMember[]>;
+  updateContactGroupMember(memberId: string, updates: Partial<ContactGroupMember>): Promise<ContactGroupMember | undefined>;
   deleteContactGroupMembers(groupId: string): Promise<void>;
   deleteContactGroupMember(memberId: string): Promise<void>;
   deleteContactGroupMembersBulk(memberIds: string[]): Promise<void>;
@@ -245,6 +246,15 @@ export class MemStorage implements IStorage {
     return members;
   }
 
+  async updateContactGroupMember(memberId: string, updates: Partial<ContactGroupMember>): Promise<ContactGroupMember | undefined> {
+    const member = this.contactGroupMembers.get(memberId);
+    if (!member) return undefined;
+    
+    const updatedMember = { ...member, ...updates };
+    this.contactGroupMembers.set(memberId, updatedMember);
+    return updatedMember;
+  }
+
   async deleteContactGroupMembersBulk(memberIds: string[]): Promise<void> {
     memberIds.forEach(memberId => {
       this.contactGroupMembers.delete(memberId);
@@ -446,6 +456,16 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(contactGroupMembers)
       .where(eq(contactGroupMembers.groupId, groupId));
+  }
+
+  async updateContactGroupMember(memberId: string, updates: Partial<ContactGroupMember>): Promise<ContactGroupMember | undefined> {
+    const [updatedMember] = await db
+      .update(contactGroupMembers)
+      .set(updates)
+      .where(eq(contactGroupMembers.id, memberId))
+      .returning();
+    
+    return updatedMember;
   }
 
   async deleteContactGroupMember(memberId: string): Promise<void> {

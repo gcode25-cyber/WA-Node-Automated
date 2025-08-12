@@ -1211,6 +1211,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update contact group member phone number
+  app.patch("/api/contact-groups/:groupId/members/:memberId", async (req, res) => {
+    try {
+      const { groupId, memberId } = req.params;
+      const { phoneNumber } = req.body;
+
+      if (!phoneNumber) {
+        return res.status(400).json({ error: "Phone number is required" });
+      }
+
+      const group = await storage.getContactGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ error: "Contact group not found" });
+      }
+
+      // Check if phone number already exists in the group (excluding current member)
+      const existingMembers = await storage.getContactGroupMembers(groupId);
+      const existingNumbers = new Set(existingMembers.filter(m => m.id !== memberId).map(m => m.phoneNumber));
+      
+      if (existingNumbers.has(phoneNumber)) {
+        return res.status(400).json({ error: "Phone number already exists in this group" });
+      }
+
+      // Update the member
+      const updatedMember = await storage.updateContactGroupMember(memberId, {
+        phoneNumber,
+        status: "valid"
+      });
+
+      if (!updatedMember) {
+        return res.status(404).json({ error: "Contact member not found" });
+      }
+
+      res.json({ success: true, member: updatedMember });
+
+    } catch (error: any) {
+      console.error("Update contact error:", error);
+      res.status(500).json({ error: error.message || "Failed to update contact" });
+    }
+  });
+
   // Add multiple contacts to multiple groups
   app.post("/api/contacts/add-to-groups", async (req, res) => {
     try {

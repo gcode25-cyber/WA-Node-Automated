@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2, Plus, UserPlus, Users, FileText } from 'lucide-react';
+import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2, Plus, UserPlus, Users, FileText, Edit2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface ContactGroupMember {
@@ -77,6 +77,10 @@ export default function GroupContacts() {
   const [validationErrors, setValidationErrors] = useState({ name: '', phoneNumber: '' });
   const [isImporting, setIsImporting] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countryData[0]); // Default to India
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingContact, setEditingContact] = useState<ContactGroupMember | null>(null);
+  const [editPhoneNumber, setEditPhoneNumber] = useState('');
+  const [editPhoneError, setEditPhoneError] = useState('');
   const queryClient = useQueryClient();
 
   const groupId = params?.groupId;
@@ -217,6 +221,32 @@ export default function GroupContacts() {
     },
   });
 
+  // Edit contact mutation
+  const editContactMutation = useMutation({
+    mutationFn: (data: { memberId: string; phoneNumber: string }) =>
+      apiRequest(`/api/contact-groups/${groupId}/members/${data.memberId}`, "PATCH", { phoneNumber: data.phoneNumber }),
+    onSuccess: () => {
+      toast({
+        title: "Contact Updated",
+        description: "Phone number updated successfully",
+      });
+      setShowEditDialog(false);
+      setEditingContact(null);
+      setEditPhoneNumber('');
+      setEditPhoneError('');
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups/${groupId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/contact-groups`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Update Contact",
+        description: error?.message || "Failed to update contact",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Validation functions
   const validateName = (name: string): string => {
     if (!name.trim()) return 'Name is required';
@@ -314,6 +344,29 @@ export default function GroupContacts() {
     return validNumbers;
   };
 
+  // Edit phone validation (accepts numbers with country codes, 9-12 digits)
+  const validateEditPhoneNumber = (phone: string): string => {
+    if (!phone.trim()) return 'Phone number is required';
+    
+    // Must start with country code
+    if (!phone.startsWith('+')) {
+      return 'Phone number must start with country code (e.g., +91, +1, +44)';
+    }
+    
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+    const match = cleanPhone.match(/^\+(\d{1,4})(\d{9,12})$/);
+    if (!match) {
+      return 'Invalid format. Use: +[country code][9-12 digits]';
+    }
+    
+    const phoneNumber = match[2];
+    if (phoneNumber.length < 9 || phoneNumber.length > 12) {
+      return `Phone number must be 9-12 digits (found ${phoneNumber.length})`;
+    }
+    
+    return '';
+  };
+
   const handleAddContact = () => {
     if (addMode === 'single') {
       const nameError = validateName(newContact.name);
@@ -354,6 +407,32 @@ export default function GroupContacts() {
         });
       }
     }
+  };
+
+  const handleEditContact = (contact: ContactGroupMember) => {
+    setEditingContact(contact);
+    setEditPhoneNumber(contact.phoneNumber);
+    setEditPhoneError('');
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = () => {
+    const error = validateEditPhoneNumber(editPhoneNumber);
+    setEditPhoneError(error);
+    
+    if (!error && editingContact) {
+      editContactMutation.mutate({
+        memberId: editingContact.id,
+        phoneNumber: editPhoneNumber.trim()
+      });
+    }
+  };
+
+  const handleEditDialogClose = () => {
+    setShowEditDialog(false);
+    setEditingContact(null);
+    setEditPhoneNumber('');
+    setEditPhoneError('');
   };
 
   const handleDialogClose = () => {
@@ -560,7 +639,7 @@ export default function GroupContacts() {
                 <div className="col-span-1">ID</div>
                 <div className="col-span-4">NAME</div>
                 <div className="col-span-5">PHONE NUMBER</div>
-                <div className="col-span-1">STATUS</div>
+                <div className="col-span-1">EDIT</div>
               </div>
 
               {/* Table Rows */}
@@ -590,12 +669,14 @@ export default function GroupContacts() {
                       {member.phoneNumber}
                     </div>
                     <div className="col-span-1 flex items-center justify-center">
-                      <Badge 
-                        variant={member.status === 'valid' ? 'default' : 'secondary'}
-                        className="text-xs"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditContact(member)}
+                        className="h-8 w-8 p-0 hover:bg-primary/10"
                       >
-                        {member.status}
-                      </Badge>
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -804,6 +885,69 @@ Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
                   </>
                 ) : (
                   <span>{addMode === 'single' ? 'Add Contact' : 'Add Numbers'}</span>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Contact Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={handleEditDialogClose}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Contact</DialogTitle>
+              <DialogDescription>
+                Update the phone number for this contact. Format: +[country code][9-12 digits]
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="editName">Name</Label>
+                <Input
+                  id="editName"
+                  value={editingContact?.name || 'No name'}
+                  disabled
+                  className="bg-muted/50"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="editPhoneNumber">Phone Number</Label>
+                <Input
+                  id="editPhoneNumber"
+                  placeholder="Enter phone number with country code (e.g., +919876543210)"
+                  value={editPhoneNumber}
+                  onChange={(e) => {
+                    setEditPhoneNumber(e.target.value);
+                    if (editPhoneError) {
+                      setEditPhoneError(validateEditPhoneNumber(e.target.value));
+                    }
+                  }}
+                  className={editPhoneError ? 'border-red-500' : ''}
+                />
+                {editPhoneError && (
+                  <p className="text-sm text-red-500">{editPhoneError}</p>
+                )}
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={handleEditDialogClose}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveEdit}
+                disabled={editContactMutation.isPending}
+                className="flex items-center space-x-2"
+              >
+                {editContactMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save</span>
                 )}
               </Button>
             </DialogFooter>
