@@ -1215,7 +1215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/contact-groups/:groupId/members/:memberId", async (req, res) => {
     try {
       const { groupId, memberId } = req.params;
-      const { phoneNumber } = req.body;
+      const { phoneNumber, name } = req.body;
 
       if (!phoneNumber) {
         return res.status(400).json({ error: "Phone number is required" });
@@ -1237,6 +1237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the member
       const updatedMember = await storage.updateContactGroupMember(memberId, {
         phoneNumber,
+        name: name || null,
         status: "valid"
       });
 

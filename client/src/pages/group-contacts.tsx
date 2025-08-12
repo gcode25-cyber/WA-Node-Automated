@@ -223,12 +223,12 @@ export default function GroupContacts() {
 
   // Edit contact mutation
   const editContactMutation = useMutation({
-    mutationFn: (data: { memberId: string; phoneNumber: string }) =>
-      apiRequest(`/api/contact-groups/${groupId}/members/${data.memberId}`, "PATCH", { phoneNumber: data.phoneNumber }),
+    mutationFn: (data: { memberId: string; phoneNumber: string; name?: string | null }) =>
+      apiRequest(`/api/contact-groups/${groupId}/members/${data.memberId}`, "PATCH", { phoneNumber: data.phoneNumber, name: data.name }),
     onSuccess: () => {
       toast({
-        title: "Contact Updated",
-        description: "Phone number updated successfully",
+        title: "Contact Updated", 
+        description: "Contact information updated successfully",
       });
       setShowEditDialog(false);
       setEditingContact(null);
@@ -423,7 +423,8 @@ export default function GroupContacts() {
     if (!error && editingContact) {
       editContactMutation.mutate({
         memberId: editingContact.id,
-        phoneNumber: editPhoneNumber.trim()
+        phoneNumber: editPhoneNumber.trim(),
+        name: editingContact.name?.trim() || null
       });
     }
   };
@@ -757,6 +758,12 @@ export default function GroupContacts() {
                           setValidationErrors(prev => ({ ...prev, name: validateName(e.target.value) }));
                         }
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          document.getElementById('phoneNumber')?.focus();
+                        }
+                      }}
                       className={validationErrors.name ? 'border-red-500' : ''}
                     />
                     {validationErrors.name && (
@@ -815,6 +822,12 @@ export default function GroupContacts() {
                             setValidationErrors(prev => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
                           }
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddContact();
+                          }
+                        }}
                         maxLength={selectedCountry.maxDigits}
                         className={`flex-1 ${validationErrors.phoneNumber ? 'border-red-500' : ''}`}
                       />
@@ -837,7 +850,9 @@ export default function GroupContacts() {
 +33123456789
 
 Format: +[country code][9-12 digits]
-Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
+Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx
+
+Press Ctrl+Enter to save`}
                     value={multipleNumbers}
                     onChange={(e) => {
                       setMultipleNumbers(e.target.value);
@@ -845,6 +860,12 @@ Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
                       if (multipleNumbersErrors.length > 0) {
                         const newErrors = validateMultiplePhoneNumbers(e.target.value);
                         setMultipleNumbersErrors(newErrors);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        handleAddContact();
                       }
                     }}
                     className={`min-h-[200px] font-mono text-sm ${multipleNumbersErrors.length > 0 ? 'border-red-500' : ''}`}
@@ -897,7 +918,7 @@ Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
             <DialogHeader>
               <DialogTitle>Edit Contact</DialogTitle>
               <DialogDescription>
-                Update the phone number for this contact. Format: +[country code][9-12 digits]
+                Update the contact name and phone number. Format: +[country code][9-12 digits]
               </DialogDescription>
             </DialogHeader>
             
@@ -906,9 +927,15 @@ Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
                 <Label htmlFor="editName">Name</Label>
                 <Input
                   id="editName"
-                  value={editingContact?.name || 'No name'}
-                  disabled
-                  className="bg-muted/50"
+                  placeholder="Enter contact name (optional)"
+                  value={editingContact?.name || ''}
+                  onChange={(e) => setEditingContact(prev => prev ? { ...prev, name: e.target.value } : prev)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      document.getElementById('editPhoneNumber')?.focus();
+                    }
+                  }}
                 />
               </div>
               
@@ -922,6 +949,12 @@ Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
                     setEditPhoneNumber(e.target.value);
                     if (editPhoneError) {
                       setEditPhoneError(validateEditPhoneNumber(e.target.value));
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveEdit();
                     }
                   }}
                   className={editPhoneError ? 'border-red-500' : ''}
