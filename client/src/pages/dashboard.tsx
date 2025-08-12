@@ -114,10 +114,10 @@ export default function Dashboard() {
   
   // Navigation states
   const [selectedFeature, setSelectedFeature] = useState<'whatsapp' | 'rcs'>('whatsapp');
-  const [selectedModule, setSelectedModule] = useState(moduleFromUrl || 'send-message');
+  const [selectedModule, setSelectedModule] = useState(moduleFromUrl || 'account');
   
   // Account panel state
-  const [showAccountView, setShowAccountView] = useState(false);
+  const [showAccountView, setShowAccountView] = useState(true);
   
   // Form states
   const [countryCode, setCountryCode] = useState("+91");
