@@ -196,10 +196,11 @@ export default function Dashboard() {
   });
 
   // Fetch QR code when needed
-  const { data: qrData } = useQuery<{qr?: string | null}>({
+  const { data: qrData, refetch: refetchQR } = useQuery<{qr?: string | null}>({
     queryKey: ['/api/get-qr'],
-    enabled: showQRCode && !sessionInfo,
-    refetchInterval: showQRCode && !sessionInfo ? 5000 : false,
+    enabled: showQRCode, // Only depend on showQRCode state
+    refetchInterval: showQRCode ? 5000 : false,
+    retry: 3,
   });
 
   // Fetch contact groups
@@ -351,8 +352,13 @@ export default function Dashboard() {
     const handleWebSocketMessage = (message: WebSocketMessage) => {
       switch (message.type) {
         case 'qr':
-          // Invalidate QR-related queries to fetch new QR
+          // Show QR section and invalidate QR-related queries to fetch new QR
+          setShowQRCode(true);
           queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+          // Also trigger manual refetch to ensure QR displays immediately
+          setTimeout(() => {
+            refetchQR();
+          }, 1000);
           break;
         case 'connected':
           // Invalidate session info when connected and refresh data
@@ -1045,13 +1051,24 @@ export default function Dashboard() {
   const logoutMutation = useMutation({
     mutationFn: () => apiRequest('/api/logout', 'POST'),
     onSuccess: () => {
-      // Show QR code and refresh data
+      // Show QR code immediately and refresh data
       setShowQRCode(true);
-      queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
+      
+      // Clear session data from cache
+      queryClient.setQueryData(['/api/session-info'], null);
+      
+      // Force refresh QR and other data
       queryClient.invalidateQueries({ queryKey: ['/api/get-qr'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/session-info'] });
       queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+      
+      // Manually trigger QR fetch after a short delay
+      setTimeout(() => {
+        refetchQR();
+      }, 2000);
+      
       toast({
         title: "Logged Out",
         description: "Successfully logged out from WhatsApp. Scan QR to reconnect.",
@@ -1195,15 +1212,24 @@ export default function Dashboard() {
           )}
           
           {/* QR Code Section */}
-          {showQRCode && !sessionInfo && qrData?.qr && (
+          {showQRCode && !sessionInfo && (
             <div className="px-3 py-4 space-y-4">
-              <div className="bg-white p-4 rounded-lg border flex justify-center">
-                <img
-                  src={qrData.qr.startsWith('data:') ? qrData.qr : `data:image/png;base64,${qrData.qr}`}
-                  alt="QR Code for WhatsApp Authentication"
-                  className="w-48 h-48 rounded"
-                />
-              </div>
+              {qrData?.qr ? (
+                <div className="bg-white p-4 rounded-lg border flex justify-center">
+                  <img
+                    src={qrData.qr.startsWith('data:') ? qrData.qr : `data:image/png;base64,${qrData.qr}`}
+                    alt="QR Code for WhatsApp Authentication"
+                    className="w-48 h-48 rounded"
+                  />
+                </div>
+              ) : (
+                <div className="bg-white p-8 rounded-lg border flex justify-center items-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-600">Generating QR Code...</p>
+                  </div>
+                </div>
+              )}
               
               {/* WhatsApp and RCS buttons */}
               <div className="space-y-2">
