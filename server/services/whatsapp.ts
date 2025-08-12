@@ -138,7 +138,6 @@ export class WhatsAppService {
         }),
         puppeteer: {
           headless: true,
-          executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
           args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -166,7 +165,10 @@ export class WhatsAppService {
             '--disable-default-apps',
             '--disable-component-extensions-with-background-pages',
             '--force-single-process-tabs',
-            `--user-data-dir=./.chrome_user_data` // Use consistent directory for session persistence
+            '--single-process',
+            '--disable-process-per-site',
+            '--disable-site-isolation-trials',
+            `--user-data-dir=./.chrome_user_data_${Date.now()}` // Use unique directory to avoid conflicts
           ],
           handleSIGINT: false,
           handleSIGTERM: false,
