@@ -116,6 +116,9 @@ export default function Dashboard() {
   const [selectedFeature, setSelectedFeature] = useState<'whatsapp' | 'rcs'>('whatsapp');
   const [selectedModule, setSelectedModule] = useState(moduleFromUrl || 'send-message');
   
+  // Account panel state
+  const [showAccountView, setShowAccountView] = useState(false);
+  
   // Form states
   const [countryCode, setCountryCode] = useState("+91");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -1054,6 +1057,10 @@ export default function Dashboard() {
       // Show QR code immediately and refresh data
       setShowQRCode(true);
       
+      // Navigate to account view to show QR code
+      setSelectedModule('account');
+      setShowAccountView(true);
+      
       // Clear session data from cache
       queryClient.setQueryData(['/api/session-info'], null);
       
@@ -1174,7 +1181,14 @@ export default function Dashboard() {
       <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
+          <div 
+            className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors cursor-pointer"
+            onClick={() => {
+              setShowAccountView(true);
+              setSelectedModule('account');
+            }}
+            data-testid="button-account-panel"
+          >
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
               {sessionInfo?.name ? (
                 <span className="text-white font-bold text-sm">
@@ -1199,63 +1213,7 @@ export default function Dashboard() {
                 </Badge>
               )}
             </div>
-            {sessionInfo && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  logoutMutation.mutate();
-                }}
-                disabled={logoutMutation.isPending}
-                className="ml-2 p-2 hover:bg-red-50 hover:text-red-600"
-                data-testid="button-logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            )}
           </div>
-          
-
-          
-          {/* QR Code Section */}
-          {!sessionInfo && (
-            <div className="px-3 py-4 space-y-4">
-              {qrData?.qr ? (
-                <div className="bg-white p-4 rounded-lg border flex justify-center">
-                  <img
-                    src={qrData.qr.startsWith('data:') ? qrData.qr : `data:image/png;base64,${qrData.qr}`}
-                    alt="QR Code for WhatsApp Authentication"
-                    className="w-48 h-48 rounded"
-                  />
-                </div>
-              ) : (
-                <div className="bg-white p-8 rounded-lg border flex justify-center items-center">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-                    <p className="text-sm text-gray-600">Generating QR Code...</p>
-                  </div>
-                </div>
-              )}
-              
-              {/* WhatsApp and RCS buttons */}
-              <div className="space-y-2">
-                <div className="flex items-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
-                  <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
-                    <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <span className="font-medium ml-3">WhatsApp</span>
-                </div>
-                
-                <div className="flex items-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
-                    <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <span className="font-medium ml-3">RCS</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
         
 
@@ -1499,6 +1457,163 @@ export default function Dashboard() {
       <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col">
         {selectedFeature === 'whatsapp' ? (
           <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Account View Module */}
+            {selectedModule === 'account' && (
+              <div className="p-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>WhatsApp Account</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your WhatsApp connection and account settings
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {sessionInfo ? (
+                      /* Connected Account View */
+                      <div className="space-y-6">
+                        {/* Account Info */}
+                        <div className="flex items-center space-x-4 p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                            {sessionInfo.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-semibold text-green-900 dark:text-green-100">
+                              {sessionInfo.name}
+                            </h3>
+                            <div className="flex items-center text-green-700 dark:text-green-300 mt-1">
+                              <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                              <span className="text-sm">Connected</span>
+                            </div>
+                            {sessionInfo.loginTime && (
+                              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                                Connected: {new Date(sessionInfo.loginTime).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Account Actions */}
+                        <div className="space-y-4">
+                          <h4 className="text-lg font-medium">Account Actions</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Logout Button */}
+                            <Button 
+                              variant="destructive" 
+                              onClick={() => logoutMutation.mutate()}
+                              disabled={logoutMutation.isPending}
+                              className="flex items-center space-x-2"
+                              data-testid="button-logout-main"
+                            >
+                              {logoutMutation.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <span>Logging out...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <LogOut className="h-4 w-4" />
+                                  <span>Logout</span>
+                                </>
+                              )}
+                            </Button>
+                            
+                            {/* Additional actions can be added here */}
+                            <Button 
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedModule('send-message');
+                                setShowAccountView(false);
+                              }}
+                              className="flex items-center space-x-2"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                              <span>Send Message</span>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* QR Code View for Connection */
+                      <div className="space-y-6">
+                        <div className="text-center">
+                          <h3 className="text-lg font-semibold mb-2">Connect Your WhatsApp</h3>
+                          <p className="text-muted-foreground mb-6">
+                            Scan the QR code below with your WhatsApp mobile app to connect your account.
+                          </p>
+                        </div>
+
+                        {/* QR Code Display */}
+                        <div className="flex justify-center">
+                          {qrData?.qr ? (
+                            <div className="bg-white p-8 rounded-2xl shadow-xl border">
+                              <img
+                                src={qrData.qr.startsWith('data:') ? qrData.qr : `data:image/png;base64,${qrData.qr}`}
+                                alt="QR Code for WhatsApp Authentication"
+                                className="w-80 h-80 mx-auto rounded-xl"
+                                loading="lazy"
+                              />
+                            </div>
+                          ) : (
+                            <div className="bg-white p-8 rounded-2xl shadow-xl border flex justify-center items-center w-96 h-96">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                                <p className="text-lg text-muted-foreground font-medium">Generating QR Code...</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Connection Status */}
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-lg text-muted-foreground font-medium">QR Code Active</span>
+                        </div>
+
+                        {/* WhatsApp and RCS buttons */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                          <div className="flex items-center p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+                            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+                              <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            </div>
+                            <span className="font-medium ml-3">WhatsApp</span>
+                          </div>
+                          
+                          <div className="flex items-center p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+                              <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <span className="font-medium ml-3">RCS</span>
+                          </div>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">How to connect:</h4>
+                          <ol className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+                            <li className="flex items-start">
+                              <span className="font-medium mr-2">1.</span>
+                              Open WhatsApp on your phone
+                            </li>
+                            <li className="flex items-start">
+                              <span className="font-medium mr-2">2.</span>
+                              Tap Menu (⋮) or Settings and select Linked Devices
+                            </li>
+                            <li className="flex items-start">
+                              <span className="font-medium mr-2">3.</span>
+                              Tap "Link a Device" and scan this QR code
+                            </li>
+                          </ol>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Send Message Module */}
             {selectedModule === 'send-message' && (
               <div className="p-6">
