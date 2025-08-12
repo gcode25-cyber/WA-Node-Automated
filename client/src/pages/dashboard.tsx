@@ -1185,10 +1185,19 @@ export default function Dashboard() {
               )}
             </div>
             <div className="flex-1 text-center ml-3">
-              <Badge variant={sessionInfo ? "default" : "secondary"} className="text-sm px-3 py-1">
-                <div className={`w-2 h-2 rounded-full mr-2 ${sessionInfo ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
-                <span className="whitespace-nowrap">{sessionInfo ? "Connected" : "Not Connected"}</span>
-              </Badge>
+              {sessionInfo ? (
+                <div className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium max-w-full">
+                  <div className="flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white mr-2 flex-shrink-0"></div>
+                    <span className="truncate break-words">{sessionInfo.name}</span>
+                  </div>
+                </div>
+              ) : (
+                <Badge variant="secondary" className="text-sm px-3 py-1">
+                  <div className="w-2 h-2 rounded-full mr-2 bg-gray-400"></div>
+                  <span className="whitespace-nowrap">Not Connected</span>
+                </Badge>
+              )}
             </div>
             {sessionInfo && (
               <Button 
@@ -1207,12 +1216,7 @@ export default function Dashboard() {
             )}
           </div>
           
-          {/* Account Name */}
-          {sessionInfo && (
-            <div className="px-3 py-2">
-              <h3 className="font-medium text-gray-900 dark:text-white">{sessionInfo.name}</h3>
-            </div>
-          )}
+
           
           {/* QR Code Section */}
           {!sessionInfo && (
