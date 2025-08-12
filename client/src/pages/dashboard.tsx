@@ -2960,7 +2960,7 @@ export default function Dashboard() {
               )}
 
             {/* Placeholder for other modules */}
-            {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups'].includes(selectedModule) && (
+            {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups', 'account'].includes(selectedModule) && (
               <div className="p-6">
                 <Card>
                   <CardHeader>
