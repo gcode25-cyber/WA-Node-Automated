@@ -547,8 +547,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const contacts = await whatsappService.getContacts();
-      // Return all contacts without deduplication to preserve multiple numbers per person
-      res.json(contacts);
+      
+      // Filter out invalid phone numbers and apply deduplication
+      const validContacts = contacts.filter(contact => {
+        // Apply the same validation as the helper function
+        return isValidPhoneNumber(contact.number || contact.id);
+      });
+
+      // Apply deduplication to clean up duplicate contacts
+      const deduplicatedContacts = deduplicateContacts(validContacts);
+      
+      // Sort contacts alphabetically by name for consistent ordering
+      deduplicatedContacts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      
+      res.json(deduplicatedContacts);
     } catch (error: any) {
       console.error("Get contacts error:", error);
       res.status(500).json({ error: error.message || "Failed to get contacts" });

@@ -1,11 +1,14 @@
-2025/08/12-04:58:49.006 45c Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/08/12-04:58:49.006 45c Recovering log #119
-2025/08/12-04:58:49.013 45c Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000119.log 
-2025/08/12-04:58:50.845 45b Level-0 table #124: started
-2025/08/12-04:58:50.946 45b Level-0 table #124: 234860 bytes OK
-2025/08/12-04:58:50.956 45b Delete type=0 #119
-2025/08/12-04:58:50.957 45b Manual compaction at level-0 from '\x00/\x00\x00\x00' @ 72057594037927935 : 1 .. '\x000\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/08/12-04:58:53.625 464 Compacting 1@1 + 1@2 files
-2025/08/12-04:58:53.815 464 Generated table #125@1: 49784 keys, 2121767 bytes
-2025/08/12-04:58:53.820 464 Compacted 1@1 + 1@2 files => 2121767 bytes
-2025/08/12-04:58:53.833 464 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-05:12:02.627 b43 Reusing MANIFEST /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/08/12-05:12:02.627 b43 Recovering log #127
+2025/08/12-05:12:02.647 b43 Reusing old log /home/runner/workspace/.chrome_user_data/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000127.log 
+2025/08/12-05:12:04.034 b4c Level-0 table #132: started
+2025/08/12-05:12:04.062 b4c Level-0 table #132: 453015 bytes OK
+2025/08/12-05:12:04.077 b4c Delete type=0 #127
+2025/08/12-05:12:04.080 b4c Manual compaction at level-0 from '\x001\x00\x00\x00' @ 72057594037927935 : 1 .. '\x002\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/12-05:12:05.880 b44 Compacting 1@1 + 1@2 files
+2025/08/12-05:12:06.018 b44 Generated table #133@1: 52605 keys, 2215943 bytes
+2025/08/12-05:12:06.024 b44 Generated table #134@1: 400 keys, 13713 bytes
+2025/08/12-05:12:06.025 b44 Compacted 1@1 + 1@2 files => 2229656 bytes
+2025/08/12-05:12:06.044 b44 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/12-05:12:06.045 b44 Delete type=2 #129
+2025/08/12-05:12:06.045 b44 Delete type=2 #132

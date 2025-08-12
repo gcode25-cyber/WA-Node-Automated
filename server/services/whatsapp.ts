@@ -1016,8 +1016,18 @@ export class WhatsAppService {
           const isPhoneNumberOnly = msg.body && /^[\d@c.us]+$/.test(msg.body.replace(/\s/g, ''));
           const isEmpty = !msg.body || msg.body.trim() === '';
           
-          // Keep real chat messages, media messages, and system messages with meaningful content
-          return !isSystemMessage && !isPhoneNumberOnly && !isEmpty;
+          // Enhanced media detection for filtering
+          const hasMediaContent = msg.hasMedia || 
+                                ['image', 'video', 'audio', 'ptt', 'document', 'sticker'].includes(msg.type) ||
+                                msg._data?.type === 'media' ||
+                                msg._data?.mimetype ||
+                                msg._data?.isMedia;
+
+          // Remove debug logging to reduce console noise
+          
+          // Keep real chat messages, media messages (even with empty body), and system messages with meaningful content
+          // Media messages should be kept even if they have empty body
+          return !isSystemMessage && !isPhoneNumberOnly && (!isEmpty || hasMediaContent);
         })
         .map((msg: any) => {
           // Enhanced contact name resolution for group messages
@@ -1044,16 +1054,25 @@ export class WhatsAppService {
             }
           }
 
+          // Better media detection - check multiple properties
+          const hasMedia = msg.hasMedia || 
+                           ['image', 'video', 'audio', 'ptt', 'document', 'sticker'].includes(msg.type) ||
+                           msg._data?.type === 'media' ||
+                           msg._data?.mimetype ||
+                           msg._data?.isMedia;
+
+          // Media detection working properly
+
           return {
             id: msg.id?.id || Date.now().toString(),
-            body: msg.body || (msg.hasMedia ? '[Media]' : ''),
+            body: msg.body || (hasMedia ? '[Media]' : ''),
             timestamp: msg.timestamp || Date.now(),
             fromMe: msg.fromMe || false,
             type: msg.type || 'chat',
             author: authorName,
-            hasMedia: msg.hasMedia || false,
-            mediaUrl: msg.hasMedia ? `/api/media/${msg.id?.id}` : undefined,
-            fileName: msg.hasMedia && msg._data?.filename ? msg._data.filename : undefined
+            hasMedia: hasMedia,
+            mediaUrl: hasMedia ? `/api/media/${msg.id?.id}` : undefined,
+            fileName: hasMedia && msg._data?.filename ? msg._data.filename : undefined
           };
         });
 
