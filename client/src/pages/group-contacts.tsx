@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Search, Download, Trash2, Upload, CheckCircle, Loader2, Plus, UserPlus, Users, FileText } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
@@ -32,6 +33,35 @@ interface ContactGroup {
   createdAt: string;
 }
 
+// Country codes with validation rules
+const countryData = [
+  { code: "+91", country: "India", flag: "🇮🇳", minDigits: 10, maxDigits: 10 },
+  { code: "+1", country: "USA/Canada", flag: "🇺🇸", minDigits: 10, maxDigits: 10 },
+  { code: "+44", country: "UK", flag: "🇬🇧", minDigits: 10, maxDigits: 11 },
+  { code: "+49", country: "Germany", flag: "🇩🇪", minDigits: 10, maxDigits: 11 },
+  { code: "+33", country: "France", flag: "🇫🇷", minDigits: 9, maxDigits: 9 },
+  { code: "+61", country: "Australia", flag: "🇦🇺", minDigits: 9, maxDigits: 10 },
+  { code: "+55", country: "Brazil", flag: "🇧🇷", minDigits: 10, maxDigits: 11 },
+  { code: "+86", country: "China", flag: "🇨🇳", minDigits: 11, maxDigits: 11 },
+  { code: "+81", country: "Japan", flag: "🇯🇵", minDigits: 10, maxDigits: 11 },
+  { code: "+82", country: "South Korea", flag: "🇰🇷", minDigits: 9, maxDigits: 10 },
+  { code: "+7", country: "Russia", flag: "🇷🇺", minDigits: 10, maxDigits: 10 },
+  { code: "+52", country: "Mexico", flag: "🇲🇽", minDigits: 10, maxDigits: 10 },
+  { code: "+62", country: "Indonesia", flag: "🇮🇩", minDigits: 10, maxDigits: 12 },
+  { code: "+92", country: "Pakistan", flag: "🇵🇰", minDigits: 10, maxDigits: 10 },
+  { code: "+880", country: "Bangladesh", flag: "🇧🇩", minDigits: 10, maxDigits: 10 },
+  { code: "+234", country: "Nigeria", flag: "🇳🇬", minDigits: 10, maxDigits: 10 },
+  { code: "+27", country: "South Africa", flag: "🇿🇦", minDigits: 9, maxDigits: 10 },
+  { code: "+90", country: "Turkey", flag: "🇹🇷", minDigits: 10, maxDigits: 10 },
+  { code: "+20", country: "Egypt", flag: "🇪🇬", minDigits: 10, maxDigits: 10 },
+  { code: "+63", country: "Philippines", flag: "🇵🇭", minDigits: 10, maxDigits: 10 },
+  { code: "+54", country: "Argentina", flag: "🇦🇷", minDigits: 10, maxDigits: 11 },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾", minDigits: 9, maxDigits: 10 },
+  { code: "+84", country: "Vietnam", flag: "🇻🇳", minDigits: 9, maxDigits: 10 },
+  { code: "+66", country: "Thailand", flag: "🇹🇭", minDigits: 9, maxDigits: 9 },
+  { code: "+971", country: "UAE", flag: "🇦🇪", minDigits: 9, maxDigits: 9 }
+];
+
 export default function GroupContacts() {
   const [match, params] = useRoute('/group-contacts/:groupId');
   const [, setLocation] = useLocation();
@@ -46,6 +76,7 @@ export default function GroupContacts() {
   const [multipleNumbersErrors, setMultipleNumbersErrors] = useState<string[]>([]);
   const [validationErrors, setValidationErrors] = useState({ name: '', phoneNumber: '' });
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(countryData[0]); // Default to India
   const queryClient = useQueryClient();
 
   const groupId = params?.groupId;
@@ -197,8 +228,18 @@ export default function GroupContacts() {
   const validatePhoneNumber = (phone: string): string => {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     if (!cleanPhone) return 'Phone number is required';
-    if (cleanPhone.length !== 10) return 'Phone number must be exactly 10 digits';
     if (!/^\d+$/.test(cleanPhone)) return 'Phone number must contain only numbers';
+    
+    const { minDigits, maxDigits, country } = selectedCountry;
+    if (minDigits === maxDigits) {
+      if (cleanPhone.length !== minDigits) {
+        return `Phone number must be exactly ${minDigits} digits for ${country}`;
+      }
+    } else {
+      if (cleanPhone.length < minDigits || cleanPhone.length > maxDigits) {
+        return `Phone number must be ${minDigits}-${maxDigits} digits for ${country}`;
+      }
+    }
     return '';
   };
 
@@ -260,11 +301,8 @@ export default function GroupContacts() {
       setValidationErrors({ name: nameError, phoneNumber: phoneError });
       
       if (!nameError && !phoneError) {
-        // Format phone number with country code
-        let formattedPhone = newContact.phoneNumber.replace(/[^0-9]/g, '');
-        if (formattedPhone.length === 10) {
-          formattedPhone = '+91' + formattedPhone;
-        }
+        // Format phone number with selected country code
+        const formattedPhone = selectedCountry.code + newContact.phoneNumber.replace(/[^0-9]/g, '');
         
         addContactMutation.mutate({
           name: newContact.name.trim(),
@@ -305,6 +343,7 @@ export default function GroupContacts() {
     setMultipleNumbers('');
     setMultipleNumbersErrors([]);
     setValidationErrors({ name: '', phoneNumber: '' });
+    setSelectedCountry(countryData[0]); // Reset to default country (India)
   };
 
   const handleAddModeSelect = (mode: 'single' | 'multiple') => {
@@ -624,21 +663,60 @@ export default function GroupContacts() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phoneNumber">Phone Number</Label>
-                    <Input
-                      id="phoneNumber"
-                      placeholder="Enter 10-digit phone number"
-                      value={newContact.phoneNumber}
-                      onChange={(e) => {
-                        // Only allow numbers
-                        const value = e.target.value.replace(/[^0-9]/g, '');
-                        setNewContact(prev => ({ ...prev, phoneNumber: value }));
-                        if (validationErrors.phoneNumber) {
-                          setValidationErrors(prev => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
-                        }
-                      }}
-                      maxLength={10}
-                      className={validationErrors.phoneNumber ? 'border-red-500' : ''}
-                    />
+                    <div className="flex space-x-2">
+                      {/* Country Code Dropdown */}
+                      <Select 
+                        value={selectedCountry.code} 
+                        onValueChange={(value) => {
+                          const country = countryData.find(c => c.code === value);
+                          if (country) {
+                            setSelectedCountry(country);
+                            // Clear phone number and validation errors when country changes
+                            setNewContact(prev => ({ ...prev, phoneNumber: '' }));
+                            setValidationErrors(prev => ({ ...prev, phoneNumber: '' }));
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-32 flex-shrink-0">
+                          <SelectValue>
+                            <div className="flex items-center space-x-2">
+                              <span>{selectedCountry.flag}</span>
+                              <span className="text-sm">{selectedCountry.code}</span>
+                            </div>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {countryData.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              <div className="flex items-center space-x-3">
+                                <span>{country.flag}</span>
+                                <span className="font-medium">{country.code}</span>
+                                <span className="text-sm text-muted-foreground">{country.country}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {/* Phone Number Input */}
+                      <Input
+                        id="phoneNumber"
+                        placeholder={`Enter ${selectedCountry.minDigits === selectedCountry.maxDigits 
+                          ? selectedCountry.minDigits 
+                          : `${selectedCountry.minDigits}-${selectedCountry.maxDigits}`}-digit phone number`}
+                        value={newContact.phoneNumber}
+                        onChange={(e) => {
+                          // Only allow numbers
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          setNewContact(prev => ({ ...prev, phoneNumber: value }));
+                          if (validationErrors.phoneNumber) {
+                            setValidationErrors(prev => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
+                          }
+                        }}
+                        maxLength={selectedCountry.maxDigits}
+                        className={`flex-1 ${validationErrors.phoneNumber ? 'border-red-500' : ''}`}
+                      />
+                    </div>
                     {validationErrors.phoneNumber && (
                       <p className="text-sm text-red-500">{validationErrors.phoneNumber}</p>
                     )}
