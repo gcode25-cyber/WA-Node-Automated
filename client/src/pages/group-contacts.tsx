@@ -248,20 +248,43 @@ export default function GroupContacts() {
     const lines = numbers.split('\n').filter(line => line.trim());
     
     lines.forEach((line, index) => {
-      const cleanPhone = line.trim().replace(/[\s\-\(\)\+]/g, '');
-      let validPhone = '';
+      const trimmedLine = line.trim();
       
-      // Handle different formats
-      if (cleanPhone.startsWith('91') && cleanPhone.length === 12) {
-        validPhone = cleanPhone.slice(2); // Remove country code
-      } else if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
-        validPhone = cleanPhone.slice(1); // Remove leading 0
-      } else if (cleanPhone.length === 10) {
-        validPhone = cleanPhone;
+      // Check if line contains country code (starts with + or contains country code pattern)
+      if (!trimmedLine.startsWith('+') && !/^[\d\s\-\(\)]+$/.test(trimmedLine)) {
+        errors.push(`Line ${index + 1}: "${trimmedLine}" must include a country code (e.g., +91, +1, +44)`);
+        return;
       }
       
-      if (!validPhone || validPhone.length !== 10 || !/^\d{10}$/.test(validPhone)) {
-        errors.push(`Line ${index + 1}: "${line.trim()}" is not a valid 10-digit phone number`);
+      // Extract country code and phone number
+      let countryCode = '';
+      let phoneNumber = '';
+      
+      if (trimmedLine.startsWith('+')) {
+        const parts = trimmedLine.replace(/[\s\-\(\)]/g, '');
+        const match = parts.match(/^\+(\d{1,4})(\d{9,12})$/);
+        if (match) {
+          countryCode = match[1];
+          phoneNumber = match[2];
+        } else {
+          errors.push(`Line ${index + 1}: "${trimmedLine}" invalid format. Use: +countrycode followed by 9-12 digits`);
+          return;
+        }
+      } else {
+        errors.push(`Line ${index + 1}: "${trimmedLine}" must start with country code (+91, +1, +44, etc.)`);
+        return;
+      }
+      
+      // Validate phone number length (9-12 digits)
+      if (phoneNumber.length < 9 || phoneNumber.length > 12) {
+        errors.push(`Line ${index + 1}: "${trimmedLine}" phone number must be 9-12 digits (found ${phoneNumber.length})`);
+        return;
+      }
+      
+      // Validate only digits
+      if (!/^\d+$/.test(phoneNumber)) {
+        errors.push(`Line ${index + 1}: "${trimmedLine}" phone number must contain only digits`);
+        return;
       }
     });
     
@@ -273,20 +296,18 @@ export default function GroupContacts() {
     const validNumbers: string[] = [];
     
     lines.forEach(line => {
-      const cleanPhone = line.trim().replace(/[\s\-\(\)\+]/g, '');
-      let validPhone = '';
+      const trimmedLine = line.trim();
       
-      // Handle different formats
-      if (cleanPhone.startsWith('91') && cleanPhone.length === 12) {
-        validPhone = cleanPhone.slice(2);
-      } else if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
-        validPhone = cleanPhone.slice(1);
-      } else if (cleanPhone.length === 10) {
-        validPhone = cleanPhone;
-      }
-      
-      if (validPhone && validPhone.length === 10 && /^\d{10}$/.test(validPhone)) {
-        validNumbers.push('+91' + validPhone);
+      if (trimmedLine.startsWith('+')) {
+        const cleanPhone = trimmedLine.replace(/[\s\-\(\)]/g, '');
+        const match = cleanPhone.match(/^\+(\d{1,4})(\d{9,12})$/);
+        if (match) {
+          const countryCode = match[1];
+          const phoneNumber = match[2];
+          if (phoneNumber.length >= 9 && phoneNumber.length <= 12) {
+            validNumbers.push(`+${countryCode}${phoneNumber}`);
+          }
+        }
       }
     });
     
@@ -635,7 +656,7 @@ export default function GroupContacts() {
               </DialogTitle>
               {addMode === 'multiple' && (
                 <DialogDescription>
-                  Enter phone numbers one per line. Supports formats: 9384938438, +913843294343, 913843843845
+                  Country code is mandatory! Enter phone numbers with country codes (+91, +1, +44, etc.) followed by 9-12 digits.
                 </DialogDescription>
               )}
             </DialogHeader>
@@ -727,7 +748,15 @@ export default function GroupContacts() {
                   <Label htmlFor="multipleNumbers">Phone Numbers</Label>
                   <Textarea
                     id="multipleNumbers"
-                    placeholder={`Enter phone numbers, one per line:\n9384938438\n+913843294343\n913843843845\n9123456789`}
+                    placeholder={`Country code is mandatory! Enter phone numbers with country codes, one per line:
++919384938438
++1234567890
++447123456789
++49123456789
++33123456789
+
+Format: +[country code][9-12 digits]
+Valid examples: +91xxxxxxxxxx, +1xxxxxxxxxx, +44xxxxxxxxxxx`}
                     value={multipleNumbers}
                     onChange={(e) => {
                       setMultipleNumbers(e.target.value);
@@ -740,7 +769,7 @@ export default function GroupContacts() {
                     className={`min-h-[200px] font-mono text-sm ${multipleNumbersErrors.length > 0 ? 'border-red-500' : ''}`}
                   />
                   {multipleNumbersErrors.length > 0 && (
-                    <div className="space-y-1">
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
                       {multipleNumbersErrors.map((error, index) => (
                         <p key={index} className="text-sm text-red-500">{error}</p>
                       ))}
