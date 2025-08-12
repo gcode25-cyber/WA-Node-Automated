@@ -1214,6 +1214,25 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+          
+          {/* WhatsApp and RCS buttons - Show when not connected */}
+          {!sessionInfo && (
+            <div className="px-3 py-4 space-y-2">
+              <div className="flex items-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="font-medium ml-3">WhatsApp</span>
+              </div>
+              
+              <div className="flex items-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+                  <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="font-medium ml-3">RCS</span>
+              </div>
+            </div>
+          )}
         </div>
         
 
@@ -1572,22 +1591,7 @@ export default function Dashboard() {
                           <span className="text-lg text-muted-foreground font-medium">QR Code Active</span>
                         </div>
 
-                        {/* WhatsApp and RCS buttons */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                          <div className="flex items-center p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
-                            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
-                              <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            </div>
-                            <span className="font-medium ml-3">WhatsApp</span>
-                          </div>
-                          
-                          <div className="flex items-center p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
-                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
-                              <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <span className="font-medium ml-3">RCS</span>
-                          </div>
-                        </div>
+
 
                         {/* Instructions */}
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
