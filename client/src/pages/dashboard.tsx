@@ -1495,9 +1495,23 @@ export default function Dashboard() {
               <div className="p-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>WhatsApp Account</span>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-5 w-5" />
+                        <span>WhatsApp Account</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedModule('send-message');
+                          setShowAccountView(false);
+                        }}
+                        className="h-8 w-8 p-0"
+                        data-testid="button-close-account"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </CardTitle>
                     <CardDescription>
                       Manage your WhatsApp connection and account settings
@@ -1563,7 +1577,7 @@ export default function Dashboard() {
                               className="flex items-center space-x-2"
                             >
                               <MessageSquare className="h-4 w-4" />
-                              <span>Send Message</span>
+                              <span>Go to Messaging</span>
                             </Button>
                           </div>
                         </div>

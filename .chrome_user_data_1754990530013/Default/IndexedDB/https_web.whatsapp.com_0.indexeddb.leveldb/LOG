@@ -135,3 +135,71 @@
 2025/08/12-09:22:12.785 c6e compacted to: files[ 0 0 1 0 0 0 0 ]
 2025/08/12-09:22:12.786 c6e Delete type=2 #37
 2025/08/12-09:22:12.786 c6e Manual compaction at level-1 from '\x00\x10\x00\x00\x05' @ 1710 : 0 .. '\x00\x11\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/12-09:24:02.665 e33 Level-0 table #40: started
+2025/08/12-09:24:02.734 e33 Level-0 table #40: 1057394 bytes OK
+2025/08/12-09:24:02.748 e33 Delete type=2 #35
+2025/08/12-09:24:02.748 e33 Delete type=0 #36
+2025/08/12-09:24:03.637 e2a Compacting 1@1 + 1@2 files
+2025/08/12-09:24:03.717 e2a Generated table #41@1: 14897 keys, 521530 bytes
+2025/08/12-09:24:03.717 e2a Compacted 1@1 + 1@2 files => 521530 bytes
+2025/08/12-09:24:03.723 e2a compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-09:24:03.724 e2a Delete type=2 #38
+2025/08/12-09:24:03.724 e2a Delete type=2 #40
+2025/08/12-09:24:06.137 e33 Level-0 table #43: started
+2025/08/12-09:24:06.184 e33 Level-0 table #43: 1106174 bytes OK
+2025/08/12-09:24:06.191 e33 Delete type=0 #39
+2025/08/12-09:24:06.267 e31 Compacting 1@1 + 1@2 files
+2025/08/12-09:24:06.336 e31 Generated table #44@1: 23149 keys, 1001880 bytes
+2025/08/12-09:24:06.336 e31 Compacted 1@1 + 1@2 files => 1001880 bytes
+2025/08/12-09:24:06.345 e31 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-09:24:07.953 c6e Level-0 table #46: started
+2025/08/12-09:24:08.052 c6e Level-0 table #46: 1088738 bytes OK
+2025/08/12-09:24:08.063 c6e Delete type=2 #41
+2025/08/12-09:24:08.063 c6e Delete type=0 #42
+2025/08/12-09:24:08.063 c6e Delete type=2 #43
+2025/08/12-09:24:08.071 e33 Compacting 1@1 + 1@2 files
+2025/08/12-09:24:08.179 e33 Generated table #47@1: 35533 keys, 1579843 bytes
+2025/08/12-09:24:08.179 e33 Compacted 1@1 + 1@2 files => 1579843 bytes
+2025/08/12-09:24:08.184 e33 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-09:24:09.400 e34 Level-0 table #49: started
+2025/08/12-09:24:09.446 e34 Level-0 table #49: 1058032 bytes OK
+2025/08/12-09:24:09.452 e34 Delete type=2 #44
+2025/08/12-09:24:09.452 e34 Delete type=0 #45
+2025/08/12-09:24:09.452 e34 Delete type=2 #46
+2025/08/12-09:24:09.547 c45 Compacting 1@1 + 1@2 files
+2025/08/12-09:24:09.682 c45 Generated table #50@1: 54315 keys, 2211672 bytes
+2025/08/12-09:24:09.691 c45 Generated table #51@1: 1343 keys, 49313 bytes
+2025/08/12-09:24:09.691 c45 Compacted 1@1 + 1@2 files => 2260985 bytes
+2025/08/12-09:24:09.696 c45 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/12-09:24:11.027 c45 Level-0 table #53: started
+2025/08/12-09:24:11.691 c45 Level-0 table #53: 926848 bytes OK
+2025/08/12-09:24:11.713 c45 Delete type=2 #47
+2025/08/12-09:24:11.713 c45 Delete type=0 #48
+2025/08/12-09:24:11.713 c45 Delete type=2 #49
+2025/08/12-09:24:11.721 e2c Compacting 1@1 + 2@2 files
+2025/08/12-09:24:11.859 e2c Generated table #54@1: 49250 keys, 2128852 bytes
+2025/08/12-09:24:11.859 e2c Compacted 1@1 + 2@2 files => 2128852 bytes
+2025/08/12-09:24:11.865 e2c compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/08/12-09:24:11.866 e2c Delete type=2 #50
+2025/08/12-09:24:11.866 e2c Delete type=2 #51
+2025/08/12-09:24:11.866 e2c Delete type=2 #53
+2025/08/12-09:24:47.632 c45 Level-0 table #56: started
+2025/08/12-09:24:47.779 c45 Level-0 table #56: 1143730 bytes OK
+2025/08/12-09:24:47.798 c45 Delete type=0 #52
+2025/08/12-09:24:47.804 c45 Compacting 1@1 + 1@2 files
+2025/08/12-09:24:47.911 c45 Generated table #57@1: 48954 keys, 2209002 bytes
+2025/08/12-09:24:47.927 c45 Generated table #58@1: 2022 keys, 113794 bytes
+2025/08/12-09:24:47.927 c45 Compacted 1@1 + 1@2 files => 2322796 bytes
+2025/08/12-09:24:47.941 c45 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/12-09:24:47.941 c45 Delete type=2 #54
+2025/08/12-09:24:47.942 c45 Delete type=2 #56
+2025/08/12-09:24:49.866 e34 Level-0 table #60: started
+2025/08/12-09:24:49.905 e34 Level-0 table #60: 1076145 bytes OK
+2025/08/12-09:24:49.912 e34 Delete type=0 #55
+2025/08/12-09:24:49.925 e53 Compacting 1@1 + 1@2 files
+2025/08/12-09:24:50.025 e53 Generated table #61@1: 48459 keys, 2208370 bytes
+2025/08/12-09:24:50.039 e53 Generated table #62@1: 5321 keys, 201329 bytes
+2025/08/12-09:24:50.039 e53 Compacted 1@1 + 1@2 files => 2409699 bytes
+2025/08/12-09:24:50.048 e53 compacted to: files[ 0 0 3 0 0 0 0 ]
+2025/08/12-09:24:50.049 e53 Delete type=2 #57
+2025/08/12-09:24:50.049 e53 Delete type=2 #60
