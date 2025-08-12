@@ -1495,23 +1495,9 @@ export default function Dashboard() {
               <div className="p-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <User className="h-5 w-5" />
-                        <span>WhatsApp Account</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedModule('send-message');
-                          setShowAccountView(false);
-                        }}
-                        className="h-8 w-8 p-0"
-                        data-testid="button-close-account"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>WhatsApp Account</span>
                     </CardTitle>
                     <CardDescription>
                       Manage your WhatsApp connection and account settings
@@ -1522,64 +1508,46 @@ export default function Dashboard() {
                       /* Connected Account View */
                       <div className="space-y-6">
                         {/* Account Info */}
-                        <div className="flex items-center space-x-4 p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                            {sessionInfo.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-xl font-semibold text-green-900 dark:text-green-100">
-                              {sessionInfo.name}
-                            </h3>
-                            <div className="flex items-center text-green-700 dark:text-green-300 mt-1">
-                              <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                              <span className="text-sm">Connected</span>
+                        <div className="flex items-center justify-between p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                              {sessionInfo.name.charAt(0).toUpperCase()}
                             </div>
-                            {sessionInfo.loginTime && (
-                              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                                Connected: {new Date(sessionInfo.loginTime).toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Account Actions */}
-                        <div className="space-y-4">
-                          <h4 className="text-lg font-medium">Account Actions</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Logout Button */}
-                            <Button 
-                              variant="destructive" 
-                              onClick={() => logoutMutation.mutate()}
-                              disabled={logoutMutation.isPending}
-                              className="flex items-center space-x-2"
-                              data-testid="button-logout-main"
-                            >
-                              {logoutMutation.isPending ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                  <span>Logging out...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <LogOut className="h-4 w-4" />
-                                  <span>Logout</span>
-                                </>
+                            <div className="flex-1">
+                              <h3 className="text-xl font-semibold text-green-900 dark:text-green-100">
+                                {sessionInfo.name}
+                              </h3>
+                              <div className="flex items-center text-green-700 dark:text-green-300 mt-1">
+                                <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                                <span className="text-sm">Connected</span>
+                              </div>
+                              {sessionInfo.loginTime && (
+                                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                                  Connected: {new Date(sessionInfo.loginTime).toLocaleString()}
+                                </p>
                               )}
-                            </Button>
-                            
-                            {/* Additional actions can be added here */}
-                            <Button 
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedModule('send-message');
-                                setShowAccountView(false);
-                              }}
-                              className="flex items-center space-x-2"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                              <span>Go to Messaging</span>
-                            </Button>
+                            </div>
                           </div>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => logoutMutation.mutate()}
+                            disabled={logoutMutation.isPending}
+                            className="flex items-center space-x-2"
+                            data-testid="button-logout-main"
+                          >
+                            {logoutMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Logging out...</span>
+                              </>
+                            ) : (
+                              <>
+                                <LogOut className="h-4 w-4" />
+                                <span>Logout</span>
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </div>
                     ) : (
@@ -3016,21 +2984,13 @@ export default function Dashboard() {
           </div>
         ) : selectedFeature === 'rcs' ? (
           <div className="p-6">
-            <Card>
-                <CardHeader>
-                  <CardTitle>RCS Messaging</CardTitle>
-                  <CardDescription>Rich Communication Services (Coming Soon)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center p-8">
-                    <Smartphone className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">RCS Features</h3>
-                    <p className="text-muted-foreground">
-                      RCS messaging features will be available in a future update, offering rich messaging capabilities.
-                    </p>
-                  </div>
-                </CardContent>
-            </Card>
+            <div className="text-center p-8">
+              <Smartphone className="h-12 w-12 text-purple-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">RCS Features</h3>
+              <p className="text-muted-foreground">
+                RCS messaging features will be available in a future update.
+              </p>
+            </div>
           </div>
         ) : null}
         </div>
