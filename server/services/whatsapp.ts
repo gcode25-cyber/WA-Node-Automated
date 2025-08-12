@@ -44,8 +44,18 @@ export class WhatsAppService {
 
   private async initializeClient() {
     if (this.isInitializing) {
-      console.log('Client already initializing, skipping...');
-      return;
+      console.log('⚠️ Client already initializing, waiting for completion...');
+      // Wait for current initialization to complete or timeout
+      let attempts = 0;
+      while (this.isInitializing && attempts < 10) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+      }
+      
+      if (this.isInitializing) {
+        console.log('🔄 Force resetting initialization flag after timeout');
+        this.isInitializing = false;
+      }
     }
     
     // Additional safety check for existing client
@@ -196,8 +206,21 @@ export class WhatsAppService {
           });
           
         } catch (qrError: any) {
-          console.error('❌ QR generation failed:', qrError.message);
-          this.qrCode = null;
+          console.error('❌ QR generation with qr-image failed:', qrError.message);
+          
+          // Fallback: Try with QRCode library
+          QRCode.toDataURL(qr)
+            .then((qrDataURL: string) => {
+              this.qrCode = qrDataURL;
+              console.log('✅ QR Code generated successfully with fallback method');
+              
+              // Broadcast QR code to all connected WebSocket clients
+              this.broadcastToClients('qr', { qr: qrDataURL });
+            })
+            .catch((fallbackError: any) => {
+              console.error('❌ Fallback QR generation also failed:', fallbackError.message);
+              this.qrCode = null;
+            });
         }
       });
 
@@ -332,7 +355,23 @@ export class WhatsAppService {
       });
 
       console.log('✅ Starting client initialization...');
-      await this.client.initialize();
+      try {
+        await this.client.initialize();
+        console.log('🎯 Client initialization completed successfully');
+      } catch (initError: any) {
+        console.error('❌ Client initialization failed:', initError.message);
+        
+        // If initialization fails, reset and try again after delay
+        this.isInitializing = false;
+        this.client = null;
+        
+        setTimeout(() => {
+          console.log('🔄 Retrying client initialization after failure...');
+          this.initializeClient();
+        }, 5000);
+        
+        throw initError;
+      }
 
     } catch (error: any) {
       console.error('❌ WhatsApp client initialization failed:', error.message);
@@ -518,10 +557,24 @@ export class WhatsAppService {
       // Broadcast logout event to clients
       this.broadcastToClients('logout', { connected: false });
       
-      // Reinitialize with delay for proper cleanup
-      setTimeout(() => {
-        this.initializeClient();
-      }, 2000);
+      // Force a complete restart after logout to ensure QR code generation
+      setTimeout(async () => {
+        console.log('🔄 Starting fresh initialization after logout...');
+        this.isInitializing = false; // Reset flag to allow initialization
+        this.client = null; // Clear client reference
+        
+        try {
+          await this.initializeClient();
+          console.log('✅ Fresh initialization completed after logout');
+        } catch (error: any) {
+          console.error('❌ Fresh initialization failed:', error.message);
+          // Try once more with longer delay
+          setTimeout(() => {
+            this.isInitializing = false;
+            this.initializeClient();
+          }, 5000);
+        }
+      }, 4000);
       
     } catch (error: any) {
       console.error('❌ Logout failed:', error.message);
