@@ -122,7 +122,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [showQRCode, setShowQRCode] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(true); // Start with true since user is not connected
   
   // Contact Groups state
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
@@ -198,8 +198,8 @@ export default function Dashboard() {
   // Fetch QR code when needed
   const { data: qrData, refetch: refetchQR } = useQuery<{qr?: string | null}>({
     queryKey: ['/api/get-qr'],
-    enabled: showQRCode, // Only depend on showQRCode state
-    refetchInterval: showQRCode ? 5000 : false,
+    enabled: !sessionInfo, // Fetch when no session
+    refetchInterval: !sessionInfo ? 5000 : false,
     retry: 3,
   });
 
@@ -1097,10 +1097,13 @@ export default function Dashboard() {
     return () => clearInterval(autoRefreshInterval);
   }, [sessionInfo, queryClient]);
 
-  // Hide QR code when user successfully authenticates
+  // Show QR code when no session, hide when authenticated
   useEffect(() => {
     if (sessionInfo && showQRCode) {
       setShowQRCode(false);
+    } else if (!sessionInfo) {
+      // Auto-show QR when not connected
+      setShowQRCode(true);
     }
   }, [sessionInfo, showQRCode]);
 
@@ -1212,7 +1215,7 @@ export default function Dashboard() {
           )}
           
           {/* QR Code Section */}
-          {showQRCode && !sessionInfo && (
+          {!sessionInfo && (
             <div className="px-3 py-4 space-y-4">
               {qrData?.qr ? (
                 <div className="bg-white p-4 rounded-lg border flex justify-center">
@@ -1254,7 +1257,7 @@ export default function Dashboard() {
 
 
         {/* Features List - Hide when QR is showing */}
-        {!(showQRCode && !sessionInfo) && (
+        {sessionInfo && (
           <div className="flex-1 p-4 space-y-2">
             {/* WhatsApp Feature */}
             <div 
