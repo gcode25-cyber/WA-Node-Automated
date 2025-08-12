@@ -1215,78 +1215,47 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* WhatsApp and RCS buttons - Show when not connected */}
-          {!sessionInfo && (
-            <div className="px-3 py-4 space-y-2">
-              <div 
-                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedFeature === 'whatsapp' 
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' 
-                    : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
-                }`}
-                onClick={() => setSelectedFeature('whatsapp')}
-                data-testid="button-whatsapp-disconnected"
-              >
-                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </div>
-                <span className="font-medium ml-3">WhatsApp</span>
-              </div>
-              
-              <div 
-                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedFeature === 'rcs' 
-                    ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' 
-                    : 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30'
-                }`}
-                onClick={() => setSelectedFeature('rcs')}
-                data-testid="button-rcs-disconnected"
-              >
-                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
-                  <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <span className="font-medium ml-3">RCS</span>
-              </div>
-            </div>
-          )}
+
         </div>
         
 
 
-        {/* Features List - Hide when QR is showing */}
-        {sessionInfo && (
-          <div className="flex-1 p-4 space-y-2">
-            {/* WhatsApp Feature */}
-            <div 
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-                selectedFeature === 'whatsapp' 
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
-              onClick={() => setSelectedFeature('whatsapp')}
-            >
-              <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <span className="font-medium ml-3">WhatsApp</span>
+        {/* Features List - Always show */}
+        <div className="px-3 py-4 space-y-2">
+          {/* WhatsApp Feature */}
+          <div 
+            className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+              selectedFeature === 'whatsapp' 
+                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}
+            onClick={() => setSelectedFeature('whatsapp')}
+            data-testid="button-whatsapp"
+          >
+            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
-
-            {/* RCS Feature */}
-            <div 
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
-                selectedFeature === 'rcs' 
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
-              onClick={() => setSelectedFeature('rcs')}
-            >
-              <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
-                <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <span className="font-medium ml-3">RCS</span>
-            </div>
+            <span className="font-medium ml-3">WhatsApp</span>
           </div>
-        )}
+
+          {/* RCS Feature */}
+          <div 
+            className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+              selectedFeature === 'rcs' 
+                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}
+            onClick={() => setSelectedFeature('rcs')}
+            data-testid="button-rcs"
+          >
+            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+              <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </div>
+            <span className="font-medium ml-3">RCS</span>
+          </div>
+        </div>
+        
+        {/* Additional modules/options can be added here when needed */}
       </div>
 
       {/* Middle Sidebar - Modules */}
