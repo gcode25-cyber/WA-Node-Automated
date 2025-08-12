@@ -652,41 +652,7 @@ export default function Dashboard() {
     },
   });
 
-  // Delete chat mutation (for personal chats only)
-  const deleteChatMutation = useMutation({
-    mutationFn: (contactId: string) => apiRequest(`/api/chats/${contactId}`, "DELETE"),
-    onSuccess: () => {
-      toast({
-        title: "Chat Deleted",
-        description: "Chat has been deleted successfully!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-      setDeletingChatId(null);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to Delete",
-        description: error.message || "Failed to delete chat",
-        variant: "destructive",
-      });
-      setDeletingChatId(null);
-    },
-  });
 
-  // Handle delete chat
-  const handleDeleteChat = async (contactId: string) => {
-    if (!sessionInfo) {
-      toast({
-        title: "Not Connected",
-        description: "Please connect to WhatsApp first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setDeletingChatId(contactId);
-    deleteChatMutation.mutate(contactId);
-  };
 
   // Media file handler
   const handleMediaSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -2638,22 +2604,7 @@ export default function Dashboard() {
                                 >
                                   Open Chat
                                 </Button>
-                                {/* Delete button for personal chats only */}
-                                {!chat.isGroup && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleDeleteChat(chat.id)}
-                                    disabled={deletingChatId === chat.id}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                                  >
-                                    {deletingChatId === chat.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <Trash2 className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                )}
+
                               </div>
                             </div>
                           </div>
