@@ -582,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return Array.from(contactMap.values());
   };
 
-  // Get all contacts from connected WhatsApp device
+  // Get contacts with pagination support
   app.get("/api/contacts", async (req, res) => {
     try {
       // Check if WhatsApp service is ready first
@@ -591,21 +591,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(503).json({ error: "WhatsApp not connected" });
       }
 
+      // Parse pagination parameters
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50; // Default 50 contacts per page
+      const search = (req.query.search as string) || '';
+      const offset = (page - 1) * limit;
+
+      console.log(`📄 Loading contacts - Page: ${page}, Limit: ${limit}, Search: "${search}"`);
+
       const contacts = await whatsappService.getContacts();
       
-      // Filter out invalid phone numbers and apply deduplication
+      // Filter out invalid phone numbers
       const validContacts = contacts.filter(contact => {
-        // Apply the same validation as the helper function
         return isValidPhoneNumber(contact.number || contact.id);
       });
 
       // Apply deduplication to clean up duplicate contacts
       const deduplicatedContacts = deduplicateContacts(validContacts);
       
-      // Sort contacts alphabetically by name for consistent ordering
-      deduplicatedContacts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      // Apply search filter if provided
+      let filteredContacts = deduplicatedContacts;
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filteredContacts = deduplicatedContacts.filter(contact => 
+          (contact.name || '').toLowerCase().includes(searchLower) ||
+          (contact.number || contact.id).includes(search)
+        );
+      }
       
-      res.json(deduplicatedContacts);
+      // Sort contacts alphabetically by name for consistent ordering
+      filteredContacts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      
+      // Calculate pagination
+      const totalContacts = filteredContacts.length;
+      const totalPages = Math.ceil(totalContacts / limit);
+      const paginatedContacts = filteredContacts.slice(offset, offset + limit);
+      
+      console.log(`📊 Contacts loaded: ${paginatedContacts.length}/${totalContacts} (Page ${page}/${totalPages})`);
+      
+      res.json({
+        contacts: paginatedContacts,
+        pagination: {
+          page,
+          limit,
+          total: totalContacts,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      });
     } catch (error: any) {
       console.error("Get contacts error:", error);
       res.status(500).json({ error: error.message || "Failed to get contacts" });

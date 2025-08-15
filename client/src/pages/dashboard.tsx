@@ -197,7 +197,7 @@ export default function Dashboard() {
     queryKey: ['/api/session-info'],
     refetchInterval: 60000, // Reduced from 10s to 60s for better performance
     staleTime: 45000, // Consider fresh for 45 seconds
-    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   // ⚡ Fast QR code fetching with reduced polling
@@ -226,13 +226,54 @@ export default function Dashboard() {
     staleTime: Infinity, // Data is always fresh from WebSocket
   });
 
-  // Fetch contacts with real-time updates
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
-    queryKey: ['/api/contacts'],
+  // Contacts pagination state
+  const [contactsPage, setContactsPage] = useState(1);
+  const [contactsSearch, setContactsSearch] = useState('');
+  const [allContacts, setAllContacts] = useState<Contact[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  
+  // Fetch contacts with pagination for performance
+  const { data: contactsResponse, isLoading: contactsLoading, isFetching: contactsFetching } = useQuery<{
+    contacts: Contact[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }>({
+    queryKey: ['/api/contacts', contactsPage, contactsSearch],
     enabled: !!sessionInfo,
-    refetchInterval: false, // Disable automatic refetch since we use WebSocket updates
-    staleTime: Infinity, // Data is always fresh from WebSocket
+    refetchInterval: false,
+    staleTime: 30000 // Cache for 30 seconds
   });
+
+  // Handle contacts pagination response with progressive loading
+  useEffect(() => {
+    if (contactsResponse) {
+      if (contactsPage === 1) {
+        // First page - replace all contacts, show immediately
+        setAllContacts(contactsResponse.contacts);
+      } else {
+        // Additional pages - append to existing contacts, show immediately
+        setAllContacts(prev => [...prev, ...contactsResponse.contacts]);
+      }
+      setIsLoadingMore(false);
+    }
+  }, [contactsResponse, contactsPage]);
+
+  // Auto-load next page when user scrolls near bottom
+  const loadNextPage = useCallback(() => {
+    if (contactsResponse?.pagination?.hasNext && !contactsFetching && !isLoadingMore) {
+      setIsLoadingMore(true);
+      setContactsPage(prev => prev + 1);
+    }
+  }, [contactsResponse?.pagination?.hasNext, contactsFetching, isLoadingMore]);
+
+  // All contacts for compatibility with existing code
+  const contacts = allContacts;
 
   // Fetch groups with real-time updates
   const { data: groups = [], isLoading: groupsLoading } = useQuery<Group[]>({
@@ -247,7 +288,7 @@ export default function Dashboard() {
     queryKey: ['/api/bulk-campaigns'],
     enabled: selectedModule === 'bulk-messaging',
     staleTime: 30000, // Fresh for 30 seconds
-    cacheTime: 10 * 60 * 1000, // Cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     refetchInterval: selectedModule === 'bulk-messaging' ? 45000 : false, // Only refresh when viewing
     refetchIntervalInBackground: false, // Stop background refresh for performance
   });
@@ -1910,8 +1951,8 @@ export default function Dashboard() {
                           <Checkbox
                             id="select-all-contacts"
                             checked={
-                              filteredContacts.length > 0 &&
-                              selectedContacts.size === filteredContacts.length
+                              contacts.length > 0 &&
+                              selectedContacts.size === contacts.length
                             }
                             onCheckedChange={handleSelectAllContacts}
                             data-testid="checkbox-select-all-contacts"
@@ -1920,17 +1961,21 @@ export default function Dashboard() {
                             htmlFor="select-all-contacts" 
                             className="text-sm font-medium cursor-pointer"
                           >
-                            Select All ({filteredContacts.length} contacts)
+                            Select All ({contacts.length} loaded contacts)
                           </label>
                         </div>
                         
-                        {/* Search Bar */}
+                        {/* Search Bar with pagination search */}
                         <div className="relative max-w-md flex-1">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
                             placeholder="Search contacts..."
-                            value={contactSearchTerm}
-                            onChange={(e) => setContactSearchTerm(e.target.value)}
+                            value={contactsSearch}
+                            onChange={(e) => {
+                              setContactsSearch(e.target.value);
+                              setContactsPage(1); // Reset to first page on search
+                              setAllContacts([]); // Clear existing contacts
+                            }}
                             className="pl-10"
                             data-testid="input-search-contacts"
                           />
@@ -1949,12 +1994,12 @@ export default function Dashboard() {
                           Please connect to WhatsApp first to view your contacts.
                         </p>
                       </div>
-                    ) : contactsLoading ? (
+                    ) : contactsLoading && contacts.length === 0 ? (
                       <div className="text-center p-8">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-4 text-muted-foreground">Loading contacts...</p>
+                        <p className="mt-4 text-muted-foreground">Loading your contacts...</p>
                       </div>
-                    ) : contacts.length === 0 ? (
+                    ) : contacts.length === 0 && !contactsLoading ? (
                       <div className="text-center p-8">
                         <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No Contacts Found</h3>
@@ -1964,8 +2009,34 @@ export default function Dashboard() {
                       </div>
                     ) : (
                       <div className="space-y-2">
+                        {/* Progressive Loading Info */}
+                        <div className="text-xs text-muted-foreground mb-4 flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                          <span className="flex items-center">
+                            {contactsLoading && contacts.length === 0 ? (
+                              <>Loading contacts...</>
+                            ) : (
+                              <>
+                                Loaded {contacts.length}
+                                {contactsResponse?.pagination ? ` of ${contactsResponse.pagination.total}` : ''} contacts
+                                {(contactsFetching || isLoadingMore) && <span className="ml-2 flex items-center">
+                                  <div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin mr-1"></div>
+                                  Loading more...
+                                </span>}
+                              </>
+                            )}
+                          </span>
+                          {contactsResponse?.pagination?.hasNext && !contactsFetching && !isLoadingMore && (
+                            <button
+                              onClick={loadNextPage}
+                              className="text-primary hover:underline text-xs font-medium"
+                            >
+                              Load Next 50
+                            </button>
+                          )}
+                        </div>
+                        
                         {/* Contacts List */}
-                        {filteredContacts.length === 0 ? (
+                        {contacts.length === 0 ? (
                           <div className="text-center p-8">
                             <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <h3 className="text-lg font-semibold mb-2">No contacts found</h3>
@@ -1974,7 +2045,7 @@ export default function Dashboard() {
                             </p>
                           </div>
                         ) : (
-                          filteredContacts.map((contact: Contact) => (
+                          contacts.map((contact: Contact) => (
                             <div key={contact.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -2036,6 +2107,26 @@ export default function Dashboard() {
                               </div>
                             </div>
                           ))
+                        )}
+
+                        {/* Load More Button at Bottom */}
+                        {contacts.length > 0 && contactsResponse?.pagination?.hasNext && (
+                          <div className="text-center py-4">
+                            <button
+                              onClick={loadNextPage}
+                              disabled={contactsFetching || isLoadingMore}
+                              className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center mx-auto"
+                            >
+                              {contactsFetching || isLoadingMore ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                  Loading More...
+                                </>
+                              ) : (
+                                <>Load More Contacts</>
+                              )}
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
