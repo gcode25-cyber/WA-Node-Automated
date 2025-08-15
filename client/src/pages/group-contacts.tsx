@@ -512,27 +512,28 @@ export default function GroupContacts() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+      <div className="max-w-none lg:max-w-6xl mx-auto p-3 sm:p-6">
+        {/* Header - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Button
               variant="ghost"
               onClick={() => setLocation('/dashboard?module=contact-groups')}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 flex-shrink-0"
+              data-testid="button-back"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>Back</span>
+              <span className="hidden sm:inline">Back</span>
             </Button>
-            <div>
-              <h1 className="text-2xl font-bold">{group?.name}</h1>
-              <p className="text-muted-foreground">
-                {group?.totalContacts} total contacts • {selectedContacts.length} selected
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold truncate">{group?.name}</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {group?.totalContacts} total • {selectedContacts.length} selected
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2 sm:space-x-2">
             <input
               type="file"
               accept=".csv"
@@ -544,17 +545,20 @@ export default function GroupContacts() {
               variant="outline"
               onClick={() => document.getElementById('csv-import')?.click()}
               disabled={isImporting}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              data-testid="button-import-csv"
             >
               {isImporting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Importing...</span>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="hidden sm:inline">Importing...</span>
+                  <span className="sm:hidden">...</span>
                 </>
               ) : (
                 <>
-                  <Upload className="h-4 w-4" />
-                  <span>Import CSV</span>
+                  <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Import CSV</span>
+                  <span className="sm:hidden">Import</span>
                 </>
               )}
             </Button>
@@ -562,54 +566,62 @@ export default function GroupContacts() {
             <Button
               variant="outline"
               onClick={exportContacts}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              data-testid="button-export-csv"
             >
-              <Download className="h-4 w-4" />
-              <span>Export CSV</span>
+              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">Export</span>
             </Button>
 
             <Button
               variant="default"
               onClick={() => setShowAddModeDialog(true)}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              data-testid="button-add-contact"
             >
-              <UserPlus className="h-4 w-4" />
-              <span>Add Contact</span>
+              <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden lg:inline">Add Contact</span>
+              <span className="lg:hidden">Add</span>
             </Button>
             
             <Button
               variant="destructive"
               onClick={() => deleteSelectedMutation.mutate(selectedContacts)}
               disabled={selectedContacts.length === 0 || deleteSelectedMutation.isPending}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              data-testid="button-delete-selected"
             >
               {deleteSelectedMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Deleting...</span>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="hidden sm:inline">Deleting...</span>
+                  <span className="sm:hidden">...</span>
                 </>
               ) : (
                 <>
-                  <Trash2 className="h-4 w-4" />
-                  <span>Delete</span>
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden lg:inline">Delete</span>
+                  <span className="lg:hidden">Del</span>
                 </>
               )}
             </Button>
           </div>
         </div>
 
-        {/* Search */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 flex-1">
-                <div className="relative flex-1 max-w-md">
+        {/* Search - Mobile Responsive */}
+        <Card className="mb-4 sm:mb-6">
+          <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
+                <div className="relative flex-1 max-w-none sm:max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search contacts..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 text-sm sm:text-base"
+                    data-testid="input-search-contacts"
                   />
                 </div>
               </div>
@@ -617,27 +629,28 @@ export default function GroupContacts() {
           </CardContent>
         </Card>
 
-        {/* Contacts Table */}
+        {/* Contacts Table - Mobile Responsive */}
         <Card>
-          <CardHeader>
-            <CardTitle>Group Contacts</CardTitle>
+          <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl">Group Contacts</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="px-3 sm:px-6">
+            <div className="space-y-3 sm:space-y-4">
               {/* Select All Section */}
-              <div className="flex items-center space-x-2 px-4 py-2 bg-muted/30 rounded-lg">
+              <div className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-muted/30 rounded-lg">
                 <Checkbox
                   id="select-all"
                   checked={selectAll}
                   onCheckedChange={handleSelectAll}
+                  data-testid="checkbox-select-all"
                 />
-                <label htmlFor="select-all" className="text-sm font-medium">
+                <label htmlFor="select-all" className="text-xs sm:text-sm font-medium">
                   Select All ({filteredMembers.length})
                 </label>
               </div>
 
-              {/* Table Header */}
-              <div className="grid grid-cols-12 gap-2 py-2 px-4 border-b font-medium text-sm text-muted-foreground text-center">
+              {/* Table Header - Hidden on Mobile, Card Layout Used Instead */}
+              <div className="hidden sm:grid grid-cols-12 gap-2 py-2 px-4 border-b font-medium text-xs sm:text-sm text-muted-foreground text-center">
                 <div className="col-span-1">SELECT</div>
                 <div className="col-span-1">ID</div>
                 <div className="col-span-4">NAME</div>
@@ -645,44 +658,87 @@ export default function GroupContacts() {
                 <div className="col-span-1">EDIT</div>
               </div>
 
-              {/* Table Rows */}
+              {/* Table Rows - Responsive Cards on Mobile, Table on Desktop */}
               {filteredMembers.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No contacts found</p>
+                <div className="text-center py-6 sm:py-8">
+                  <Users className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mb-4" />
+                  <p className="text-sm sm:text-base text-muted-foreground">No contacts found</p>
                 </div>
               ) : (
-                filteredMembers.map((member, index) => (
-                  <div
-                    key={member.id}
-                    className="grid grid-cols-12 gap-2 py-3 px-4 border-b hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="col-span-1 flex items-center justify-center">
-                      <Checkbox
-                        checked={selectedContacts.includes(member.id)}
-                        onCheckedChange={(checked) => handleSelectContact(member.id, checked as boolean)}
-                      />
+                <div className="space-y-3 sm:space-y-0">
+                  {filteredMembers.map((member, index) => (
+                    <div key={member.id}>
+                      {/* Mobile Card Layout */}
+                      <div className="sm:hidden border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start justify-between space-x-3">
+                          <div className="flex items-start space-x-2 flex-1 min-w-0">
+                            <Checkbox
+                              checked={selectedContacts.includes(member.id)}
+                              onCheckedChange={(checked) => handleSelectContact(member.id, checked as boolean)}
+                              className="mt-1 flex-shrink-0"
+                              data-testid={`checkbox-contact-${member.id}`}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <p className="font-medium text-sm truncate">{member.name || 'Unknown'}</p>
+                                <Badge 
+                                  variant={member.status === 'valid' ? 'default' : member.status === 'invalid' ? 'destructive' : 'secondary'}
+                                  className="text-xs flex-shrink-0"
+                                >
+                                  {member.status}
+                                </Badge>
+                              </div>
+                              <p className="text-xs font-mono text-muted-foreground break-all">{member.phoneNumber}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Added {new Date(member.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditContact(member)}
+                            className="flex-shrink-0 p-2"
+                            data-testid={`button-edit-contact-${member.id}`}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Desktop Table Layout */}
+                      <div className="hidden sm:grid grid-cols-12 gap-2 py-3 px-4 border-b hover:bg-muted/50 transition-colors">
+                        <div className="col-span-1 flex items-center justify-center">
+                          <Checkbox
+                            checked={selectedContacts.includes(member.id)}
+                            onCheckedChange={(checked) => handleSelectContact(member.id, checked as boolean)}
+                            data-testid={`checkbox-contact-${member.id}`}
+                          />
+                        </div>
+                        <div className="col-span-1 flex items-center justify-center text-sm text-muted-foreground">
+                          {index + 1}
+                        </div>
+                        <div className="col-span-4 flex items-center justify-center text-sm">
+                          {member.name || '-'}
+                        </div>
+                        <div className="col-span-5 flex items-center justify-center font-mono text-sm">
+                          {member.phoneNumber}
+                        </div>
+                        <div className="col-span-1 flex items-center justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditContact(member)}
+                            className="h-8 w-8 p-0 hover:bg-primary/10"
+                            data-testid={`button-edit-contact-${member.id}`}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="col-span-1 flex items-center justify-center text-sm text-muted-foreground">
-                      {index + 1}
-                    </div>
-                    <div className="col-span-4 flex items-center justify-center text-sm">
-                      {member.name || '-'}
-                    </div>
-                    <div className="col-span-5 flex items-center justify-center font-mono text-sm">
-                      {member.phoneNumber}
-                    </div>
-                    <div className="col-span-1 flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditContact(member)}
-                        className="h-8 w-8 p-0 hover:bg-primary/10"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </CardContent>

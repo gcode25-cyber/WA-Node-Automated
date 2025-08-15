@@ -300,13 +300,13 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="max-w-4xl mx-auto h-screen flex flex-col">
-        {/* Chat Header */}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="max-w-none lg:max-w-4xl mx-auto h-screen flex flex-col">
+        {/* Chat Header - Mobile Responsive */}
         <Card className="rounded-none border-x-0 border-t-0">
-          <CardHeader className="py-4">
+          <CardHeader className="py-3 sm:py-4 px-3 sm:px-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -317,21 +317,23 @@ export default function ChatPage() {
                       setLocation("/dashboard?module=chats");
                     }
                   }}
+                  className="flex-shrink-0 p-2"
+                  data-testid="button-back"
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  contact.isGroup ? 'bg-green-100' : 'bg-blue-100'
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  contact.isGroup ? 'bg-green-100 dark:bg-green-900/20' : 'bg-blue-100 dark:bg-blue-900/20'
                 }`}>
                   {contact.isGroup ? (
-                    <Users className="h-5 w-5 text-green-600" />
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                   ) : (
-                    <Phone className="h-5 w-5 text-blue-600" />
+                    <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                   )}
                 </div>
-                <div>
-                  <CardTitle className="text-lg">{contact.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{contact.name}</CardTitle>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">
                     {/* Never display IDs - show meaningful information instead */}
                     {contact.isGroup 
                       ? `${(contact as any).participants?.length || 0} participants`
@@ -345,8 +347,8 @@ export default function ChatPage() {
           </CardHeader>
         </Card>
 
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Chat Messages - Mobile Responsive */}
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4">
           {chatLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -360,13 +362,13 @@ export default function ChatPage() {
             chatHistory?.messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${msg.fromMe ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${msg.fromMe ? 'justify-end' : 'justify-start'} px-1 sm:px-0`}
               >
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                  className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 sm:px-4 py-2 rounded-lg ${
                     msg.fromMe
                       ? 'bg-green-500 text-white'
-                      : 'bg-white border shadow-sm'
+                      : 'bg-white dark:bg-gray-700 border shadow-sm text-gray-900 dark:text-white'
                   }`}
                 >
                   {/* Show sender name for group messages that are not from me */}
@@ -442,10 +444,10 @@ export default function ChatPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{msg.body}</p>
+                      <p className="text-xs sm:text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{msg.body}</p>
                   )}
                   
-                  <p className={`text-xs mt-1 ${
+                  <p className={`text-[10px] sm:text-xs mt-1 ${
                     msg.fromMe ? 'text-green-100' : 'text-muted-foreground'
                   }`}>
                     {new Date(msg.timestamp * 1000).toLocaleDateString('en-GB')} {new Date(msg.timestamp * 1000).toLocaleTimeString()}
@@ -457,16 +459,16 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* File Upload Area */}
+        {/* File Upload Area - Mobile Responsive */}
         {selectedFile && (
-          <Card className="m-4 mb-0">
-            <CardContent className="p-4">
+          <Card className="mx-2 sm:mx-4 mb-0">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                   {getFileIcon(selectedFile)}
-                  <div>
-                    <p className="font-medium">{selectedFile.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">{selectedFile.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {formatFileSize(selectedFile.size)}
                     </p>
                   </div>
@@ -475,6 +477,8 @@ export default function ChatPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedFile(null)}
+                  className="flex-shrink-0 ml-2"
+                  data-testid="button-remove-file"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -483,12 +487,12 @@ export default function ChatPage() {
           </Card>
         )}
 
-        {/* Message Input */}
+        {/* Message Input - Mobile Responsive */}
         <Card className="rounded-none border-x-0 border-b-0">
-          <CardContent className="p-4">
+          <CardContent className="p-2 sm:p-4">
             <div 
               className={`flex items-end space-x-2 p-2 border-2 border-dashed rounded-lg transition-colors ${
-                isDragOver ? 'border-primary bg-primary/5' : 'border-muted'
+                isDragOver ? 'border-primary bg-primary/5' : 'border-muted dark:border-gray-600'
               }`}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -498,7 +502,8 @@ export default function ChatPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                className="shrink-0"
+                className="shrink-0 p-2 min-h-[44px] sm:min-h-auto"
+                data-testid="button-attach-file"
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -509,8 +514,9 @@ export default function ChatPage() {
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder={contact.isGroup && (contact as any).onlyAdminsCanMessage && !(contact as any).isAdmin ? "Only admins can send messages" : "Type a message..."}
-                  className="border-0 focus-visible:ring-0 resize-none"
+                  className="border-0 focus-visible:ring-0 resize-none text-sm sm:text-base min-h-[40px] sm:min-h-auto"
                   disabled={contact.isGroup && (contact as any).onlyAdminsCanMessage && !(contact as any).isAdmin}
+                  data-testid="input-message"
                 />
               </div>
               
@@ -518,6 +524,8 @@ export default function ChatPage() {
                 onClick={handleSendMessage}
                 disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || sendMediaMutation.isPending || (contact.isGroup && (contact as any).onlyAdminsCanMessage && !(contact as any).isAdmin)}
                 size="sm"
+                className="flex-shrink-0 p-2 min-h-[44px] sm:min-h-auto"
+                data-testid="button-send-message"
               >
                 {(sendMessageMutation.isPending || sendMediaMutation.isPending) ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -536,7 +544,7 @@ export default function ChatPage() {
             />
             
             {isDragOver && (
-              <div className="text-center text-sm text-muted-foreground mt-2">
+              <div className="text-center text-xs sm:text-sm text-muted-foreground mt-2">
                 Drop your file here to attach
               </div>
             )}

@@ -1182,40 +1182,40 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
-      {/* Left Sidebar - Features */}
-      <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900">
+      {/* 📱 Mobile-First Responsive Left Sidebar - Features */}
+      <div className="w-full lg:w-64 bg-white dark:bg-gray-800 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 flex flex-col order-1 lg:order-none max-h-48 lg:max-h-none overflow-y-auto lg:overflow-visible">
+        {/* 📱 Responsive Header */}
+        <div className="p-2 sm:p-4 border-b border-gray-200 dark:border-gray-700">
           <div 
-            className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center p-2 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors cursor-pointer"
             onClick={() => {
               setShowAccountView(true);
               setSelectedModule('account');
             }}
             data-testid="button-account-panel"
           >
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
               {sessionInfo?.name ? (
-                <span className="text-white font-bold text-sm">
+                <span className="text-white font-bold text-xs sm:text-sm">
                   {sessionInfo.name.charAt(0).toUpperCase()}
                 </span>
               ) : (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
               )}
             </div>
-            <div className="flex-1 text-center ml-3">
+            <div className="flex-1 text-center ml-2 sm:ml-3">
               {sessionInfo ? (
-                <div className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium max-w-full">
+                <div className="bg-blue-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium max-w-full">
                   <div className="flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white mr-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white mr-1 sm:mr-2 flex-shrink-0"></div>
                     <span className="truncate break-words">{sessionInfo.name}</span>
                   </div>
                 </div>
               ) : (
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  <div className="w-2 h-2 rounded-full mr-2 bg-gray-400"></div>
-                  <span className="whitespace-nowrap">Not Connected</span>
+                <Badge variant="secondary" className="text-xs sm:text-sm px-2 sm:px-3 py-1">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full mr-1 sm:mr-2 bg-gray-400"></div>
+                  <span className="whitespace-nowrap text-xs sm:text-sm">Not Connected</span>
                 </Badge>
               )}
             </div>
@@ -1226,11 +1226,11 @@ export default function Dashboard() {
         
 
 
-        {/* Features List - Always show */}
-        <div className="px-3 py-4 space-y-2">
-          {/* WhatsApp Feature */}
+        {/* 📱 Responsive Features List */}
+        <div className="px-2 sm:px-3 py-2 sm:py-4 space-y-1 sm:space-y-2">
+          {/* 📱 WhatsApp Feature - Touch Friendly */}
           <div 
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-colors min-h-[44px] ${
               selectedFeature === 'whatsapp' 
                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
                 : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -1238,15 +1238,15 @@ export default function Dashboard() {
             onClick={() => setSelectedFeature('whatsapp')}
             data-testid="button-whatsapp"
           >
-            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
-              <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
             </div>
-            <span className="font-medium ml-3">WhatsApp</span>
+            <span className="font-medium ml-2 sm:ml-3 text-sm sm:text-base">WhatsApp</span>
           </div>
 
-          {/* RCS Feature */}
+          {/* 📱 RCS Feature - Touch Friendly */}
           <div 
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+            className={`flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-colors min-h-[44px] ${
               selectedFeature === 'rcs' 
                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
                 : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -1254,22 +1254,23 @@ export default function Dashboard() {
             onClick={() => setSelectedFeature('rcs')}
             data-testid="button-rcs"
           >
-            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
-              <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+              <Smartphone className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 dark:text-purple-400" />
             </div>
-            <span className="font-medium ml-3">RCS</span>
+            <span className="font-medium ml-2 sm:ml-3 text-sm sm:text-base hidden sm:inline">RCS</span>
+            <span className="font-medium ml-2 sm:ml-3 text-sm sm:text-base sm:hidden">RCS</span>
           </div>
         </div>
         
         {/* Additional modules/options can be added here when needed */}
       </div>
 
-      {/* Middle Sidebar - Modules */}
+      {/* 📱 Responsive Middle Sidebar - Modules */}
       {selectedFeature === 'whatsapp' && (
-        <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-          {/* Module Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white">WhatsApp</h3>
+        <div className="w-full lg:w-80 bg-white dark:bg-gray-800 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 order-2 lg:order-none max-h-64 lg:max-h-none overflow-y-auto lg:overflow-visible">
+          {/* 📱 Responsive Module Header */}
+          <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">WhatsApp</h3>
           </div>
           
           {/* Modules List */}
