@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -29,9 +30,21 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/forgot-password" component={ForgotPassword} />
 
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/chat/:contactId" component={ChatPage} />
-      <Route path="/group-contacts/:groupId" component={GroupContacts} />
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/chat/:contactId">
+        <ProtectedRoute>
+          <ChatPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/group-contacts/:groupId">
+        <ProtectedRoute>
+          <GroupContacts />
+        </ProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
