@@ -89,6 +89,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const user = await storage.createUser(userInsertData);
       
+      // Automatically log in the user after successful signup
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      req.session.userEmail = user.email;
+      req.session.userFullName = user.fullName;
+      
+      // Always remember sessions for 30 days (persistent across restarts)
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      
+      // Force session save to ensure persistence
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error after signup:', err);
+        } else {
+          console.log('✅ User automatically logged in after signup');
+        }
+      });
+      
       res.status(201).json({ 
         message: "Account created successfully", 
         user: { 
