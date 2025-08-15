@@ -6,8 +6,10 @@ vite.config.ts.*
 *.tar.gz
 uploads/
 # Chrome user data folders for WhatsApp Web.js
-.chrome_user_data*
 chrome-user-data/
+.wwebjs_auth/
 .whatsapp-session/
-# Specific Chrome user data pattern
-.chrome user data */
+# Prevent any timestamped or random Chrome user data folders
+chrome_user_data_*/
+.chrome_user_data*/
+chrome user data */
