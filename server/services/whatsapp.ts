@@ -1063,7 +1063,31 @@ export class WhatsAppService {
         throw new Error('Failed to create MessageMedia from file');
       }
       
-      console.log(`📄 Media created successfully: ${media.mimetype || 'unknown mimetype'}`);
+      // Set proper filename and ensure correct mime type
+      media.filename = fileName;
+      
+      // Detect and set proper mime type based on file extension if not detected
+      if (!media.mimetype || media.mimetype === 'unknown mimetype') {
+        const fileExtension = fileName.toLowerCase().split('.').pop();
+        const mimeTypeMap: Record<string, string> = {
+          'txt': 'text/plain',
+          'pdf': 'application/pdf',
+          'jpg': 'image/jpeg',
+          'jpeg': 'image/jpeg',
+          'png': 'image/png',
+          'gif': 'image/gif',
+          'mp4': 'video/mp4',
+          'mp3': 'audio/mpeg',
+          'doc': 'application/msword',
+          'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+        
+        if (fileExtension && mimeTypeMap[fileExtension]) {
+          media.mimetype = mimeTypeMap[fileExtension];
+        }
+      }
+      
+      console.log(`📄 Media created successfully: ${media.mimetype || 'application/octet-stream'}, filename: ${media.filename}`);
       
       let chatId: string;
       
