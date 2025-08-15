@@ -1034,8 +1034,25 @@ export class WhatsAppService {
     }
 
     try {
+      console.log(`📄 Processing media message: ${fileName} at ${mediaPath}`);
+      
+      // Validate media path exists
+      const fs = await import('fs');
+      if (!mediaPath || !fs.existsSync(mediaPath)) {
+        throw new Error(`Media file not found at path: ${mediaPath}`);
+      }
+
       const MessageMedia = (await import('whatsapp-web.js')).MessageMedia;
+      
+      console.log(`📊 File stats: ${JSON.stringify(fs.statSync(mediaPath))}`);
+      
       const media = MessageMedia.fromFilePath(mediaPath);
+      
+      if (!media) {
+        throw new Error('Failed to create MessageMedia from file');
+      }
+      
+      console.log(`📄 Media created successfully: ${media.mimetype || 'unknown mimetype'}`);
       
       let chatId: string;
       
@@ -1063,6 +1080,12 @@ export class WhatsAppService {
       
     } catch (error: any) {
       console.error('❌ Failed to send media message:', error.message);
+      console.error('❌ Full error details:', error);
+      
+      // Check if error is due to file path issues
+      if (error.message.includes('fromFilePath') || error.message.includes('ENOENT')) {
+        throw new Error(`File access error: ${error.message}. Please try uploading the file again.`);
+      }
       
       // Check if error is due to disconnection and update status
       if (error.message.includes('Cannot read properties of undefined') || 

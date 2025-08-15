@@ -431,6 +431,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No media file provided" });
       }
 
+      console.log(`📤 Received file upload:`, {
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        path: req.file.path
+      });
+
+      // Verify file exists before processing
+      if (!fs.existsSync(req.file.path)) {
+        return res.status(400).json({ error: "Uploaded file not found" });
+      }
+
       const parsed = sendMediaMessageSchema.parse({
         phoneNumber: req.body.phoneNumber,
         message: req.body.message,
@@ -444,6 +456,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       res.json({ success: true, messageId: result.messageId, fileName: result.fileName });
+      
+      // Clean up uploaded file after successful send
+      if (req.file?.path && fs.existsSync(req.file.path)) {
+        const filePath = req.file.path;
+        const fileName = req.file.originalname;
+        setTimeout(() => {
+          try {
+            fs.unlinkSync(filePath);
+            console.log(`🗑️ Cleaned up uploaded file: ${fileName}`);
+          } catch (cleanupError) {
+            console.warn("Failed to clean up uploaded file:", cleanupError);
+          }
+        }, 1000); // Delay cleanup to ensure message is fully processed
+      }
     } catch (error) {
       console.error("Send media message error:", error);
       
@@ -451,6 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.file?.path && fs.existsSync(req.file.path)) {
         try {
           fs.unlinkSync(req.file.path);
+          console.log(`🗑️ Cleaned up uploaded file after error: ${req.file.originalname}`);
         } catch (cleanupError) {
           console.warn("Failed to clean up uploaded file:", cleanupError);
         }
