@@ -168,7 +168,7 @@ export class WhatsAppService {
             '--single-process',
             '--disable-process-per-site',
             '--disable-site-isolation-trials',
-            `--user-data-dir=./.chrome_user_data_${Date.now()}` // Use unique directory to avoid conflicts
+            `--user-data-dir=./chrome-user-data` // Use consistent directory for session persistence
           ],
           handleSIGINT: false,
           handleSIGTERM: false,
