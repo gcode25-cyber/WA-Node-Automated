@@ -1,5 +1,13 @@
 import pkg from 'whatsapp-web.js';
-const { Client, LocalAuth, MessageMedia } = pkg as any;
+const { Client, LocalAuth, MessageMedia } = pkg;
+
+// Log import status to verify correct loading
+console.log('🔍 WhatsApp imports:', {
+  Client: typeof Client,
+  LocalAuth: typeof LocalAuth,
+  MessageMedia: typeof MessageMedia,
+  fromFilePath: typeof MessageMedia?.fromFilePath
+});
 import QRCode from 'qrcode';
 import qrImage from 'qr-image';
 import { storage } from '../storage';
@@ -1042,9 +1050,12 @@ export class WhatsAppService {
         throw new Error(`Media file not found at path: ${mediaPath}`);
       }
 
-      const MessageMedia = (await import('whatsapp-web.js')).MessageMedia;
-      
       console.log(`📊 File stats: ${JSON.stringify(fs.statSync(mediaPath))}`);
+      console.log(`🔍 MessageMedia availability:`, { MessageMedia: typeof MessageMedia, fromFilePath: typeof MessageMedia?.fromFilePath });
+      
+      if (!MessageMedia || typeof MessageMedia.fromFilePath !== 'function') {
+        throw new Error('MessageMedia.fromFilePath is not available. WhatsApp Web.js may not be properly initialized.');
+      }
       
       const media = MessageMedia.fromFilePath(mediaPath);
       

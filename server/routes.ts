@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'image/jpeg', 'image/png', 'image/gif', 'image/webp',
         'video/mp4', 'video/3gpp', 'video/quicktime',
         'audio/aac', 'audio/mp3', 'audio/mpeg', 'audio/amr', 'audio/ogg',
-        'application/pdf', 'text/plain',
+        'application/pdf', 'text/plain', 'application/json',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       ];
