@@ -1182,9 +1182,9 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex flex-col xl:flex-row bg-gray-50 dark:bg-gray-900">
       {/* 📱 Mobile-First Responsive Left Sidebar - Features */}
-      <div className="w-full lg:w-64 bg-white dark:bg-gray-800 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 flex flex-col order-1 lg:order-none max-h-48 lg:max-h-none overflow-y-auto lg:overflow-visible">
+      <div className="w-full xl:w-64 lg:w-60 md:w-56 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 flex flex-col order-1 xl:order-none max-h-40 sm:max-h-44 md:max-h-48 xl:max-h-none overflow-y-auto xl:overflow-visible shrink-0">
         {/* 📱 Responsive Header */}
         <div className="p-2 sm:p-4 border-b border-gray-200 dark:border-gray-700">
           <div 
@@ -1267,7 +1267,7 @@ export default function Dashboard() {
 
       {/* 📱 Responsive Middle Sidebar - Modules */}
       {selectedFeature === 'whatsapp' && (
-        <div className="w-full lg:w-80 bg-white dark:bg-gray-800 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 order-2 lg:order-none max-h-64 lg:max-h-none overflow-y-auto lg:overflow-visible">
+        <div className="w-full xl:w-80 lg:w-72 md:w-64 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 order-2 xl:order-none max-h-56 sm:max-h-60 md:max-h-64 xl:max-h-none overflow-y-auto xl:overflow-visible shrink-0">
           {/* 📱 Responsive Module Header */}
           <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">WhatsApp</h3>
@@ -1454,7 +1454,7 @@ export default function Dashboard() {
 
       {/* RCS Module */}
       {selectedFeature === 'rcs' && (
-        <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+        <div className="w-full xl:w-80 lg:w-72 md:w-64 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 order-2 xl:order-none max-h-56 sm:max-h-60 md:max-h-64 xl:max-h-none overflow-y-auto xl:overflow-visible shrink-0">
           <div className="p-6">
             <h3 className="font-semibold text-gray-900 dark:text-white">RCS</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -1465,13 +1465,13 @@ export default function Dashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col order-3 xl:order-none">
         {selectedFeature === 'whatsapp' ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Account View Module */}
             {selectedModule === 'account' && (
-              <div className="p-6">
-                <Card>
+              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
+                <Card className="w-full max-w-4xl mx-auto">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <User className="h-5 w-5" />
@@ -1594,8 +1594,8 @@ export default function Dashboard() {
 
             {/* Send Message Module */}
             {selectedModule === 'send-message' && (
-              <div className="p-6">
-                <Card>
+              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
+                <Card className="w-full max-w-4xl mx-auto">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <MessageSquare className="h-5 w-5" />
@@ -1609,9 +1609,9 @@ export default function Dashboard() {
                     {/* Phone Number with Country Code */}
                     <div className="space-y-2">
                       <Label htmlFor="phone-number">Recipient Phone Number</Label>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                         <Select value={countryCode} onValueChange={setCountryCode}>
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="w-full sm:w-32">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -2047,10 +2047,10 @@ export default function Dashboard() {
 
             {/* Contact Groups Module */}
             {selectedModule === 'contact-groups' && (
-              <div className="p-6">
-                <Card>
+              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
+                <Card className="w-full max-w-6xl mx-auto">
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
+                    <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex items-center space-x-2">
                         <Users className="h-5 w-5" />
                         <span>Contact Groups</span>
@@ -2058,6 +2058,7 @@ export default function Dashboard() {
                       <Button 
                         onClick={() => setShowCreateGroupDialog(true)}
                         disabled={!sessionInfo}
+                        className="w-full sm:w-auto"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Create Group
@@ -2182,13 +2183,13 @@ export default function Dashboard() {
 
             {/* Enhanced Bulk Messaging Module */}
             {selectedModule === 'bulk-messaging' && (
-              <div className="p-6 space-y-6 overflow-y-auto max-h-screen">
-                <div className="flex justify-between items-center">
+              <div className="p-3 sm:p-4 md:p-6 space-y-6 overflow-y-auto max-h-full">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Bulk Messaging</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Bulk Messaging</h1>
                     <p className="text-muted-foreground">Create and manage bulk messaging campaigns</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
                       <DialogTrigger asChild>
                         <Button disabled={!sessionInfo}>
@@ -2196,7 +2197,7 @@ export default function Dashboard() {
                           Create Campaign
                         </Button>
                       </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 w-[calc(100vw-2rem)] sm:w-auto">
                       <DialogHeader>
                         <DialogTitle>Create New Campaign</DialogTitle>
                       </DialogHeader>
@@ -2730,7 +2731,7 @@ export default function Dashboard() {
             {selectedModule === 'chats' && (
               <div className="flex flex-col h-full">
                 {/* Sticky Header */}
-                <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <MessageSquare className="h-5 w-5" />
@@ -2743,7 +2744,7 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-6 pr-2 min-h-0">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pr-2 min-h-0">
                   {!sessionInfo ? (
                     <div className="text-center p-8">
                       <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

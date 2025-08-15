@@ -5,6 +5,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enhanced Mobile Viewport Handling */
+@viewport {
+  width: device-width;
+  zoom: 1.0;
+}
+
+/* Fix for small screens and viewport issues */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* Ensure proper scrolling on mobile */
+@layer utilities {
+  .scroll-smooth-mobile {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .responsive-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-grid {
+      grid-template-columns: auto auto 1fr;
+    }
+  }
+}
+
 /* Disable text selection globally */
 * {
   -webkit-user-select: none;
