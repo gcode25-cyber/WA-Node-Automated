@@ -85,20 +85,22 @@ export default function GroupContacts() {
 
   const groupId = params?.groupId;
 
-  // Fetch group details
+  // ⚡ Optimized group details fetching
   const { data: group, isLoading: groupLoading } = useQuery<ContactGroup>({
     queryKey: [`/api/contact-groups/${groupId}`],
     enabled: !!groupId,
-    staleTime: 0, // Always refetch to get fresh data
-    refetchOnWindowFocus: true,
+    staleTime: 60000, // Cache for 1 minute instead of always refetch
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false, // Disable focus refetch for performance
   });
 
-  // Fetch group members
+  // ⚡ Smart group members caching
   const { data: members = [], isLoading: membersLoading } = useQuery<ContactGroupMember[]>({
     queryKey: [`/api/contact-groups/${groupId}/members`],
     enabled: !!groupId,
-    staleTime: 0, // Always refetch to get fresh data
-    refetchOnWindowFocus: true,
+    staleTime: 30000, // Cache for 30 seconds - updates handled by mutations
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Disable focus refetch for better performance
   });
 
   // Delete selected members mutation

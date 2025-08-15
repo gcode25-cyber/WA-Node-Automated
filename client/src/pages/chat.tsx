@@ -73,12 +73,13 @@ export default function ChatPage() {
 
   const contact = contacts.find(c => c.id === contactId) || groups.find(g => g.id === contactId);
 
-  // Fetch chat history from WhatsApp Web API
+  // ⚡ Optimized chat history with WebSocket real-time updates
   const { data: chatHistory, isLoading: chatLoading } = useQuery<ChatHistory>({
     queryKey: ['/api/chat-history', contactId],
     enabled: !!contactId,
-    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
-    staleTime: 3000,
+    refetchInterval: false, // Disabled - using WebSocket for real-time updates
+    staleTime: 30000, // Cache for 30 seconds - WebSocket handles real-time
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   // Listen for real-time messages via WebSocket

@@ -189,27 +189,33 @@ export default function Dashboard() {
     bulkMessage
   };
 
-  // Fetch current session info
+  // ⚡ Optimized session info with smart caching
   const { data: sessionInfo } = useQuery<{
     name: string;
     loginTime: string;
   }>({
     queryKey: ['/api/session-info'],
-    refetchInterval: 10000, // Check every 10 seconds
+    refetchInterval: 60000, // Reduced from 10s to 60s for better performance
+    staleTime: 45000, // Consider fresh for 45 seconds
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
-  // Fetch QR code when needed
+  // ⚡ Fast QR code fetching with reduced polling
   const { data: qrData, refetch: refetchQR } = useQuery<{qr?: string | null}>({
     queryKey: ['/api/get-qr'],
     enabled: !sessionInfo, // Fetch when no session
-    refetchInterval: !sessionInfo ? 5000 : false,
-    retry: 3,
+    refetchInterval: !sessionInfo ? 3000 : false, // Reduced from 5s to 3s
+    retry: 2, // Reduced retries for faster response
+    staleTime: 2000, // Cache for 2 seconds
   });
 
-  // Fetch contact groups
+  // ⚡ Smart contact groups caching - only fetch when needed
   const { data: contactGroups = [], isLoading: contactGroupsLoading } = useQuery<ContactGroup[]>({
     queryKey: ['/api/contact-groups'],
-    refetchInterval: 30000,
+    enabled: selectedModule === 'contact-groups' || selectedModule === 'bulk-messaging',
+    staleTime: 10 * 60 * 1000, // Keep fresh for 10 minutes
+    cacheTime: 30 * 60 * 1000, // Cache for 30 minutes
+    refetchInterval: false, // Disable automatic refresh - load only when needed
   });
 
   // Fetch chats with real-time updates
@@ -236,14 +242,14 @@ export default function Dashboard() {
     staleTime: Infinity, // Data is always fresh from WebSocket
   });
 
-  // Fetch bulk campaigns with smart refresh based on active campaigns
+  // ⚡ Efficient bulk campaigns with conditional refresh
   const { data: bulkCampaigns = [], isLoading: campaignsLoading } = useQuery<BulkCampaign[]>({
     queryKey: ['/api/bulk-campaigns'],
-    refetchInterval: () => {
-      // Refresh every 30 seconds for bulk campaigns
-      return 30000;
-    },
-    refetchIntervalInBackground: true, // Keep refreshing even when tab is not focused
+    enabled: selectedModule === 'bulk-messaging',
+    staleTime: 30000, // Fresh for 30 seconds
+    cacheTime: 10 * 60 * 1000, // Cache for 10 minutes
+    refetchInterval: selectedModule === 'bulk-messaging' ? 45000 : false, // Only refresh when viewing
+    refetchIntervalInBackground: false, // Stop background refresh for performance
   });
 
   // Helper function to determine if a phone number is valid (more inclusive)

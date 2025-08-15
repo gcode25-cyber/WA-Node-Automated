@@ -297,10 +297,10 @@ export class WhatsAppService {
           sessionInfo: this.sessionInfo 
         });
 
-        // Full data synchronization after client is ready
+        // ⚡ Immediate data synchronization for superfast loading
         setTimeout(() => {
           this.performFullDataSync();
-        }, 2000); // Wait 2 seconds to ensure client is fully ready
+        }, 500); // Reduced from 2000ms to 500ms for faster loading
       });
 
       this.client.on('authenticated', () => {
@@ -1339,9 +1339,9 @@ export class WhatsAppService {
 
     try {
       
-      // Add timeout to prevent hanging
+      // ⚡ Fast timeout for better performance
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout fetching chats')), 30000);
+        setTimeout(() => reject(new Error('Timeout fetching chats')), 10000); // Reduced from 30s to 10s
       });
       
       const chatsPromise = this.client.getChats();
@@ -1414,9 +1414,9 @@ export class WhatsAppService {
 
     try {
       
-      // Add timeout to prevent hanging
+      // ⚡ Fast timeout for better performance  
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout fetching contacts')), 30000);
+        setTimeout(() => reject(new Error('Timeout fetching contacts')), 10000); // Reduced from 30s to 10s
       });
       
       const contactsPromise = this.client.getContacts();
@@ -1702,9 +1702,9 @@ export class WhatsAppService {
       return;
     }
     
-    // Additional verification that client is fully connected
+    // ⚡ Fast client verification - reduced wait time
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 3; // Reduced from 10 to 3
     
     while (attempts < maxAttempts) {
       try {
@@ -1716,20 +1716,23 @@ export class WhatsAppService {
       }
       
       attempts++;
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 200)); // Reduced from 1000ms to 200ms
     }
     
     try {
       
-      // Load all data in sequence with retries for reliability
-      const syncTasks = [
+      // ⚡ Load all data in parallel for maximum speed
+      const [chatsResult, contactsResult, groupsResult] = await Promise.allSettled([
         this.syncChats(),
         this.syncContacts(), 
         this.syncGroups()
-      ];
+      ]);
       
-      await Promise.allSettled(syncTasks);
+      console.log('⚡ Parallel data sync completed:', {
+        chats: chatsResult.status,
+        contacts: contactsResult.status, 
+        groups: groupsResult.status
+      });
       
 
       
