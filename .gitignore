@@ -5,6 +5,7 @@ server/public
 vite.config.ts.*
 *.tar.gz
 uploads/
+attached_assets/
 # Chrome user data folders for WhatsApp Web.js
 chrome-user-data/
 .wwebjs_auth/
