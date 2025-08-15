@@ -9,3 +9,5 @@ uploads/
 .chrome_user_data*
 chrome-user-data/
 .whatsapp-session/
+# Specific Chrome user data pattern
+.chrome user data */
