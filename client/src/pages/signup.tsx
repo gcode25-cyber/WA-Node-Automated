@@ -119,12 +119,12 @@ export default function Signup() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="signup" />
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] py-4 px-4 sm:py-8">
+      <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4">
         <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 max-w-6xl w-full items-center">
             {/* Left Side - Signup Form */}
             <div className="flex items-center justify-center order-2 lg:order-1">
               <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
-                <CardHeader className="space-y-2 sm:space-y-4 text-center pt-4 sm:pt-6">
+                <CardHeader className="space-y-4 text-center">
                   <div>
                     <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Create Account</CardTitle>
                     <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
@@ -133,7 +133,7 @@ export default function Signup() {
                   </div>
                 </CardHeader>
               
-                <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+                <CardContent className="space-y-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
                 <div className="relative">
                   <Input
