@@ -1316,61 +1316,6 @@ export default function Dashboard() {
           
           {/* Modules List */}
           <div className="p-4 space-y-4">
-            {/* Templates Section */}
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">TEMPLATES</h4>
-              
-              <div 
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedModule === 'button-template' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedModule('button-template')}
-              >
-                <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center">
-                  <span className="text-pink-600 dark:text-pink-400 text-sm">📱</span>
-                </div>
-                <div>
-                  <div className="font-medium text-sm">Button template</div>
-                  <div className="text-xs text-gray-500">Create interactive button messages</div>
-                </div>
-              </div>
-
-              <div 
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedModule === 'poll-template' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedModule('poll-template')}
-              >
-                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                  <span className="text-blue-600 dark:text-blue-400 text-sm">📊</span>
-                </div>
-                <div>
-                  <div className="font-medium text-sm">Poll template</div>
-                  <div className="text-xs text-gray-500">Create Poll messages</div>
-                </div>
-              </div>
-
-              <div 
-                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedModule === 'list-template' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedModule('list-template')}
-              >
-                <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
-                  <span className="text-orange-600 dark:text-orange-400 text-sm">📝</span>
-                </div>
-                <div>
-                  <div className="font-medium text-sm">List message template</div>
-                  <div className="text-xs text-gray-500">Create list of items/options</div>
-                </div>
-              </div>
-            </div>
 
             {/* Contact Section */}
             <div className="space-y-2">
@@ -1485,6 +1430,60 @@ export default function Dashboard() {
                   <BarChart3 className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div className="font-medium text-sm">Reports</div>
+              </div>
+
+              {/* Templates Section - moved after Reports */}
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-6 mb-2">TEMPLATES</h4>
+              
+              <div 
+                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedModule === 'button-template' 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedModule('button-template')}
+              >
+                <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center">
+                  <span className="text-pink-600 dark:text-pink-400 text-sm">📱</span>
+                </div>
+                <div>
+                  <div className="font-medium text-sm">Button template</div>
+                  <div className="text-xs text-gray-500">Create interactive button messages</div>
+                </div>
+              </div>
+
+              <div 
+                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedModule === 'poll-template' 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedModule('poll-template')}
+              >
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                  <span className="text-blue-600 dark:text-blue-400 text-sm">📊</span>
+                </div>
+                <div>
+                  <div className="font-medium text-sm">Poll template</div>
+                  <div className="text-xs text-gray-500">Create Poll messages</div>
+                </div>
+              </div>
+
+              <div 
+                className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedModule === 'list-template' 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedModule('list-template')}
+              >
+                <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
+                  <span className="text-orange-600 dark:text-orange-400 text-sm">📝</span>
+                </div>
+                <div>
+                  <div className="font-medium text-sm">List message template</div>
+                  <div className="text-xs text-gray-500">Create list of items/options</div>
+                </div>
               </div>
             </div>
           </div>
