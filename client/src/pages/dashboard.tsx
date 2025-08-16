@@ -244,7 +244,26 @@ export default function Dashboard() {
       hasPrev: boolean;
     };
   }>({
-    queryKey: ['/api/contacts', contactsPage, contactsSearch],
+    queryKey: ['contacts', contactsPage, contactsSearch],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: contactsPage.toString(),
+        limit: '50'
+      });
+      if (contactsSearch.trim()) {
+        params.append('search', contactsSearch.trim());
+      }
+      
+      const response = await fetch(`/api/contacts?${params.toString()}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contacts: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
     enabled: !!sessionInfo,
     refetchInterval: false,
     staleTime: 30000 // Cache for 30 seconds
