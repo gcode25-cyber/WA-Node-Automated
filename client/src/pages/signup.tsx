@@ -131,12 +131,12 @@ export default function Signup() {
                 </CardHeader>
               
                 <CardContent className="space-y-6">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="relative">
                   <Input
                     id="fullName"
                     type="text"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("fullName")}
                   />
                   <Label 
@@ -144,7 +144,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.fullName
                         ? "hidden"
-                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
+                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Fullname
@@ -158,7 +158,7 @@ export default function Signup() {
                   <Input
                     id="username"
                     type="text"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("username")}
                   />
                   <Label 
@@ -166,7 +166,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.username
                         ? "hidden"
-                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
+                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Username
@@ -180,7 +180,7 @@ export default function Signup() {
                   <Input
                     id="email"
                     type="email"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                     {...register("email")}
                   />
                   <Label 
@@ -188,7 +188,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.email
                         ? "hidden"
-                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
+                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Email
@@ -198,10 +198,10 @@ export default function Signup() {
                   )}
                 </div>
 
-                <div className="space-y-1 sm:space-y-2">
+                <div className="space-y-2">
                   <div className="flex space-x-2">
                     <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
-                      <SelectTrigger className="w-24 sm:w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-xs sm:text-sm">
+                      <SelectTrigger className="w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
@@ -220,7 +220,7 @@ export default function Signup() {
                       <Input
                         id="phone"
                         type="tel"
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
+                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                         {...register("phone")}
                       />
                       <Label 
@@ -228,7 +228,7 @@ export default function Signup() {
                         className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                           fieldValues.phone
                             ? "hidden"
-                            : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
+                            : "top-3 text-sm text-gray-500 dark:text-gray-400"
                         }`}
                       >
                         Enter phone number
@@ -254,7 +254,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.password
                         ? "hidden"
-                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
+                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Password
@@ -284,7 +284,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.confirmPassword
                         ? "hidden"
-                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
+                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Confirm Password
@@ -332,7 +332,7 @@ export default function Signup() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 sm:py-3 text-sm sm:text-lg font-semibold font-inter tracking-wide rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 text-lg font-semibold font-inter tracking-wide rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
                   disabled={isSubmitting || signupMutation.isPending}
                 >
                   {isSubmitting || signupMutation.isPending ? "Creating Account..." : "SIGN UP"}
