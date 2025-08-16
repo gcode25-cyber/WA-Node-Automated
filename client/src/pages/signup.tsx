@@ -244,9 +244,18 @@ export default function Signup() {
                         {...register("phone", {
                           validate: validatePhoneNumber
                         })}
+                        maxLength={getCurrentCountryDigits().max}
                         onInput={(e) => {
                           const target = e.target as HTMLInputElement;
-                          target.value = target.value.replace(/[^0-9]/g, '');
+                          const numericValue = target.value.replace(/[^0-9]/g, '');
+                          const maxDigits = getCurrentCountryDigits().max;
+                          
+                          // Limit to maximum digits for selected country
+                          if (numericValue.length > maxDigits) {
+                            target.value = numericValue.slice(0, maxDigits);
+                          } else {
+                            target.value = numericValue;
+                          }
                         }}
                         inputMode="numeric"
                         pattern="[0-9]*"
