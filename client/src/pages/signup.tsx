@@ -244,6 +244,12 @@ export default function Signup() {
                         {...register("phone", {
                           validate: validatePhoneNumber
                         })}
+                        onInput={(e) => {
+                          const target = e.target as HTMLInputElement;
+                          target.value = target.value.replace(/[^0-9]/g, '');
+                        }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                       />
                       <Label 
                         htmlFor="phone" 
