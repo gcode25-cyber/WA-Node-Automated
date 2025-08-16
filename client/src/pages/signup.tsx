@@ -16,44 +16,34 @@ import { Eye, EyeOff } from "lucide-react";
 import { signupSchema, type SignupRequest } from "@shared/schema";
 import Navigation from "@/components/ui/navigation";
 
-// Country codes list
+// Country codes list with phone number validation
 const countryCodes = [
-  { code: "+1", country: "Canada and US", flag: "🇺🇸", id: "us" },
-  { code: "+91", country: "India", flag: "🇮🇳", id: "in" },
-  { code: "+44", country: "United Kingdom", flag: "🇬🇧", id: "gb" },
-  { code: "+49", country: "Germany", flag: "🇩🇪", id: "de" },
-  { code: "+33", country: "France", flag: "🇫🇷", id: "fr" },
-  { code: "+61", country: "Australia", flag: "🇦🇺", id: "au" },
-  { code: "+81", country: "Japan", flag: "🇯🇵", id: "jp" },
-  { code: "+86", country: "China", flag: "🇨🇳", id: "cn" },
-  { code: "+7", country: "Russia", flag: "🇷🇺", id: "ru" },
-  { code: "+55", country: "Brazil", flag: "🇧🇷", id: "br" },
-  { code: "+52", country: "Mexico", flag: "🇲🇽", id: "mx" },
-  { code: "+34", country: "Spain", flag: "🇪🇸", id: "es" },
-  { code: "+39", country: "Italy", flag: "🇮🇹", id: "it" },
-  { code: "+31", country: "Netherlands", flag: "🇳🇱", id: "nl" },
-  { code: "+41", country: "Switzerland", flag: "🇨🇭", id: "ch" },
-  { code: "+46", country: "Sweden", flag: "🇸🇪", id: "se" },
-  { code: "+47", country: "Norway", flag: "🇳🇴", id: "no" },
-  { code: "+45", country: "Denmark", flag: "🇩🇰", id: "dk" },
-  { code: "+358", country: "Finland", flag: "🇫🇮", id: "fi" },
-  { code: "+82", country: "South Korea", flag: "🇰🇷", id: "kr" },
-  { code: "+65", country: "Singapore", flag: "🇸🇬", id: "sg" },
-  { code: "+60", country: "Malaysia", flag: "🇲🇾", id: "my" },
-  { code: "+66", country: "Thailand", flag: "🇹🇭", id: "th" },
-  { code: "+84", country: "Vietnam", flag: "🇻🇳", id: "vn" },
-  { code: "+62", country: "Indonesia", flag: "🇮🇩", id: "id" },
-  { code: "+63", country: "Philippines", flag: "🇵🇭", id: "ph" },
-  { code: "+971", country: "United Arab Emirates", flag: "🇦🇪", id: "ae" },
-  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦", id: "sa" },
-  { code: "+20", country: "Egypt", flag: "🇪🇬", id: "eg" },
-  { code: "+27", country: "South Africa", flag: "🇿🇦", id: "za" },
-  { code: "+234", country: "Nigeria", flag: "🇳🇬", id: "ng" },
-  { code: "+254", country: "Kenya", flag: "🇰🇪", id: "ke" },
-  { code: "+92", country: "Pakistan", flag: "🇵🇰", id: "pk" },
-  { code: "+880", country: "Bangladesh", flag: "🇧🇩", id: "bd" },
-  { code: "+94", country: "Sri Lanka", flag: "🇱🇰", id: "lk" },
-  { code: "+977", country: "Nepal", flag: "🇳🇵", id: "np" },
+  { code: "+91", country: "India", flag: "🇮🇳", id: "in", digits: { min: 10, max: 10 } },
+  { code: "+1", country: "USA", flag: "🇺🇸", id: "us", digits: { min: 10, max: 10 } },
+  { code: "+1", country: "Canada", flag: "🇨🇦", id: "ca", digits: { min: 10, max: 10 } },
+  { code: "+44", country: "United Kingdom", flag: "🇬🇧", id: "gb", digits: { min: 10, max: 11 } },
+  { code: "+49", country: "Germany", flag: "🇩🇪", id: "de", digits: { min: 10, max: 11 } },
+  { code: "+33", country: "France", flag: "🇫🇷", id: "fr", digits: { min: 9, max: 9 } },
+  { code: "+61", country: "Australia", flag: "🇦🇺", id: "au", digits: { min: 9, max: 9 } },
+  { code: "+55", country: "Brazil", flag: "🇧🇷", id: "br", digits: { min: 10, max: 11 } },
+  { code: "+86", country: "China", flag: "🇨🇳", id: "cn", digits: { min: 11, max: 11 } },
+  { code: "+81", country: "Japan", flag: "🇯🇵", id: "jp", digits: { min: 10, max: 11 } },
+  { code: "+82", country: "South Korea", flag: "🇰🇷", id: "kr", digits: { min: 9, max: 10 } },
+  { code: "+7", country: "Russia", flag: "🇷🇺", id: "ru", digits: { min: 10, max: 10 } },
+  { code: "+52", country: "Mexico", flag: "🇲🇽", id: "mx", digits: { min: 10, max: 10 } },
+  { code: "+62", country: "Indonesia", flag: "🇮🇩", id: "id", digits: { min: 10, max: 12 } },
+  { code: "+92", country: "Pakistan", flag: "🇵🇰", id: "pk", digits: { min: 10, max: 10 } },
+  { code: "+880", country: "Bangladesh", flag: "🇧🇩", id: "bd", digits: { min: 10, max: 10 } },
+  { code: "+234", country: "Nigeria", flag: "🇳🇬", id: "ng", digits: { min: 10, max: 10 } },
+  { code: "+27", country: "South Africa", flag: "🇿🇦", id: "za", digits: { min: 9, max: 9 } },
+  { code: "+90", country: "Turkey", flag: "🇹🇷", id: "tr", digits: { min: 10, max: 10 } },
+  { code: "+20", country: "Egypt", flag: "🇪🇬", id: "eg", digits: { min: 10, max: 10 } },
+  { code: "+63", country: "Philippines", flag: "🇵🇭", id: "ph", digits: { min: 10, max: 10 } },
+  { code: "+54", country: "Argentina", flag: "🇦🇷", id: "ar", digits: { min: 10, max: 11 } },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾", id: "my", digits: { min: 9, max: 10 } },
+  { code: "+84", country: "Vietnam", flag: "🇻🇳", id: "vn", digits: { min: 9, max: 10 } },
+  { code: "+66", country: "Thailand", flag: "🇹🇭", id: "th", digits: { min: 9, max: 9 } },
+  { code: "+971", country: "United Arab Emirates", flag: "🇦🇪", id: "ae", digits: { min: 9, max: 9 } },
 ];
 
 export default function Signup() {
@@ -84,6 +74,36 @@ export default function Signup() {
   });
 
   const fieldValues = watch();
+
+  // Get current country's digit requirements
+  const getCurrentCountryDigits = () => {
+    const country = countryCodes.find(c => c.code === selectedCountryCode);
+    return country ? country.digits : { min: 10, max: 10 };
+  };
+
+  const getPlaceholderText = () => {
+    const digits = getCurrentCountryDigits();
+    if (digits.min === digits.max) {
+      return `Enter ${digits.min} digit phone number`;
+    }
+    return `Enter ${digits.min}-${digits.max} digit phone number`;
+  };
+
+  // Custom phone validation
+  const validatePhoneNumber = (phone: string) => {
+    if (!phone) return "Phone number is required";
+    
+    const digits = getCurrentCountryDigits();
+    const phoneDigits = phone.replace(/\D/g, '').length;
+    
+    if (phoneDigits < digits.min) {
+      return `Phone number must be at least ${digits.min} digits`;
+    }
+    if (phoneDigits > digits.max) {
+      return `Phone number must not exceed ${digits.max} digits`;
+    }
+    return true;
+  };
 
   const signupMutation = useMutation({
     mutationFn: async (data: SignupRequest) => {
@@ -221,7 +241,9 @@ export default function Signup() {
                         id="phone"
                         type="tel"
                         className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
-                        {...register("phone")}
+                        {...register("phone", {
+                          validate: validatePhoneNumber
+                        })}
                       />
                       <Label 
                         htmlFor="phone" 
@@ -231,7 +253,7 @@ export default function Signup() {
                             : "top-3 text-sm text-gray-500 dark:text-gray-400"
                         }`}
                       >
-                        Enter phone number
+                        {getPlaceholderText()}
                       </Label>
                     </div>
                   </div>
