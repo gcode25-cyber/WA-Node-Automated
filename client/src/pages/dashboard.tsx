@@ -1332,9 +1332,8 @@ export default function Dashboard() {
                 <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                   <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div>
+                <div className="flex-1 flex items-center justify-center">
                   <div className="font-medium text-sm">Contacts</div>
-                  <div className="text-xs text-gray-500">Create, edit your contacts</div>
                 </div>
               </div>
             </div>
@@ -1446,9 +1445,8 @@ export default function Dashboard() {
                 <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center">
                   <span className="text-pink-600 dark:text-pink-400 text-sm">📱</span>
                 </div>
-                <div>
+                <div className="flex-1 flex items-center justify-center">
                   <div className="font-medium text-sm">Button template</div>
-                  <div className="text-xs text-gray-500">Create interactive button messages</div>
                 </div>
               </div>
 
@@ -1463,9 +1461,8 @@ export default function Dashboard() {
                 <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                   <span className="text-blue-600 dark:text-blue-400 text-sm">📊</span>
                 </div>
-                <div>
+                <div className="flex-1 flex items-center justify-center">
                   <div className="font-medium text-sm">Poll template</div>
-                  <div className="text-xs text-gray-500">Create Poll messages</div>
                 </div>
               </div>
 
@@ -1480,9 +1477,8 @@ export default function Dashboard() {
                 <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
                   <span className="text-orange-600 dark:text-orange-400 text-sm">📝</span>
                 </div>
-                <div>
+                <div className="flex-1 flex items-center justify-center">
                   <div className="font-medium text-sm">List message template</div>
-                  <div className="text-xs text-gray-500">Create list of items/options</div>
                 </div>
               </div>
             </div>
