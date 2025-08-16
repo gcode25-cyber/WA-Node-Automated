@@ -119,7 +119,7 @@ export default function Signup() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="signup" />
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4">
+      <div className="flex items-center justify-center min-h-screen pt-24 pb-8 px-4">
         <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 max-w-6xl w-full items-center">
             {/* Left Side - Signup Form */}
             <div className="flex items-center justify-center order-2 lg:order-1">
