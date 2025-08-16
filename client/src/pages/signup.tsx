@@ -126,10 +126,7 @@ export default function Signup() {
               <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
                 <CardHeader className="space-y-4 text-center">
                   <div>
-                    <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Create Account</CardTitle>
-                    <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
-                      Join our WhatsApp messaging platform
-                    </CardDescription>
+                    <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Signup</CardTitle>
                   </div>
                 </CardHeader>
               
