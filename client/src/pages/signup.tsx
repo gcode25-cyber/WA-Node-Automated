@@ -75,6 +75,15 @@ export default function Signup() {
 
   const fieldValues = watch();
 
+  // Re-validate phone when country changes
+  useEffect(() => {
+    if (fieldValues.phone) {
+      clearErrors("phone");
+      // Trigger re-validation
+      setValue("phone", fieldValues.phone, { shouldValidate: true });
+    }
+  }, [selectedCountryCode, fieldValues.phone, clearErrors, setValue]);
+
   // Get current country's digit requirements
   const getCurrentCountryDigits = () => {
     const country = countryCodes.find(c => c.code === selectedCountryCode);
@@ -91,17 +100,20 @@ export default function Signup() {
 
   // Custom phone validation
   const validatePhoneNumber = (phone: string) => {
-    if (!phone) return "Phone number is required";
+    if (!phone || phone.trim() === "") {
+      return "Phone number is required";
+    }
     
     const digits = getCurrentCountryDigits();
     const phoneDigits = phone.replace(/\D/g, '').length;
     
     if (phoneDigits < digits.min) {
-      return `Phone number must be at least ${digits.min} digits`;
+      return `Phone number must be at least ${digits.min} digits for ${countryCodes.find(c => c.code === selectedCountryCode)?.country}`;
     }
     if (phoneDigits > digits.max) {
-      return `Phone number must not exceed ${digits.max} digits`;
+      return `Phone number must not exceed ${digits.max} digits for ${countryCodes.find(c => c.code === selectedCountryCode)?.country}`;
     }
+    
     return true;
   };
 
@@ -242,7 +254,8 @@ export default function Signup() {
                         type="tel"
                         className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
                         {...register("phone", {
-                          validate: validatePhoneNumber
+                          validate: (value) => validatePhoneNumber(value),
+                          required: "Phone number is required"
                         })}
                         maxLength={getCurrentCountryDigits().max}
                         onInput={(e) => {
