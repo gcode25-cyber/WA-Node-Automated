@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
-import { signupSchema, type SignupRequest } from "@shared/schema";
+import { type SignupRequest } from "@shared/schema";
 import Navigation from "@/components/ui/navigation";
 
 // Country codes list with phone number validation
@@ -61,7 +61,7 @@ export default function Signup() {
     setValue,
     formState: { errors, isSubmitting }
   } = useForm<SignupRequest>({
-    resolver: zodResolver(signupSchema),
+    mode: "onBlur",
     defaultValues: {
       fullName: "",
       username: "",
@@ -169,7 +169,9 @@ export default function Signup() {
                     id="fullName"
                     type="text"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
-                    {...register("fullName")}
+                    {...register("fullName", {
+                      required: "Full name is required"
+                    })}
                   />
                   <Label 
                     htmlFor="fullName" 
@@ -191,7 +193,9 @@ export default function Signup() {
                     id="username"
                     type="text"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
-                    {...register("username")}
+                    {...register("username", {
+                      required: "Username is required"
+                    })}
                   />
                   <Label 
                     htmlFor="username" 
@@ -213,7 +217,13 @@ export default function Signup() {
                     id="email"
                     type="email"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
-                    {...register("email")}
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Invalid email format"
+                      }
+                    })}
                   />
                   <Label 
                     htmlFor="email" 
@@ -356,8 +366,11 @@ export default function Signup() {
                   <Checkbox 
                     id="acceptTerms"
                     checked={fieldValues.acceptTerms}
+                    {...register("acceptTerms", {
+                      validate: (value) => value === true || "You must accept the terms and conditions"
+                    })}
                     onCheckedChange={(checked) => {
-                      setValue("acceptTerms", checked === true);
+                      setValue("acceptTerms", checked === true, { shouldValidate: true });
                       if (checked && errors.acceptTerms) {
                         clearErrors("acceptTerms");
                       }
