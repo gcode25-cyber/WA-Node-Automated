@@ -119,24 +119,27 @@ export default function Signup() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation currentPage="signup" />
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4">
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl w-full items-center">
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] py-4 px-4 sm:py-8">
+        <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 max-w-6xl w-full items-center">
             {/* Left Side - Signup Form */}
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center order-2 lg:order-1">
               <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
-                <CardHeader className="space-y-4 text-center">
+                <CardHeader className="space-y-2 sm:space-y-4 text-center pt-4 sm:pt-6">
                   <div>
-                    <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Signup</CardTitle>
+                    <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-inter tracking-tight">Create Account</CardTitle>
+                    <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+                      Join our WhatsApp messaging platform
+                    </CardDescription>
                   </div>
                 </CardHeader>
               
-                <CardContent className="space-y-6">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
                 <div className="relative">
                   <Input
                     id="fullName"
                     type="text"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
                     {...register("fullName")}
                   />
                   <Label 
@@ -144,7 +147,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.fullName
                         ? "hidden"
-                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Fullname
@@ -158,7 +161,7 @@ export default function Signup() {
                   <Input
                     id="username"
                     type="text"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
                     {...register("username")}
                   />
                   <Label 
@@ -166,7 +169,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.username
                         ? "hidden"
-                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Username
@@ -180,7 +183,7 @@ export default function Signup() {
                   <Input
                     id="email"
                     type="email"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
                     {...register("email")}
                   />
                   <Label 
@@ -188,7 +191,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.email
                         ? "hidden"
-                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Email
@@ -198,10 +201,10 @@ export default function Signup() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1 sm:space-y-2">
                   <div className="flex space-x-2">
                     <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
-                      <SelectTrigger className="w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                      <SelectTrigger className="w-24 sm:w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-xs sm:text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
@@ -220,7 +223,7 @@ export default function Signup() {
                       <Input
                         id="phone"
                         type="tel"
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3"
+                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 text-sm sm:text-base"
                         {...register("phone")}
                       />
                       <Label 
@@ -228,7 +231,7 @@ export default function Signup() {
                         className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                           fieldValues.phone
                             ? "hidden"
-                            : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                            : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
                         }`}
                       >
                         Enter phone number
@@ -246,7 +249,7 @@ export default function Signup() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3 pr-12"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 pr-12 text-sm sm:text-base"
                     {...register("password")}
                   />
                   <Label 
@@ -254,7 +257,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.password
                         ? "hidden"
-                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Password
@@ -276,7 +279,7 @@ export default function Signup() {
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-3 px-3 pr-12"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 py-2 sm:py-3 px-3 pr-12 text-sm sm:text-base"
                     {...register("confirmPassword")}
                   />
                   <Label 
@@ -284,7 +287,7 @@ export default function Signup() {
                     className={`absolute left-3 pointer-events-none transition-all duration-200 ${
                       fieldValues.confirmPassword
                         ? "hidden"
-                        : "top-3 text-sm text-gray-500 dark:text-gray-400"
+                        : "top-2 sm:top-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     Confirm Password
@@ -332,7 +335,7 @@ export default function Signup() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 text-lg font-semibold font-inter tracking-wide rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 sm:py-3 text-sm sm:text-lg font-semibold font-inter tracking-wide rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
                   disabled={isSubmitting || signupMutation.isPending}
                 >
                   {isSubmitting || signupMutation.isPending ? "Creating Account..." : "SIGN UP"}
@@ -350,13 +353,13 @@ export default function Signup() {
             </div>
 
             {/* Right Side - Animated Illustration */}
-            <div className="hidden lg:flex items-center justify-center relative">
+            <div className="hidden lg:flex items-center justify-center relative order-1 lg:order-2">
               <div className="relative">
                 {/* Animated image */}
                 <img 
                   src="/form-user.png"
                   alt="WhatsApp Messaging Illustration"
-                  className="w-96 h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:-rotate-3 filter drop-shadow-2xl"
+                  className="w-80 xl:w-96 h-80 xl:h-96 object-contain transform hover:scale-110 transition-all duration-700 hover:-rotate-3 filter drop-shadow-2xl"
                   loading="lazy"
                 />
                 
@@ -369,10 +372,10 @@ export default function Signup() {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
-        <div className="flex space-x-6 text-sm text-gray-600 dark:text-gray-400">
-          <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Terms of Service</Link>
-          <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Privacy Policy</Link>
+      <div className="py-4 text-center">
+        <div className="flex justify-center space-x-4 sm:space-x-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <Link href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</Link>
+          <Link href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</Link>
         </div>
       </div>
     </div>
