@@ -1517,18 +1517,21 @@ export default function Dashboard() {
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Account View Module */}
             {selectedModule === 'account' && (
-              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
-                <Card className="w-full">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>WhatsApp Account</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your WhatsApp connection and account settings
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <User className="h-5 w-5" />
+                    <span className="text-lg font-semibold">WhatsApp Account</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your WhatsApp connection and account settings
+                  </p>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+                  <div className="space-y-6">
                     {sessionInfo ? (
                       /* Connected Account View */
                       <div className="space-y-6">
@@ -1634,25 +1637,28 @@ export default function Dashboard() {
                         </div>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Send Message Module */}
             {selectedModule === 'send-message' && (
-              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
-                <Card className="w-full">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <MessageSquare className="h-5 w-5" />
-                      <span>Send Single Message</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Send a message to any WhatsApp number using your connected WhatsApp
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <MessageSquare className="h-5 w-5" />
+                    <span className="text-lg font-semibold">Send Single Message</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Send a message to any WhatsApp number using your connected WhatsApp
+                  </p>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+                  <div className="space-y-6">
                     {/* Phone Number with Country Code */}
                     <div className="space-y-2">
                       <Label htmlFor="phone-number">Recipient Phone Number</Label>
@@ -1851,69 +1857,87 @@ export default function Dashboard() {
                         </>
                       )}
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Template Modules */}
             {selectedModule === 'button-template' && (
-              <div className="p-6">
-                <Card>
-                    <CardHeader>
-                      <CardTitle>Button Template</CardTitle>
-                      <CardDescription>Create interactive button messages (Coming Soon)</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center p-8">
-                        <span className="text-4xl mb-4 block">📱</span>
-                        <h3 className="text-lg font-semibold mb-2">Button Template</h3>
-                        <p className="text-muted-foreground">
-                          This feature will allow you to create interactive button messages for enhanced user engagement.
-                        </p>
-                      </div>
-                    </CardContent>
-                </Card>
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <MessageSquare className="h-5 w-5" />
+                    <span className="text-lg font-semibold">Button Template</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Create interactive button messages (Coming Soon)
+                  </p>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+                  <div className="text-center p-8">
+                    <span className="text-4xl mb-4 block">📱</span>
+                    <h3 className="text-lg font-semibold mb-2">Button Template</h3>
+                    <p className="text-muted-foreground">
+                      This feature will allow you to create interactive button messages for enhanced user engagement.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
             {selectedModule === 'poll-template' && (
-              <div className="p-6">
-                <Card>
-                    <CardHeader>
-                      <CardTitle>Poll Template</CardTitle>
-                      <CardDescription>Create Poll messages (Coming Soon)</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center p-8">
-                        <span className="text-4xl mb-4 block">📊</span>
-                        <h3 className="text-lg font-semibold mb-2">Poll Template</h3>
-                        <p className="text-muted-foreground">
-                          This feature will allow you to create poll messages to gather feedback from your contacts.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <MessageSquare className="h-5 w-5" />
+                    <span className="text-lg font-semibold">Poll Template</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Create Poll messages (Coming Soon)
+                  </p>
                 </div>
-              )}
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+                  <div className="text-center p-8">
+                    <span className="text-4xl mb-4 block">📊</span>
+                    <h3 className="text-lg font-semibold mb-2">Poll Template</h3>
+                    <p className="text-muted-foreground">
+                      This feature will allow you to create poll messages to gather feedback from your contacts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {selectedModule === 'list-template' && (
-              <div className="p-6">
-                <Card>
-                    <CardHeader>
-                      <CardTitle>List Message Template</CardTitle>
-                      <CardDescription>Create list of items/options (Coming Soon)</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center p-8">
-                        <span className="text-4xl mb-4 block">📝</span>
-                        <h3 className="text-lg font-semibold mb-2">List Message Template</h3>
-                        <p className="text-muted-foreground">
-                          This feature will allow you to create structured list messages with multiple options.
-                        </p>
-                      </div>
-                    </CardContent>
-                </Card>
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <MessageSquare className="h-5 w-5" />
+                    <span className="text-lg font-semibold">List Message Template</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Create list of items/options (Coming Soon)
+                  </p>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+                  <div className="text-center p-8">
+                    <span className="text-4xl mb-4 block">📝</span>
+                    <h3 className="text-lg font-semibold mb-2">List Message Template</h3>
+                    <p className="text-muted-foreground">
+                      This feature will allow you to create structured list messages with multiple options.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2144,28 +2168,30 @@ export default function Dashboard() {
 
             {/* Contact Groups Module */}
             {selectedModule === 'contact-groups' && (
-              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
-                <Card className="w-full">
-                  <CardHeader>
-                    <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-5 w-5" />
-                        <span>Contact Groups</span>
-                      </div>
-                      <Button 
-                        onClick={() => setShowCreateGroupDialog(true)}
-                        disabled={!sessionInfo}
-                        className="w-full sm:w-auto"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Group
-                      </Button>
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your contact groups for bulk messaging campaigns
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-2">
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-5 w-5" />
+                      <span className="text-lg font-semibold">Contact Groups</span>
+                    </div>
+                    <Button 
+                      onClick={() => setShowCreateGroupDialog(true)}
+                      disabled={!sessionInfo}
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Group
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your contact groups for bulk messaging campaigns
+                  </p>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
                     {contactGroupsLoading ? (
                       <div className="text-center p-8">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -2273,27 +2299,36 @@ export default function Dashboard() {
                         ))}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Enhanced Bulk Messaging Module */}
             {selectedModule === 'bulk-messaging' && (
-              <div className="p-3 sm:p-4 md:p-6 space-y-6 overflow-y-auto max-h-full">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Bulk Messaging</h1>
-                    <p className="text-muted-foreground">Create and manage bulk messaging campaigns</p>
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-5 w-5" />
+                      <span className="text-lg font-semibold">Bulk Messaging</span>
+                    </div>
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    Create and manage bulk messaging campaigns
+                  </p>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-6 min-h-0">
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
-                      <DialogTrigger asChild>
-                        <Button disabled={!sessionInfo}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Campaign
-                        </Button>
-                      </DialogTrigger>
+                      <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
+                        <DialogTrigger asChild>
+                          <Button disabled={!sessionInfo}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Campaign
+                          </Button>
+                        </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 w-[calc(100vw-2rem)] sm:w-auto">
                       <DialogHeader>
                         <DialogTitle>Create New Campaign</DialogTitle>
@@ -2816,8 +2851,6 @@ export default function Dashboard() {
                       ))}
                     </div>
                   )}
-
-
                 </div>
               </div>
             )}
@@ -3016,24 +3049,30 @@ export default function Dashboard() {
 
             {/* Reports Module */}
             {selectedModule === 'reports' && (
-              <div className="p-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Reports</CardTitle>
-                    <CardDescription>Analytics and reporting features</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center p-8">
-                      <BarChart3 className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-                      <p className="text-muted-foreground">
-                        Comprehensive WhatsApp analytics, message reports, and performance insights will be available here soon.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-3 sm:p-4 md:p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <BarChart3 className="h-5 w-5" />
+                    <span className="text-lg font-semibold">Reports</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Analytics and reporting features
+                  </p>
                 </div>
-              )}
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 min-h-0">
+                  <div className="text-center p-8">
+                    <BarChart3 className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
+                    <p className="text-muted-foreground">
+                      Comprehensive WhatsApp analytics, message reports, and performance insights will be available here soon.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Placeholder for other modules */}
             {!['send-message', 'button-template', 'poll-template', 'list-template', 'contacts', 'reports', 'chats', 'contact-groups', 'bulk-messaging', 'groups', 'account'].includes(selectedModule) && (
