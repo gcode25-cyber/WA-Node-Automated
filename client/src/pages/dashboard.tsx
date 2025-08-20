@@ -2667,61 +2667,53 @@ export default function Dashboard() {
                 )}
 
                 {/* Campaign List */}
-                <div className="space-y-4">
-                  {!sessionInfo ? (
-                    <Card>
-                      <CardContent className="text-center py-8">
-                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
-                        <p className="text-muted-foreground">
-                          Please connect to WhatsApp first to create campaigns.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ) : campaignsLoading ? (
-                    <Card>
-                      <CardContent className="text-center py-8">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-4 text-muted-foreground">Loading campaigns...</p>
-                      </CardContent>
-                    </Card>
-                  ) : bulkCampaigns.length === 0 ? (
-                    <Card>
-                      <CardContent className="text-center py-8">
-                        <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
-                        <p className="text-muted-foreground mb-4">Create your first bulk messaging campaign</p>
-                        <Button onClick={() => setShowBulkMessageDialog(true)}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Campaign
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="grid gap-4 max-h-[calc(100vh-300px)] overflow-y-auto">
-                      {bulkCampaigns.map((campaign: BulkCampaign) => (
-                        <Card key={campaign.id}>
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="flex items-center gap-2">
-                                  {campaign.name}
-                                  <Badge 
-                                    className={
-                                      campaign.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                                      campaign.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                                      campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                                      campaign.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                      campaign.status === 'failed' ? 'bg-red-100 text-red-800' :
-                                      'bg-gray-100 text-gray-800'
-                                    }
-                                  >
-                                    {campaign.status}
-                                  </Badge>
-                                </CardTitle>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Created: {new Date(campaign.createdAt).toLocaleString()}
-                                </p>
-                              </div>
+                {!sessionInfo ? (
+                  <div className="text-center p-8">
+                    <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
+                    <p className="text-muted-foreground">
+                      Please connect to WhatsApp first to create campaigns.
+                    </p>
+                  </div>
+                ) : campaignsLoading ? (
+                  <div className="text-center p-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading campaigns...</p>
+                  </div>
+                ) : bulkCampaigns.length === 0 ? (
+                  <div className="text-center p-8">
+                    <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
+                    <p className="text-muted-foreground mb-4">Create your first bulk messaging campaign</p>
+                    <Button onClick={() => setShowBulkMessageDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Campaign
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {bulkCampaigns.map((campaign: BulkCampaign) => (
+                      <div key={campaign.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="font-semibold flex items-center gap-2">
+                              {campaign.name}
+                              <Badge 
+                                className={
+                                  campaign.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                                  campaign.status === 'running' ? 'bg-blue-100 text-blue-800' :
+                                  campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                                  campaign.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                  campaign.status === 'failed' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }
+                              >
+                                {campaign.status}
+                              </Badge>
+                            </h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Created: {new Date(campaign.createdAt).toLocaleString()}
+                            </p>
+                          </div>
                               <div className="flex gap-2">
                                 {campaign.status === "draft" && (
                                   <Button 
@@ -2772,11 +2764,9 @@ export default function Dashboard() {
                                   <Trash2 className="h-4 w-4 mr-1" />
                                   Delete
                                 </Button>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-4">
+                          </div>
+                        </div>
+                        <div className="space-y-4">
                               <div>
                                 <h4 className="font-medium text-sm mb-1">Message Preview</h4>
                                 <p className="text-sm text-muted-foreground line-clamp-2">
@@ -2845,13 +2835,11 @@ export default function Dashboard() {
                                   <p className="text-muted-foreground capitalize">{campaign.status}</p>
                                 </div>
                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        </div>
+                      </div>
                       ))}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
