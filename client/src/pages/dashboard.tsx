@@ -1642,7 +1642,7 @@ export default function Dashboard() {
             {/* Send Message Module */}
             {selectedModule === 'send-message' && (
               <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
-                <Card className="w-full max-w-4xl mx-auto">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <MessageSquare className="h-5 w-5" />
@@ -2145,7 +2145,7 @@ export default function Dashboard() {
             {/* Contact Groups Module */}
             {selectedModule === 'contact-groups' && (
               <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
-                <Card className="w-full max-w-6xl mx-auto">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex items-center space-x-2">
