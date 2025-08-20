@@ -1518,7 +1518,7 @@ export default function Dashboard() {
             {/* Account View Module */}
             {selectedModule === 'account' && (
               <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-full">
-                <Card className="w-full max-w-4xl mx-auto">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <User className="h-5 w-5" />
