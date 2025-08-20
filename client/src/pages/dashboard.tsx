@@ -2313,22 +2313,13 @@ export default function Dashboard() {
                       <MessageSquare className="h-5 w-5" />
                       <span className="text-lg font-semibold">Bulk Messaging</span>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Create and manage bulk messaging campaigns
-                  </p>
-                </div>
-                
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-6 min-h-0">
-                  <div className="flex gap-2 w-full sm:w-auto">
-                      <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
-                        <DialogTrigger asChild>
-                          <Button disabled={!sessionInfo}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Create Campaign
-                          </Button>
-                        </DialogTrigger>
+                    <Dialog open={showBulkMessageDialog} onOpenChange={setShowBulkMessageDialog}>
+                      <DialogTrigger asChild>
+                        <Button disabled={!sessionInfo} className="w-full sm:w-auto">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Campaign
+                        </Button>
+                      </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 w-[calc(100vw-2rem)] sm:w-auto">
                       <DialogHeader>
                         <DialogTitle>Create New Campaign</DialogTitle>
@@ -2597,21 +2588,40 @@ export default function Dashboard() {
                     </DialogContent>
                     </Dialog>
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    Create and manage bulk messaging campaigns
+                  </p>
                 </div>
+                
+                {/* Connect WhatsApp Message - Right after header */}
+                {!sessionInfo && (
+                  <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div className="text-center p-8">
+                      <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
+                      <p className="text-muted-foreground">
+                        Please connect to WhatsApp first to create campaigns.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-6 min-h-0">
 
                 {/* Enhanced Analytics Section - Moved to top */}
-                {bulkCampaigns.length > 0 && (
+                {sessionInfo && bulkCampaigns.length > 0 && (
                   <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          Campaign Analytics
+                    <div className="border rounded-lg">
+                      <div className="border-b p-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">Campaign Analytics</h3>
                           <Badge variant="outline" className="text-xs">
                             Last updated: {new Date().toLocaleTimeString()}
                           </Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                        </div>
+                      </div>
+                      <div className="p-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           <div className="text-center p-4 border rounded-lg">
                             <div className="text-3xl font-bold text-blue-600 mb-1">
@@ -2661,35 +2671,28 @@ export default function Dashboard() {
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {/* Campaign List */}
-                {!sessionInfo ? (
-                  <div className="text-center p-8">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Connect WhatsApp</h3>
-                    <p className="text-muted-foreground">
-                      Please connect to WhatsApp first to create campaigns.
-                    </p>
-                  </div>
-                ) : campaignsLoading ? (
+                {sessionInfo && (
+                  campaignsLoading ? (
                   <div className="text-center p-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                     <p className="mt-4 text-muted-foreground">Loading campaigns...</p>
                   </div>
-                ) : bulkCampaigns.length === 0 ? (
-                  <div className="text-center p-8">
-                    <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
-                    <p className="text-muted-foreground mb-4">Create your first bulk messaging campaign</p>
-                    <Button onClick={() => setShowBulkMessageDialog(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Campaign
-                    </Button>
-                  </div>
-                ) : (
+                  ) : bulkCampaigns.length === 0 ? (
+                    <div className="text-center p-8">
+                      <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
+                      <p className="text-muted-foreground mb-4">Create your first bulk messaging campaign</p>
+                      <Button onClick={() => setShowBulkMessageDialog(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Campaign
+                      </Button>
+                    </div>
+                  ) : (
                   <div className="space-y-2">
                     {bulkCampaigns.map((campaign: BulkCampaign) => (
                       <div key={campaign.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
@@ -2838,8 +2841,10 @@ export default function Dashboard() {
                         </div>
                       </div>
                       ))}
-                  </div>
+                    </div>
+                  )
                 )}
+                </div>
               </div>
             )}
 
