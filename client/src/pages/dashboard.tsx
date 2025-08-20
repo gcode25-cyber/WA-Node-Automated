@@ -1242,9 +1242,9 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col xl:flex-row bg-gray-50 dark:bg-gray-900">
+      <div className="h-screen flex flex-col xl:flex-row bg-gray-50 dark:bg-gray-900">
       {/* 📱 Mobile-First Responsive Left Sidebar - Features */}
-      <div className="w-full xl:w-64 lg:w-60 md:w-56 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 flex flex-col order-1 xl:order-none max-h-40 sm:max-h-44 md:max-h-48 xl:max-h-none overflow-y-auto xl:overflow-visible shrink-0">
+      <div className="w-full xl:w-64 lg:w-60 md:w-56 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 flex flex-col order-1 xl:order-none h-auto xl:h-full shrink-0">
         {/* 📱 Responsive Header */}
         <div className="p-2 sm:p-4 border-b border-gray-200 dark:border-gray-700">
           <div 
@@ -1327,14 +1327,14 @@ export default function Dashboard() {
 
       {/* 📱 Responsive Middle Sidebar - Modules */}
       {selectedFeature === 'whatsapp' && (
-        <div className="w-full xl:w-80 lg:w-72 md:w-64 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 order-2 xl:order-none max-h-56 sm:max-h-60 md:max-h-64 xl:max-h-none overflow-y-auto xl:overflow-visible shrink-0">
+        <div className="w-full xl:w-80 lg:w-72 md:w-64 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 order-2 xl:order-none h-auto xl:h-full shrink-0 flex flex-col">
           {/* 📱 Responsive Module Header */}
           <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">WhatsApp</h3>
           </div>
           
           {/* Modules List */}
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 flex-1 overflow-y-auto xl:overflow-visible">
 
             {/* Contact Section */}
             <div className="space-y-2">
@@ -1501,7 +1501,7 @@ export default function Dashboard() {
 
       {/* RCS Module */}
       {selectedFeature === 'rcs' && (
-        <div className="w-full xl:w-80 lg:w-72 md:w-64 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 order-2 xl:order-none max-h-56 sm:max-h-60 md:max-h-64 xl:max-h-none overflow-y-auto xl:overflow-visible shrink-0">
+        <div className="w-full xl:w-80 lg:w-72 md:w-64 bg-white dark:bg-gray-800 border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 order-2 xl:order-none h-auto xl:h-full shrink-0">
           <div className="p-6">
             <h3 className="font-semibold text-gray-900 dark:text-white">RCS</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -1512,7 +1512,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col order-3 xl:order-none">
+      <div className="flex-1 h-full overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col order-3 xl:order-none">
         {selectedFeature === 'whatsapp' ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Account View Module */}
